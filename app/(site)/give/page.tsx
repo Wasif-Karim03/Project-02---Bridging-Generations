@@ -41,9 +41,9 @@ export default function GivePage() {
         aria-labelledby="give-form-title"
         className="bg-ground px-4 py-16 sm:px-6 lg:px-[6%] lg:py-20"
       >
-        <div className="mx-auto max-w-[1280px] flex flex-col gap-8">
+        <div className="mx-auto max-w-[640px] flex flex-col gap-8">
           <h2 id="give-form-title" className="text-balance text-heading-3 text-ink">
-            Your profile
+            Your details
           </h2>
           <DonorProfileForm />
         </div>

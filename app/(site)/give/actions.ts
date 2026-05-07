@@ -27,51 +27,34 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function isValidUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:";
-  } catch {
-    return false;
-  }
-}
-
 export async function submitGiveForm(
   _prev: GiveActionState,
   formData: FormData,
 ): Promise<GiveActionState> {
   const honeypot = String(formData.get("company") ?? "");
   if (honeypot.length > 0) {
-    return {
-      status: "success",
-      message: "Profile submitted — we'll be in touch.",
-      fieldErrors: {},
-    };
+    return { status: "success", message: "Profile submitted — we'll be in touch.", fieldErrors: {} };
   }
 
   const isAnonymous = formData.get("visibility") === "anonymous";
-  const nameInput = String(formData.get("name") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim();
+  const address = String(formData.get("address") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
-  const photoUrl = String(formData.get("photoUrl") ?? "").trim();
-  const messageInput = String(formData.get("message") ?? "").trim();
+  const countryCode = String(formData.get("countryCode") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  const country = String(formData.get("country") ?? "").trim();
 
   const fieldErrors: GiveActionState["fieldErrors"] = {};
 
-  if (!isAnonymous) {
-    if (!nameInput) fieldErrors.name = "Please enter your name.";
-    else if (nameInput.length > 60) fieldErrors.name = "Name must be 60 characters or less.";
-  }
+  if (!name) fieldErrors.name = "Please enter your name.";
+  if (!address) fieldErrors.address = "Please enter your address.";
   if (!email) fieldErrors.email = "Please enter an email.";
   else if (!isValidEmail(email)) fieldErrors.email = "Please enter a valid email.";
-  if (photoUrl && !isValidUrl(photoUrl)) fieldErrors.photoUrl = "Please enter a valid URL.";
-  if (messageInput.length > 300) fieldErrors.message = "Message must be 300 characters or less.";
+  if (!phone) fieldErrors.phone = "Please enter your phone number.";
+  if (!country) fieldErrors.country = "Please select your country.";
 
   if (Object.keys(fieldErrors).length > 0) {
-    return {
-      status: "error",
-      message: "Please fix the errors below and try again.",
-      fieldErrors,
-    };
+    return { status: "error", message: "Please fix the errors below and try again.", fieldErrors };
   }
 
   const headerList = await headers();
@@ -88,29 +71,24 @@ export async function submitGiveForm(
     };
   }
 
-  const displayName = isAnonymous ? "Anonymous" : nameInput;
-  const subject = `[BG-PROFILE] New donor profile — ${displayName}`;
+  const displayName = isAnonymous ? "Anonymous" : name;
+  const subject = `[BG-PROFILE] New donor sign-up — ${displayName}`;
   const body = [
-    `Display name: ${displayName}`,
+    `Name: ${displayName}`,
     `Email: ${email}`,
+    `Phone: ${countryCode} ${phone}`,
+    `Address: ${address}`,
+    `Country: ${country}`,
     `Visibility: ${isAnonymous ? "anonymous" : "public"}`,
-    photoUrl ? `Photo URL: ${photoUrl}` : null,
-    messageInput ? `\nPublic message:\n${messageInput}` : null,
-  ]
-    .filter(Boolean)
-    .join("\n");
+  ].join("\n");
 
   const apiKey = process.env.RESEND_API_KEY;
   const fromAddress = process.env.RESEND_FROM_EMAIL ?? "contact@bridginggenerations.org";
 
   if (!apiKey) {
-    console.warn("[give] RESEND_API_KEY is not set; profile submission logged but not sent.");
+    console.warn("[give] RESEND_API_KEY not set; logged only.");
     console.info("[give] %s\n%s", subject, body);
-    return {
-      status: "success",
-      message: "Profile submitted — we'll be in touch.",
-      fieldErrors: {},
-    };
+    return { status: "success", message: "Profile submitted — we'll be in touch.", fieldErrors: {} };
   }
 
   try {
@@ -127,8 +105,7 @@ export async function submitGiveForm(
     console.error("[give] resend failed", err);
     return {
       status: "error",
-      message:
-        "Something went wrong on our end. Please try again or email info@bridginggenerations.org.",
+      message: "Something went wrong. Please try again or email info@bridginggenerations.org.",
       fieldErrors: {},
     };
   }
