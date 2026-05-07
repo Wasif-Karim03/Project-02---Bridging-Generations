@@ -1,0 +1,1273 @@
+@import "tailwindcss";
+
+@theme {
+  /* §1 Color — surface */
+  --color-ground: #f5f1ea;
+  --color-ground-2: #ffffff;
+  --color-ground-3: #efe7d8;
+
+  /* §1 Color — ink */
+  --color-ink: #1e1e1e;
+  --color-ink-2: #5c5c5c;
+
+  /* §1 Color — line */
+  --color-hairline: #ddd6c7;
+
+  /* §1 Color — accent. accent-2 is non-text only (2.1:1 on ground); use accent-2-text for type. */
+  --color-accent: #0f4c5c;
+  --color-accent-2: #e76f51;
+  --color-accent-2-hover: #d85a3a;
+  --color-accent-2-text: #b5462b;
+  --color-accent-3: #ffb84d;
+
+  /* §2 Typography — family. PR 1.4 defines --font-jakarta via next/font. */
+  --font-sans: var(--font-jakarta, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+
+  /* §2 Typography — weights in use */
+  --font-weight-body: 400;
+  --font-weight-meta: 500;
+  --font-weight-heading: 600;
+  --font-weight-display: 700;
+
+  /* §2 Typography — display-tier ledger.
+     --text-display-1 → full-width landing heroes (homepage, /about, /donate).
+     --text-display-2 → narrow / two-column / half-width heroes (the five index
+       pages: /blog, /projects, /donors, /gallery, /success-stories) and
+       /blog/[slug] H1.
+     --text-heading-1..6 → in-page section titles.
+
+     Display tiers use clamp() so a 7-word headline at 360px wraps to ≤3 lines.
+     Heading + body tiers stay stepped via the @media (max-width: 767px) block
+     below — they don't have the same wrap pathology as display.
+     text-wrap: pretty is applied to display tiers (avoids orphans without
+     re-flowing prose); text-wrap: balance is applied per-component on heading
+     tiers via the existing `text-balance` className. */
+  --text-display-1: clamp(2.75rem, 1.5rem + 5vw, 5.5rem); /* 44px @ 360px → 88px @ 1280px+ */
+  --text-display-1--line-height: 1.05;
+  --text-display-1--letter-spacing: -0.02em;
+  --text-display-1--font-weight: 700;
+
+  --text-display-2: clamp(2.25rem, 1.25rem + 4vw, 4rem); /* 36px @ 360px → 64px @ 1080px+ */
+  --text-display-2--line-height: 1.05;
+  --text-display-2--letter-spacing: -0.02em;
+  --text-display-2--font-weight: 700;
+
+  --text-heading-1: clamp(1.75rem, 1rem + 3vw, 3rem); /* 28px @ 360px → 48px @ 1067px+ */
+  --text-heading-1--line-height: 1.1;
+  --text-heading-1--letter-spacing: -0.01em;
+  --text-heading-1--font-weight: 700;
+
+  --text-heading-2: clamp(1.5rem, 0.875rem + 2.5vw, 2.5rem); /* 24px @ 360px → 40px @ 1040px+ */
+  --text-heading-2--line-height: 1.1;
+  --text-heading-2--letter-spacing: normal;
+  --text-heading-2--font-weight: 700;
+
+  --text-heading-3: 32px;
+  --text-heading-3--line-height: 1.2;
+  --text-heading-3--letter-spacing: normal;
+  --text-heading-3--font-weight: 700;
+
+  --text-heading-4: 28px;
+  --text-heading-4--line-height: 1.2;
+  --text-heading-4--letter-spacing: normal;
+  --text-heading-4--font-weight: 600;
+
+  --text-heading-5: 22px;
+  --text-heading-5--line-height: 1.2;
+  --text-heading-5--letter-spacing: normal;
+  --text-heading-5--font-weight: 600;
+
+  --text-heading-6: 20px;
+  --text-heading-6--line-height: 1.3;
+  --text-heading-6--letter-spacing: normal;
+  --text-heading-6--font-weight: 600;
+
+  --text-body-lg: 20px;
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--letter-spacing: normal;
+  --text-body-lg--font-weight: 400;
+
+  --text-body: 17px;
+  --text-body--line-height: 1.7;
+  --text-body--letter-spacing: normal;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: 15px;
+  --text-body-sm--line-height: 1.6;
+  --text-body-sm--letter-spacing: normal;
+  --text-body-sm--font-weight: 400;
+
+  --text-meta: 13px;
+  --text-meta--line-height: 1.4;
+  --text-meta--letter-spacing: 0.02em;
+  --text-meta--font-weight: 500;
+
+  --text-eyebrow: 12px;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.1em;
+  --text-eyebrow--font-weight: 500;
+
+  --text-nav-link: 13px;
+  --text-nav-link--line-height: 1;
+  --text-nav-link--letter-spacing: 0.08em;
+  --text-nav-link--font-weight: 600;
+
+  /* §2 Typography — the "note" voice. One italic inflection per page (signed aside,
+     teacher note, caption). Font-style is layered via the .text-note rule below
+     @theme, because Tailwind v4's --text-* sub-properties cover size/line-height/
+     letter-spacing/weight but not font-style. */
+  --text-note: 22px;
+  --text-note--line-height: 1.35;
+  --text-note--letter-spacing: 0.005em;
+  --text-note--font-weight: 500;
+
+  /* §4 Shape — editorial sharp. Baseline is 0 for cards, buttons, inputs, and containers.
+     --radius-full is the only named radius; it backs avatars, status dots, and pill tags.
+     See §4 SHAPE on /design for the corner-shape progressive enhancement demo. */
+  --radius-full: 9999px;
+
+  /* §5 Elevation */
+  --shadow-card: 0 4px 16px rgba(30, 30, 30, 0.06);
+  --shadow-card-hover: 0 8px 24px rgba(30, 30, 30, 0.09);
+  --shadow-cta: 0 4px 16px rgba(231, 111, 81, 0.2);
+
+  /* §9 Motion — duration scale */
+  --motion-xs: 120ms;
+  --motion-sm: 220ms;
+  --motion-md: 400ms;
+  --motion-lg: 700ms;
+  --motion-xl: 1200ms;
+
+  /* §9 Motion — easing (also generates Tailwind ease-* utilities) */
+  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-linear: linear;
+}
+
+:root {
+  /* §3 Spacing — section rhythm and container gutter (semantic; consume via var()). */
+  --space-section-sm: 64px;
+  --space-section-md: 96px;
+  --space-section-lg: 128px;
+  --space-section-xl: 160px;
+  --space-container-x: clamp(16px, 6vw, 96px);
+
+  /* §3 stack: 16 / 24 / 32 / 40 / 56 — pick from Tailwind 4px grid: p-4 p-6 p-8 p-10 p-14 */
+  /* §3 inline: 8 / 12 / 16 / 24 — pick from Tailwind 4px grid: gap-2 gap-3 gap-4 gap-6 */
+
+  /* §3 R4.6 — long-form column spine. Header, body, marginalia rail, scene-break
+     all align to --column-spine. Cover image may extend to --cover-bleed as a
+     deliberate edge-bleed so the page reads as one composition with one wider
+     band, not three competing measures. */
+  --column-spine: 65ch;
+  --cover-bleed: 90ch;
+  --rail-width: 14rem;
+  --rail-gap: 2rem;
+
+  /* §1 Paper grain — feTurbulence tile applied to cream surfaces; rect opacity baked at 0.008.
+     Inlined as data URI (was /textures/paper-grain.svg) so the texture ships inside the CSS chunk
+     instead of triggering a separate HTTP request — that round-trip was the LCP cost on /contact
+     (T13). The SVG body is identical to public/textures/paper-grain.svg, just URL-encoded. */
+  --bg-paper-grain: url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22320%22%20height=%22320%22%3E%3Cfilter%20id=%22n%22%3E%3CfeTurbulence%20baseFrequency=%220.85%22%20numOctaves=%222%22%20stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect%20width=%22100%25%22%20height=%22100%25%22%20filter=%22url%28%23n%29%22%20opacity=%220.05%22/%3E%3C/svg%3E");
+
+  /* §1 Linen texture — diagonal crosshatch tile applied to teal panels via .teal-panel::before.
+     Reads like book cloth instead of paper. Stroke-opacity baked at 0.06 in the SVG. */
+  --bg-linen-texture: url("/textures/linen.svg");
+}
+
+/* iOS zoom guard — keeps inputs at the 16px threshold under any future
+   per-form font tweak. Without this, an input at < 16px triggers
+   automatic zoom on focus on iOS Safari. */
+input,
+select,
+textarea {
+  font-size: max(16px, 1rem);
+}
+
+/* §1 Paper grain — unlayered rule with :where() (specificity 0). Unlayered CSS beats all
+   layered rules per cascade spec, so background-image lands; Tailwind's utility .bg-ground*
+   only sets background-color, so the two stack without conflict. Teal panels use
+   background-color directly (not .bg-accent), so this selector doesn't catch them — they
+   keep only their own .teal-panel::before noise. */
+:where(.bg-ground),
+:where(.bg-ground-2),
+:where(.bg-ground-3) {
+  background-image: var(--bg-paper-grain);
+  background-size: 320px 320px;
+  background-repeat: repeat;
+}
+
+/* §4 Shape — corner-shape progressive enhancement. Baseline border-radius renders a rounded
+   rectangle in all browsers; Chrome 139+ upgrades to the named shape via @supports. Reserve these
+   for hero-level surfaces (featured portrait, marquee CTA) — shape as hierarchy, not decoration. */
+.shape-squircle {
+  border-radius: 16px;
+}
+.shape-scoop {
+  border-radius: 24px;
+}
+.shape-bevel {
+  border-radius: 12px;
+}
+@supports (corner-shape: squircle) {
+  .shape-squircle {
+    corner-shape: squircle;
+  }
+  .shape-scoop {
+    corner-shape: scoop;
+  }
+  .shape-bevel {
+    corner-shape: bevel;
+  }
+}
+
+/* §9 View transitions — fade + slight Y shift on route change (see ViewTransitionRoot). */
+::view-transition-old(root) {
+  animation: vt-fade-out var(--motion-xs) var(--ease-in-out) both;
+}
+::view-transition-new(root) {
+  animation: vt-fade-in var(--motion-sm) var(--ease-smooth) both;
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* Nav mobile menu — staggered item slide-in, 60ms per index (see Nav component). */
+@keyframes menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.menu-item-in {
+  animation: menu-item-in var(--motion-sm) var(--ease-smooth) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-item-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* §9 Reveal-on-scroll. JS toggles .is-visible (see Reveal component) — opacity-only on reduced motion. */
+/* Non-cascade: parent animates. Cascade: parent stays static, direct children animate with per-item delay. */
+.reveal-on-scroll:not([data-reveal-cascade]) {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity var(--motion-lg) var(--ease-smooth),
+    transform var(--motion-lg) var(--ease-smooth);
+}
+.reveal-on-scroll:not([data-reveal-cascade]).is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-on-scroll:not([data-reveal-cascade])[data-reveal-stagger="left"] {
+  transform: translateX(-30px);
+}
+.reveal-on-scroll:not([data-reveal-cascade])[data-reveal-stagger="left"].is-visible {
+  transform: translateX(0);
+}
+.reveal-on-scroll:not([data-reveal-cascade])[data-reveal-stagger="right"] {
+  transform: translateX(30px);
+}
+.reveal-on-scroll:not([data-reveal-cascade])[data-reveal-stagger="right"].is-visible {
+  transform: translateX(0);
+}
+.reveal-on-scroll:not([data-reveal-cascade])[data-reveal-stagger="scale-in"] {
+  transform: scale(0.96);
+}
+.reveal-on-scroll:not([data-reveal-cascade])[data-reveal-stagger="scale-in"].is-visible {
+  transform: scale(1);
+}
+.reveal-on-scroll[data-reveal-cascade] > [data-reveal-item] {
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity var(--motion-lg) var(--ease-smooth),
+    transform var(--motion-lg) var(--ease-smooth);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-on-scroll[data-reveal-cascade].is-visible > [data-reveal-item] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-on-scroll[data-reveal-cascade][data-reveal-stagger="left"] > [data-reveal-item] {
+  transform: translateX(-30px);
+}
+.reveal-on-scroll[data-reveal-cascade][data-reveal-stagger="left"].is-visible > [data-reveal-item] {
+  transform: translateX(0);
+}
+.reveal-on-scroll[data-reveal-cascade][data-reveal-stagger="right"] > [data-reveal-item] {
+  transform: translateX(30px);
+}
+.reveal-on-scroll[data-reveal-cascade][data-reveal-stagger="right"].is-visible
+  > [data-reveal-item] {
+  transform: translateX(0);
+}
+.reveal-on-scroll[data-reveal-cascade][data-reveal-stagger="scale-in"] > [data-reveal-item] {
+  transform: scale(0.96);
+}
+.reveal-on-scroll[data-reveal-cascade][data-reveal-stagger="scale-in"].is-visible
+  > [data-reveal-item] {
+  transform: scale(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll,
+  .reveal-on-scroll.is-visible,
+  .reveal-on-scroll[data-reveal-cascade] > [data-reveal-item],
+  .reveal-on-scroll[data-reveal-cascade].is-visible > [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* §9 Reveal kind="develop" — image filter transition; overrides default fade+translate. */
+.reveal-on-scroll[data-reveal-kind="develop"] {
+  opacity: 0.85;
+  filter: saturate(0.4) sepia(0.25) brightness(1.02);
+  transform: none;
+  transition:
+    opacity 900ms var(--ease-smooth),
+    filter 900ms var(--ease-smooth);
+}
+.reveal-on-scroll[data-reveal-kind="develop"].is-visible {
+  opacity: 1;
+  filter: saturate(1.02) sepia(0) brightness(1);
+  transform: none;
+}
+@media (max-width: 767px) {
+  .reveal-on-scroll[data-reveal-kind="develop"] {
+    transition-duration: 720ms;
+  }
+}
+
+/* §9 Reveal kind="draw-underline" — wrapper keeps default fade, appended underline
+   scales in left→right on visibility. The main HandDrawnUnderline path is a filled
+   lenticular shape (not a stroke), so scaleX + transform-origin yields the draw-in. */
+.reveal-on-scroll[data-reveal-kind="draw-underline"] .reveal-underline {
+  display: block;
+  margin-top: 4px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 600ms var(--ease-smooth);
+}
+.reveal-on-scroll[data-reveal-kind="draw-underline"].is-visible .reveal-underline {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll[data-reveal-kind="develop"],
+  .reveal-on-scroll[data-reveal-kind="develop"].is-visible {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+  .reveal-on-scroll[data-reveal-kind="draw-underline"] .reveal-underline {
+    transform: scaleX(1);
+    transition: none;
+  }
+}
+
+/* §9 Imagery variety — optional hero duotone and portrait vignette on hover. */
+.hero-duotone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2-text));
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 1;
+}
+.portrait-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(30, 30, 30, 0.3) 100%);
+  opacity: 0;
+  transition: opacity var(--motion-sm) var(--ease-smooth);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .group:hover .portrait-vignette,
+  .group:focus-within .portrait-vignette {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .portrait-vignette,
+  .group:focus-within .portrait-vignette {
+    opacity: 1;
+  }
+}
+
+/* §9 Teal-panel treatment — gradient depth + grain + optional quote-glyph. Contrast stays AA. */
+.teal-panel {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: var(--color-accent);
+}
+.teal-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Book-cover composite (R1.2): top-weighted depth gradient + linen weave. The dark-top
+     fade reads as a bound spine; the linen replaces the prior feTurbulence noise. */
+  background-image:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 50%),
+    var(--bg-linen-texture);
+  background-repeat: no-repeat, repeat;
+  background-size:
+    100% 100%,
+    220px 220px;
+  pointer-events: none;
+  z-index: -1;
+}
+.teal-panel-glyph {
+  position: absolute;
+  top: -0.05em;
+  left: 0.15em;
+  font-size: clamp(140px, 22vw, 260px);
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+.teal-panel-glyph::before {
+  content: "\201C";
+}
+
+/* §9 Program ribbon — top-right index mark on ProgramCard. Deeper-coral fill (accent-2-text,
+   5.8:1 white) marks "Fully funded" as the celebratory rare state. The lighter --color-accent-2
+   (3.09:1) was tried first per the editorial loudness argument but failed both small + large
+   text AA — accent-2-text keeps the coral identity while passing AA-strict. Active + paused
+   use a quiet ink-2 outline so the default reads as restraint, not chrome. */
+.program-ribbon {
+  position: absolute;
+  top: 0;
+  right: 1rem;
+  z-index: 1;
+  transform: translateY(-0.375rem);
+  padding: 0.25rem 0.75rem;
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  font-weight: var(--text-eyebrow--font-weight);
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+.program-ribbon[data-status="funded"] {
+  background-color: var(--color-accent-2-text);
+  color: #ffffff;
+}
+.program-ribbon[data-status="active"] {
+  background-color: transparent;
+  border-color: color-mix(in srgb, var(--color-ink-2) 40%, transparent);
+  color: var(--color-ink-2);
+}
+.program-ribbon[data-status="paused"] {
+  background-color: transparent;
+  border-color: color-mix(in srgb, var(--color-ink-2) 40%, transparent);
+  color: var(--color-ink-2);
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+/* §9 R4.5 — `.card-hover` removed. Editorial primitives in `components/ui/editorial/`
+   own card hover semantics directly; the site no longer ships a global lift/shadow
+   contract for cards. Token `--shadow-card-hover` is retained — used by the mobile
+   nav drawer, the design-system swatch, and the motion-lab demo. */
+
+/* §9 Chapter break — hand-drawn coral mark between major sections.
+   IntersectionObserver in ChapterBreak.tsx adds .is-visible to trigger the scaleX draw-in.
+   accent-2-text (4.5:1) over spec-literal accent-2 (1.7:1) — reads as intentional gesture.
+   width: 100% (not margin auto) so flex-column parents don't collapse the cross-axis stretch. */
+.chapter-break {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 40px 0;
+}
+@media (min-width: 768px) {
+  .chapter-break {
+    margin: 64px 0;
+  }
+}
+.chapter-break__mark {
+  display: block;
+  width: 60%;
+  max-width: 480px;
+  height: 12px;
+  color: var(--color-accent-2-text);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 600ms var(--ease-smooth);
+}
+.chapter-break.is-visible .chapter-break__mark {
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .chapter-break__mark {
+    transform: scaleX(1);
+    transition: none;
+  }
+}
+
+/* §9 Scroll-progress rule — scroll-driven scaleX on supporting browsers
+   (Chrome 115+), rAF-driven JS fallback lives in ScrollProgressRule.tsx.
+   The fixed 2px teal line mounts at top-14 (under the 56px Nav). */
+@supports (animation-timeline: scroll(root)) {
+  .scroll-progress-rule {
+    animation: scroll-progress-rule linear both;
+    animation-timeline: scroll(root);
+  }
+  @keyframes scroll-progress-rule {
+    to {
+      transform: scaleX(1);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress-rule {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
+/* Ken-Burns motion — slow scale loop for editorial success-story heroes. */
+@keyframes kenburns {
+  0% {
+    transform: scale(1);
+    transform-origin: 50% 50%;
+  }
+  100% {
+    transform: scale(1.03);
+    transform-origin: 50% 45%;
+  }
+}
+.kenburns {
+  animation: kenburns 20s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kenburns {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* §9 R4.9 Motion vocabulary — six named motions, each with a reduced-motion contract.
+   Reference: Stripe Press (motion reserved for cover threshold), Bloomberg Businessweek
+   (scroll motion as act-break punctuation, not paragraph decoration), The Pudding (motion
+   tied to argument structure). The Motion Lab on /design demonstrates each.
+     1. develop      — Reveal kind="develop" filter saturate-in.            (above, §9)
+     2. kenburns     — slow scale loop on success-story portraits.          (above)
+     3. horizon      — 1px hairline settle above act-break headlines.       (.section-act below)
+     4. settle       — active-state indicator entry on Nav.                 (.nav-active-motif below)
+     5. page-fade    — view-transition cross-fade. Root: ::view-transition-old/new(root) above.
+                       Per-route override for success-story hero portrait.  (below)
+     6. drawer-sheet — mobile nav PANEL slide-in.                           (.drawer-sheet below) */
+
+/* horizon — 1px hairline settles above the headline as a SectionAct enters viewport.
+   IntersectionObserver in components/ui/SectionAct.tsx toggles .is-visible.
+   The hairline is short (4rem) on purpose: punctuation, not banner. */
+.section-act {
+  position: relative;
+  padding-top: 1.5rem;
+}
+.section-act::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4rem;
+  height: 1px;
+  background: var(--color-hairline);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--motion-md) var(--ease-smooth),
+    transform var(--motion-md) var(--ease-smooth);
+}
+.section-act.is-visible::before {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-act::before {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* settle — active-page indicator entry on Nav. The chosen motif (swash or notch — see
+   ACTIVE_MOTIF in components/layout/Nav.tsx) renders inside .nav-active-motif and
+   settles in via opacity + Y. Reduced-motion: instant. */
+.nav-active-motif {
+  display: inline-block;
+  animation: nav-active-settle var(--motion-sm) var(--ease-smooth) both;
+}
+@keyframes nav-active-settle {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-active-motif {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* page-fade per-route override — success-story hero portrait crossfades against
+   itself when navigating from the index featured slot → its slug. Both the index
+   Feature.Image and the slug PortraitHero set view-transition-name: success-story-hero
+   so the browser pairs them; the named animation replaces the root cross-fade for that
+   element. Opacity-only: a Y-shift on a portrait crossfade reads as glitch, not motion. */
+::view-transition-old(success-story-hero) {
+  animation: vt-portrait-out var(--motion-md) var(--ease-smooth) both;
+}
+::view-transition-new(success-story-hero) {
+  animation: vt-portrait-in var(--motion-md) var(--ease-smooth) both;
+}
+@keyframes vt-portrait-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-portrait-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(success-story-hero),
+  ::view-transition-new(success-story-hero) {
+    animation: none;
+  }
+}
+
+/* drawer-sheet — mobile nav PANEL slide-in. The panel itself fades + drops 8px from
+   above; per-list-item stagger is the existing .menu-item-in (60ms steps).
+   Reduced-motion: instant. */
+.drawer-sheet {
+  animation: drawer-sheet-in var(--motion-md) var(--ease-smooth) both;
+}
+@keyframes drawer-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer-sheet {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* §9 Atmospheric page — scroll-driven background-color drift on long narrative
+   routes (/about + /success-stories/[slug]). Same @supports pattern as
+   .scroll-progress-rule above. The base rule sets a stable cream so Firefox
+   (no animation-timeline support) keeps the static ground color. Reduced-motion
+   always cancels the animation regardless of @supports. */
+.atmospheric-page {
+  background-color: var(--color-ground);
+}
+@supports (animation-timeline: scroll()) {
+  .atmospheric-page {
+    animation: bg-atmospheric-shift linear both;
+    animation-timeline: scroll(root);
+  }
+  @keyframes bg-atmospheric-shift {
+    0% {
+      background-color: var(--color-ground);
+    }
+    40% {
+      background-color: color-mix(in oklab, var(--color-ground) 70%, var(--color-accent-3) 5%);
+    }
+    70% {
+      background-color: var(--color-ground-3);
+    }
+    100% {
+      background-color: var(--color-ground);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atmospheric-page {
+    animation: none;
+    background-color: var(--color-ground);
+  }
+}
+
+/* §2 Typography — mobile size overrides (<768px). Line-height, tracking, weight stay constant.
+   display-1, display-2, heading-1, and heading-2 are intentionally absent here —
+   they fluid-scale via clamp(). */
+@media (max-width: 767px) {
+  :root {
+    --text-heading-3: 28px;
+    --text-heading-4: 24px;
+    --text-heading-5: 20px;
+    --text-heading-6: 18px;
+    --text-body-lg: 18px;
+    --text-body: 16px;
+    --text-body-sm: 14px;
+    --text-note: 20px;
+    /* meta / eyebrow / nav-link are identical on both breakpoints */
+  }
+}
+
+/* §2 Typography — text-wrap: pretty on display tiers. Avoids orphan last-line
+   single words at all viewports (Chromium 117+, Safari 17.4+; Firefox falls
+   back to default wrap with no visual regression). */
+.text-display-1,
+.text-display-2 {
+  text-wrap: pretty;
+}
+
+/* §9 Motion — mobile duration override (<768px). Reveal default consumes var(--motion-lg)
+   so a token redefinition reaches every default reveal at once (700 → 560ms, ~20% faster).
+   Develop reveal hardcodes 900ms (Prompt 6 baseline) and is overridden at the rule level
+   below the develop block. */
+@media (max-width: 767px) {
+  :root {
+    --motion-lg: 560ms;
+  }
+}
+
+/* §2 Typography — "note" voice carries font-style. Tailwind v4 auto-generates
+   the .text-note utility with size/line-height/letter-spacing/weight from @theme,
+   but font-style is not a recognized --text-* sub-property; it rides here. */
+.text-note {
+  font-style: italic;
+}
+
+/* §9 Testimonial — book-cover detail layer (R1.2):
+   .testimonial-quote-mark lifts the inline curly quotes to editorial scale.
+   .testimonial-highlight wraps a keyword inside the quote with an AmberMark behind it;
+   the 0.6 opacity scales the motif's 52%-peak amber down to ~31% so AA contrast holds
+   on white text over the (teal + amber) composite.
+   .testimonial-speaker-underline draws in left-to-right when Reveal sets `is-visible`
+   on an ancestor. Reduced-motion: render at full immediately, no transition. */
+.testimonial-quote-mark {
+  font-size: 1.2em;
+  color: rgba(255, 255, 255, 0.4);
+}
+.testimonial-highlight {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+.testimonial-highlight__bg {
+  position: absolute;
+  inset: 0.1em -0.1em 0.05em -0.1em;
+  /* SVG intrinsic dimensions (400×14) win over `inset`-derived sizing without explicit
+     width/height. Tying both to the parent box restores the highlighter geometry. */
+  width: calc(100% + 0.2em);
+  height: calc(100% - 0.15em);
+  opacity: 0.6;
+  z-index: -1;
+  pointer-events: none;
+}
+.testimonial-speaker-underline {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 600ms var(--ease-smooth) 200ms;
+}
+.is-visible .testimonial-speaker-underline {
+  clip-path: inset(0 0 0 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .testimonial-speaker-underline {
+    clip-path: inset(0 0 0 0);
+    transition: none;
+  }
+}
+
+/* Heading-anchor — appended to MDX h2/h3 by rehype-autolink-headings.
+   Hidden at rest; revealed on :focus-visible (keyboard / screen-reader users)
+   so the editorial reading rhythm is preserved on /terms and long-form posts. */
+.heading-anchor {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: var(--color-accent);
+  font-weight: 400;
+  opacity: 0;
+  text-decoration: none;
+  transition: opacity 150ms var(--ease-smooth);
+}
+.heading-anchor:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .heading-anchor {
+    transition: none;
+  }
+}
+
+/* §10 R4.6 — long-form editorial chrome. */
+
+/* Long-form spine: rail in the left gutter at lg+, body at column-spine.
+   Tailwind 4 has trouble with arbitrary values that include `minmax()` —
+   this class encodes the layout once so consumers don't reach for fragile
+   bracketed syntax. */
+.longform-spine {
+  display: block;
+  margin-inline: auto;
+}
+@media (min-width: 1024px) {
+  .longform-spine {
+    display: grid;
+    max-width: calc(var(--rail-width) + var(--rail-gap) + var(--column-spine));
+    grid-template-columns: var(--rail-width) minmax(0, var(--column-spine));
+    column-gap: var(--rail-gap);
+  }
+}
+
+/* Dropcap. First letter of the wrapped paragraph floats left at ~3.5 line-heights,
+   carries the display-1 weight stop, sits in the body's measure. aria-hidden on
+   the decorative wrapper; screen readers still receive the original first letter
+   (we don't hide the original ::first-letter — we style it). Mobile: keep, just
+   smaller. Reduced motion: irrelevant — this is type. */
+.dropcap > p:first-of-type::first-letter,
+p.dropcap::first-letter {
+  float: left;
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-display);
+  font-size: clamp(3.5em, 4em, 4.5em);
+  line-height: 0.85;
+  margin: 0.05em 0.12em 0 0;
+  color: var(--color-ink);
+  letter-spacing: -0.04em;
+}
+@media (max-width: 640px) {
+  .dropcap > p:first-of-type::first-letter,
+  p.dropcap::first-letter {
+    font-size: 3em;
+    line-height: 0.9;
+    margin: 0.1em 0.1em 0 0;
+  }
+}
+
+/* Marginalia — author-placed aside. lg+ floats into the right gutter; <lg
+   inlines below the paragraph. Print-hidden. The :where wrapper bleeds 0
+   specificity so consumers can override per-instance. */
+.marginalia {
+  display: block;
+  font-size: var(--text-body-sm);
+  line-height: 1.55;
+  color: var(--color-ink-2);
+  border-left: 1px solid var(--color-hairline);
+  padding-left: 1rem;
+  margin: 1.25rem 0;
+}
+@media (min-width: 1024px) {
+  .marginalia {
+    float: right;
+    clear: right;
+    width: 14rem;
+    margin: 0.25rem -16rem 1.25rem 1.5rem;
+    border-left: none;
+    border-top: 1px solid var(--color-hairline);
+    padding: 0.75rem 0 0 0;
+  }
+  .marginalia[data-position="left"] {
+    float: left;
+    clear: left;
+    margin: 0.25rem 1.5rem 1.25rem -16rem;
+  }
+}
+
+/* Marginalia rail — page chrome (read-time / dateline / share). Sticky in the
+   left gutter at lg+; inlines at the top of the article on smaller viewports.
+   At lg+ items separate with hairline rules so the rail reads as a deliberate
+   masthead, not loose type. */
+.marginalia-rail {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  letter-spacing: var(--text-meta--letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  margin: 0 0 2rem 0;
+}
+@media (min-width: 1024px) {
+  .marginalia-rail {
+    position: sticky;
+    top: 5.5rem;
+    flex-direction: column;
+    gap: 0;
+    width: 12rem;
+    margin: 0;
+    border-top: 1px solid var(--color-hairline);
+    align-self: start;
+  }
+  .marginalia-rail > * {
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+  .marginalia-rail .share-rail {
+    padding: 0.875rem 0 0 0;
+    border-bottom: none;
+  }
+}
+
+/* Scene break — three editorial marks (◆ ◆ ◆), centered, generous breath.
+   Decorative; aria-hidden on the wrapper. */
+.scene-break {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem;
+  margin: 4rem 0;
+  color: var(--color-ink-2);
+  font-size: 0.625rem;
+  letter-spacing: 0.4em;
+}
+.scene-break::before,
+.scene-break::after {
+  content: "";
+  height: 1px;
+  flex: 0 1 4rem;
+  background: var(--color-hairline);
+}
+@media (max-width: 640px) {
+  .scene-break {
+    margin: 3rem 0;
+  }
+}
+
+/* StoryToc — sticky on lg+, collapsible <details> below. Active item gets
+   weight + accent ink. The <details> > summary affordance becomes the toggle
+   on small viewports. */
+.toc-sticky {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .toc-sticky {
+    display: block;
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
+    width: 14rem;
+    font-size: var(--text-meta);
+    line-height: 1.5;
+    letter-spacing: var(--text-meta--letter-spacing);
+  }
+}
+.toc-sticky__list,
+.toc-collapsible__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.toc-sticky__item a,
+.toc-collapsible__item a {
+  display: block;
+  padding: 0.25rem 0;
+  color: var(--color-ink-2);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  padding-left: 0.75rem;
+  margin-left: -0.75rem;
+  transition:
+    color 200ms var(--ease-smooth),
+    border-color 200ms var(--ease-smooth);
+}
+.toc-sticky__item a:hover,
+.toc-collapsible__item a:hover {
+  color: var(--color-ink);
+}
+.toc-sticky__item[data-active="true"] a,
+.toc-collapsible__item[data-active="true"] a {
+  color: var(--color-accent);
+  border-left-color: var(--color-accent);
+  font-weight: 600;
+}
+.toc-collapsible {
+  display: block;
+  margin: 0 0 2rem 0;
+  border-top: 1px solid var(--color-hairline);
+  border-bottom: 1px solid var(--color-hairline);
+  padding: 0.75rem 0;
+}
+.toc-collapsible > summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: var(--text-eyebrow);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+.toc-collapsible > summary::-webkit-details-marker {
+  display: none;
+}
+.toc-collapsible > summary::after {
+  content: "+";
+  font-size: 1.5em;
+  line-height: 1;
+  font-weight: 400;
+  transition: transform 200ms var(--ease-smooth);
+}
+.toc-collapsible[open] > summary::after {
+  content: "−";
+}
+.toc-collapsible[open] > .toc-collapsible__list {
+  margin-top: 0.75rem;
+}
+@media (min-width: 1024px) {
+  .toc-collapsible {
+    display: none;
+  }
+}
+
+/* Share rail — small inline component on the marginalia rail; full-width
+   button on mobile. 44px floor on mobile per WCAG. */
+.share-rail__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-meta);
+  letter-spacing: var(--text-meta--letter-spacing);
+  text-transform: uppercase;
+  color: var(--color-ink-2);
+  background: transparent;
+  border: 1px solid var(--color-hairline);
+  padding: 0.625rem 1rem;
+  cursor: pointer;
+  transition:
+    color 200ms var(--ease-smooth),
+    border-color 200ms var(--ease-smooth);
+  min-height: 44px;
+}
+.share-rail__button:hover {
+  color: var(--color-ink);
+  border-color: var(--color-ink-2);
+}
+.share-rail__toast {
+  margin-left: 0.75rem;
+  color: var(--color-accent);
+  font-size: var(--text-meta);
+  letter-spacing: var(--text-meta--letter-spacing);
+  opacity: 0;
+  transition: opacity 200ms var(--ease-smooth);
+  pointer-events: none;
+}
+.share-rail__toast[data-visible="true"] {
+  opacity: 1;
+}
+
+/* PullQuote — oversized opening glyph carries the editorial weight. The glyph
+   uses the existing display family (no new typeface), italic, accent ink, and
+   bleeds beyond the spine on lg+. Hanging punctuation: the opening quote sits
+   outside the column. Glyph at ~12rem at lg+ — large enough that the quote
+   reads as "this is the editorial pull-quote" not "this is a styled blockquote." */
+.pullquote {
+  position: relative;
+  margin: 3rem 0;
+  padding: 0;
+}
+.pullquote__glyph {
+  position: absolute;
+  top: -0.4em;
+  left: -0.05em;
+  font-family: var(--font-sans);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(6rem, 10vw, 9rem);
+  line-height: 0.85;
+  color: var(--color-accent);
+  user-select: none;
+  pointer-events: none;
+  z-index: 0;
+}
+.pullquote__quote {
+  position: relative;
+  z-index: 1;
+  font-size: var(--text-heading-3);
+  line-height: 1.25;
+  font-weight: 500;
+  color: var(--color-ink);
+  letter-spacing: -0.005em;
+  font-style: italic;
+  padding-left: 3rem;
+}
+.pullquote__cite {
+  display: block;
+  margin-top: 1rem;
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  letter-spacing: var(--text-meta--letter-spacing);
+  text-transform: uppercase;
+  font-style: normal;
+  color: var(--color-ink-2);
+  padding-left: 3rem;
+}
+@media (min-width: 1024px) {
+  .pullquote {
+    margin-right: -2.5rem;
+  }
+  .pullquote__glyph {
+    left: -2.5rem;
+    top: -0.45em;
+    font-size: clamp(9rem, 13vw, 12rem);
+  }
+  .pullquote__quote,
+  .pullquote__cite {
+    padding-left: 0;
+  }
+}
+@media (max-width: 640px) {
+  .pullquote__glyph {
+    font-size: 5rem;
+    top: -0.3em;
+  }
+  .pullquote__quote {
+    font-size: var(--text-heading-4);
+    padding-left: 2rem;
+  }
+  .pullquote__cite {
+    padding-left: 2rem;
+  }
+}
+
+/* R4.10 — mobile aspect ladder. Used by hero <Image> wrappers (via
+   MobileImage) where 16:9 desktop crops decapitate subjects on phone
+   aspect ratios. Snaps to 16:9 at sm:+ for desktop. */
+@utility mobile-aspect-portrait {
+  aspect-ratio: 4 / 5;
+  @media (min-width: 640px) {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@utility mobile-aspect-square {
+  aspect-ratio: 1 / 1;
+  @media (min-width: 640px) {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* R4.10 — focal point applied only at phone viewports. Desktop falls
+   back to default object-position (centered). Consumed by MobileImage. */
+@media (max-width: 640px) {
+  .mobile-fp > img {
+    object-position: var(--mobile-fp-x, 50%) var(--mobile-fp-y, 30%);
+  }
+}
+
+/* Print — long-form is the obvious print target. Hide chrome that doesn't
+   serve the printed page; let the article body fill the sheet. !important is
+   the canonical print-CSS pattern: the chrome elements carry class-level
+   specificity (Tailwind utilities, layout classes) that beats element-level
+   selectors here, and the body color/background overrides the atmospheric-page
+   scroll-driven background. Use sparingly and only inside @media print. */
+@media print {
+  nav,
+  footer,
+  .marginalia-rail,
+  .toc-sticky,
+  .toc-collapsible,
+  /* biome-ignore lint/style/noDescendingSpecificity: print override of .marginalia-rail .share-rail; display:none !important escapes the cascade */
+    .share-rail,
+  .heading-anchor {
+    /* biome-ignore lint/complexity/noImportantStyles: print override of chrome utility classes */
+    display: none !important;
+  }
+  article {
+    /* biome-ignore lint/complexity/noImportantStyles: print override of max-w-* utility */
+    max-width: 100% !important;
+  }
+  .pullquote__glyph {
+    color: #000;
+  }
+  body {
+    /* biome-ignore lint/complexity/noImportantStyles: print resets atmospheric-page scroll bg */
+    background: #fff !important;
+    /* biome-ignore lint/complexity/noImportantStyles: print resets atmospheric-page color */
+    color: #000 !important;
+  }
+}
+
+/* Lenis smooth-scroll global rules. Required so native CSS smooth-scroll and
+   nested scroll containers don't fight the JS interpolation in
+   components/layout/SmoothScroll.tsx. */
+@layer base {
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    /* biome-ignore lint/complexity/noImportantStyles: Lenis must override native scroll-behavior:smooth to prevent stutter; this is the documented Lenis integration pattern */
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  .lenis.lenis-scrolling iframe:not([data-lenis-interactive]) {
+    /* biome-ignore lint/complexity/noImportantStyles: Lenis only blocks iframe pointer events DURING active scroll gestures (.lenis-scrolling is on <html> mid-scroll only). Clicks on the Givebutter widget at /donate work between gestures because the class is removed within ~300ms of the last input. */
+    pointer-events: none !important;
+  }
+}
+
+/* Tailwind v4 ships will-change-{auto,scroll,contents,transform} but not
+   will-change-opacity. Used by motion helpers (FadeIn, SectionTransition). */
+@utility will-change-opacity {
+  will-change: opacity;
+}

@@ -1,0 +1,36 @@
+headline: Sponsor a student.
+intro: |-
+  $30 a month covers tuition, books, daily meals, and materials for one child for the full school year. Every dollar goes to program costs — the board is unpaid, and 100% of project-designated gifts pass through to schools in the Chittagong Hill Tracts.
+givebutterAccountId: "[CONFIRM: acct= value from Givebutter dashboard embed code]"
+givebutterCampaignId: "[CONFIRM: six-character campaign code from Givebutter dashboard — ZbQ0n2 was a stub, not a real campaign]"
+monthlySuggestion: 30
+transactionSource: placeholder
+afterDonateNote: |-
+  Givebutter emails your tax-deductible receipt automatically. Questions, changes, or a preference to give by check? Reach out and the board will route it.
+afterDonateNoteFallback: |-
+  We're standing up the Givebutter campaign now. To give in the meantime, write to info@bridginggenerations.org — the board confirms receipt and routes the gift by hand. Checks made out to "Bridging Generations" are also welcome; reply for mailing instructions.
+thankYouBody: |-
+  If you just gave, thank you — your contribution keeps one more student in the classroom. A tax-deductible receipt will arrive from Givebutter within the next few minutes.
+thankYouBodyFallback: |-
+  Thank you for getting in touch about giving. Once the Givebutter campaign is live, sponsorships flow through it directly; until then, the board confirms receipt of every gift personally and emails you within two business days.
+transactionSourceNote: |-
+  Heads up — the answers below describe how giving works through Givebutter. We're standing up the campaign now; in the meantime, write to info@bridginggenerations.org and the board will route your gift by hand.
+faq:
+  - question: Is my donation tax-deductible?
+    answer: |-
+      Yes. Bridging Generations is a registered 501(c)(3) nonprofit in the United States. Givebutter issues your tax-deductible receipt automatically at the time of the gift.
+  - question: How is my money used?
+    answer: |-
+      Every project-designated gift goes directly to program costs — tuition, books, meals, and school materials. The board is unpaid and operating overhead is carried by a small group of recurring donors.
+  - question: Are there processing fees?
+    answer: |-
+      Givebutter passes on the payment processor's fee (about 2.9% plus $0.30 for card gifts). You'll see a small optional checkbox at checkout to cover the fee yourself, which many donors choose.
+  - question: Can I cancel a recurring donation?
+    answer: |-
+      Any time. Your Givebutter receipt includes a link to manage or cancel your recurring gift. No questions asked.
+  - question: Can I give by check or wire?
+    answer: |-
+      Yes — email info@bridginggenerations.org and we will send mailing instructions or wire details. Checks should be made out to "Bridging Generations".
+  - question: Do you ship internationally?
+    answer: |-
+      Gifts from outside the United States are welcome via Givebutter. U.S. tax-deduction rules apply only to U.S. taxpayers; please consult your local advisor for rules in your country.

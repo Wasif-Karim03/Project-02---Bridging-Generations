@@ -1,0 +1,19 @@
+displayName: Bishal
+schoolId: rangamati-school
+grade: 5
+community: tripura
+quote: My teacher says I ask too many questions. I don't plan to stop.
+portrait:
+  src: /student-4.jpg
+  alt: A student reads a book outdoors
+consent:
+  portraitReleaseStatus: granted
+  storyReleaseStatus: granted
+  signedDate: 2025-09-01
+  releaseFormId: BG-REL-2025-001
+  consentScope:
+    - website
+    - print-materials
+  revokable: true
+sponsorshipStatus: sponsored
+enrolledAt: 2024-01-11

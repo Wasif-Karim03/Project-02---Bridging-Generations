@@ -1,0 +1,10 @@
+title: School meal program
+summary: A hot meal every school day for all 156 students — so hunger never pulls a child out of the classroom.
+body: "[CONFIRM: meal program body — short paragraph that adds new context beyond the summary, e.g. cook ratio, kitchen locations, lean-season impact data]"
+fundingGoal: 12000
+fundingRaised: 8400
+status: active
+heroImage:
+  src: /project-meal.jpg
+  alt: Children share a midday meal around a classroom table
+order: 1
