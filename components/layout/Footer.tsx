@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { Link } from "next-view-transitions";
-import { Accordion } from "@/components/ui/Accordion";
 import { footerContent } from "@/content/fixtures/footer";
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
 
@@ -10,6 +10,9 @@ type FooterProps = {
   mailingAddress?: string;
   tagline?: string;
   contactEmail?: string;
+  secondaryEmail?: string;
+  phoneNumber?: string;
+  whatsappNumber?: string;
   form990Url?: string;
   candidProfileUrl?: string;
   socialLinks?: {
@@ -25,15 +28,18 @@ export function Footer({
   mailingAddress,
   tagline,
   contactEmail,
+  secondaryEmail,
+  phoneNumber,
+  whatsappNumber,
   form990Url,
   candidProfileUrl,
   socialLinks,
 }: FooterProps = {}) {
-  const { brand, explore, copyrightNote, legalLinks } = footerContent;
+  const { brand, about, others, copyrightNote } = footerContent;
   const year = new Date().getFullYear();
   const einHasRealValue = !isPlaceholder(ein) && ein !== EIN_PLACEHOLDER;
   const showMailingAddress = !isPlaceholder(mailingAddress);
-  const showImprint = einHasRealValue || showMailingAddress;
+  const showSecondaryEmail = Boolean(secondaryEmail && !isPlaceholder(secondaryEmail));
   const showTransparency = Boolean(form990Url) || Boolean(candidProfileUrl);
   const hasAnySocial = Boolean(
     socialLinks?.instagram ||
@@ -44,33 +50,78 @@ export function Footer({
 
   return (
     <div className="bg-accent text-white">
-      <div className="mx-auto grid max-w-[1280px] gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[3fr_5fr_2fr] lg:gap-16 lg:px-[6%] lg:py-14">
+      <div className="mx-auto grid max-w-[1280px] gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-16 lg:px-[6%] lg:py-14">
+        {/* Column 1 — Head Office */}
         <div>
           <p className="text-heading-6 font-bold">{brand.name}</p>
           {tagline ? <p className="mt-3 text-body-sm text-white">{tagline}</p> : null}
-          {showImprint ? (
-            <div className="mt-6 border-t border-white/15 pt-6">
+          <div className="mt-6 border-t border-white/15 pt-6">
+            <p className="text-eyebrow uppercase text-accent-3">Head Office</p>
+            <ul className="mt-4 flex flex-col gap-3 text-body-sm">
+              {phoneNumber ? (
+                <li>
+                  <a
+                    href={`tel:${phoneNumber.replace(/\s+/g, "")}`}
+                    className="inline-flex min-h-[28px] items-center transition-colors hover:text-accent-3"
+                  >
+                    {phoneNumber}
+                  </a>
+                  {whatsappNumber ? (
+                    <>
+                      {" "}
+                      <a
+                        href={`https://wa.me/${whatsappNumber}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent-3 underline underline-offset-[3px] hover:no-underline"
+                      >
+                        (WhatsApp)
+                      </a>
+                    </>
+                  ) : null}
+                </li>
+              ) : null}
+              {contactEmail ? (
+                <li>
+                  <a
+                    href={`mailto:${contactEmail}`}
+                    className="break-all transition-colors hover:text-accent-3"
+                  >
+                    {contactEmail}
+                  </a>
+                </li>
+              ) : null}
+              {showSecondaryEmail ? (
+                <li>
+                  <a
+                    href={`mailto:${secondaryEmail}`}
+                    className="break-all transition-colors hover:text-accent-3"
+                  >
+                    {secondaryEmail}
+                  </a>
+                </li>
+              ) : null}
               {showMailingAddress ? (
-                <address className="whitespace-pre-line text-meta not-italic text-white">
-                  {mailingAddress}
-                </address>
+                <li>
+                  <address className="whitespace-pre-line not-italic">{mailingAddress}</address>
+                </li>
               ) : null}
-              {einHasRealValue ? (
-                <p className="mt-3 text-meta uppercase tracking-[0.02em] text-white">
-                  501(c)(3) · EIN <span className="tabular-nums">{ein}</span> · Tax-deductible
-                </p>
-              ) : null}
-            </div>
+            </ul>
+          </div>
+          {einHasRealValue ? (
+            <p className="mt-4 text-meta uppercase tracking-[0.02em] text-white/80">
+              501(c)(3) · EIN <span className="tabular-nums">{ein}</span> · Tax-deductible
+            </p>
           ) : null}
           {showTransparency ? (
-            <ul className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-meta text-white">
+            <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-meta">
               {form990Url ? (
                 <li>
                   <a
                     href={form990Url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-[3px] transition-colors hover:text-accent-3 hover:no-underline active:text-accent-3 active:no-underline"
+                    className="underline underline-offset-[3px] transition-colors hover:text-accent-3 hover:no-underline"
                   >
                     Form 990
                   </a>
@@ -82,7 +133,7 @@ export function Footer({
                     href={candidProfileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-[3px] transition-colors hover:text-accent-3 hover:no-underline active:text-accent-3 active:no-underline"
+                    className="underline underline-offset-[3px] transition-colors hover:text-accent-3 hover:no-underline"
                   >
                     Candid profile
                   </a>
@@ -91,7 +142,7 @@ export function Footer({
             </ul>
           ) : null}
           {hasAnySocial ? (
-            <ul className="mt-6 flex items-center gap-2 border-t border-white/15 pt-6">
+            <ul className="mt-5 flex items-center gap-2">
               {socialLinks?.instagram ? (
                 <li>
                   <a
@@ -99,7 +150,7 @@ export function Footer({
                     href={socialLinks.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex size-11 items-center justify-center text-white transition-colors hover:text-accent-3 active:text-accent-3"
+                    className="inline-flex size-10 items-center justify-center text-white transition-colors hover:text-accent-3"
                   >
                     <InstagramMark />
                   </a>
@@ -112,7 +163,7 @@ export function Footer({
                     href={socialLinks.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex size-11 items-center justify-center text-white transition-colors hover:text-accent-3 active:text-accent-3"
+                    className="inline-flex size-10 items-center justify-center text-white transition-colors hover:text-accent-3"
                   >
                     <FacebookMark />
                   </a>
@@ -125,7 +176,7 @@ export function Footer({
                     href={socialLinks.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex size-11 items-center justify-center text-white transition-colors hover:text-accent-3 active:text-accent-3"
+                    className="inline-flex size-10 items-center justify-center text-white transition-colors hover:text-accent-3"
                   >
                     <LinkedInMark />
                   </a>
@@ -138,7 +189,7 @@ export function Footer({
                     href={socialLinks.youtube}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex size-11 items-center justify-center text-white transition-colors hover:text-accent-3 active:text-accent-3"
+                    className="inline-flex size-10 items-center justify-center text-white transition-colors hover:text-accent-3"
                   >
                     <YouTubeMark />
                   </a>
@@ -147,108 +198,61 @@ export function Footer({
             </ul>
           ) : null}
         </div>
-        {/* <sm: stacked accordion clusters in a single column. sm+: split into two grid columns. */}
-        <div className="sm:hidden">
-          <Accordion
-            summary="Explore"
-            defaultOpen
-            className="border-white/15 [&>summary]:text-accent-3"
-          >
-            <ul className="flex flex-col gap-2 text-body-sm">
-              {explore.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-white transition-colors hover:text-accent-3 active:text-accent-3"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Accordion>
-          {contactEmail ? (
-            <Accordion summary="Contact" className="border-white/15 [&>summary]:text-accent-3">
-              <ul className="flex flex-col gap-2 text-body-sm">
-                <li>
-                  <a
-                    href={`mailto:${contactEmail}`}
-                    className="text-white transition-colors hover:text-accent-3 active:text-accent-3"
-                  >
-                    Email us
-                  </a>
-                </li>
-                <li>
-                  <Link
-                    href="/contact"
-                    className="text-white transition-colors hover:text-accent-3 active:text-accent-3"
-                  >
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </Accordion>
-          ) : null}
-        </div>
-        <div className="hidden sm:block">
-          <p className="text-eyebrow uppercase text-accent-3">Explore</p>
-          <ul className="mt-4 flex flex-col gap-2 text-body-sm lg:block lg:columns-2 lg:gap-x-12 lg:space-y-2">
-            {explore.map((link) => (
-              <li key={link.href} className="lg:break-inside-avoid">
-                <Link
-                  href={link.href}
-                  className="text-white transition-colors hover:text-accent-3 active:text-accent-3"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-        {contactEmail ? (
-          <div className="hidden sm:block">
-            <p className="text-eyebrow uppercase text-accent-3">Contact</p>
-            <ul className="mt-4 flex flex-col gap-2 text-body-sm">
-              <li>
-                <a
-                  href={`mailto:${contactEmail}`}
-                  className="text-white transition-colors hover:text-accent-3 active:text-accent-3"
-                >
-                  Email us
-                </a>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-white transition-colors hover:text-accent-3 active:text-accent-3"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-        ) : null}
-      </div>
-      <div className="border-t border-white/15">
-        <div className="mx-auto flex max-w-[1280px] flex-col gap-2 px-4 py-5 text-meta text-white sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-x-3 sm:gap-y-2 sm:px-6 lg:px-[6%]">
-          <p>
-            © {year} {copyrightNote}
-          </p>
-          <span aria-hidden="true" className="hidden sm:inline">
-            ·
-          </span>
-          <ul className="flex gap-3">
-            {legalLinks.map((link) => (
+
+        {/* Column 2 — About */}
+        <div>
+          <p className="text-eyebrow uppercase text-accent-3">About</p>
+          <ul className="mt-4 flex flex-col gap-2 text-body-sm">
+            {about.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="transition-colors hover:text-accent-3 active:text-accent-3"
+                  className="text-white transition-colors hover:text-accent-3"
                 >
                   {link.label}
                 </Link>
               </li>
             ))}
           </ul>
+        </div>
+
+        {/* Column 3 — Others */}
+        <div>
+          <p className="text-eyebrow uppercase text-accent-3">Others</p>
+          <ul className="mt-4 flex flex-col gap-2 text-body-sm">
+            {others.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="text-white transition-colors hover:text-accent-3"
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Payment row + copyright */}
+      <div className="border-t border-white/15">
+        <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-4 py-5 text-meta text-white sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6 lg:px-[6%]">
+          <p>
+            © {year} {copyrightNote}
+          </p>
+          <div className="flex items-center gap-3">
+            <span className="text-eyebrow uppercase tracking-[0.1em] text-white/70">
+              Payments accepted
+            </span>
+            <Image
+              src="/bkash-logo.svg"
+              alt="bKash payment accepted"
+              width={60}
+              height={20}
+              className="h-5 w-auto"
+            />
+            <span className="text-meta text-white/70">Card / Stripe</span>
+          </div>
         </div>
       </div>
     </div>

@@ -16,9 +16,14 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
       <SmoothScroll />
       <SkipLink />
       <header>
-        <Nav contactEmail={siteSettings.contactEmail} />
+        <Nav
+          contactEmail={siteSettings.contactEmail}
+          phoneNumber={siteSettings.phoneNumber ?? undefined}
+          whatsappNumber={siteSettings.whatsappNumber ?? undefined}
+        />
       </header>
-      <main id="main-content" tabIndex={-1} className="flex-1 pt-14 outline-none">
+      {/* pt-14 (56px) is the nav height; contact strip adds 36px at lg+ */}
+      <main id="main-content" tabIndex={-1} className="flex-1 pt-14 outline-none lg:pt-[5.75rem]">
         {children}
       </main>
       <footer>
@@ -27,6 +32,9 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
           mailingAddress={siteSettings.mailingAddress}
           tagline={siteSettings.copy.footerTagline}
           contactEmail={siteSettings.contactEmail}
+          secondaryEmail={siteSettings.secondaryEmail ?? undefined}
+          phoneNumber={siteSettings.phoneNumber ?? undefined}
+          whatsappNumber={siteSettings.whatsappNumber ?? undefined}
           form990Url={siteSettings.form990Url || undefined}
           candidProfileUrl={siteSettings.candidProfileUrl || undefined}
           socialLinks={siteSettings.socialLinks}

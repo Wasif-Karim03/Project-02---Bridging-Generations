@@ -3,13 +3,36 @@ export type NavItem = {
   label: string;
 };
 
-export const primaryNav: NavItem[] = [
-  { href: "/about", label: "About" },
-  { href: "/projects", label: "Projects" },
+export type NavDropdownItem = NavItem & {
+  description?: string;
+};
+
+export type PrimaryNavItem =
+  | NavItem
+  | (NavItem & { dropdown: NavDropdownItem[] });
+
+// Spec navigation order (top navbar):
+// Home, About BG (dropdown), Students, Projects, Testimonial, Blog, Gallery, Donors
+// Home is implicit in the brand wordmark; not duplicated as a nav item.
+export const primaryNav: PrimaryNavItem[] = [
+  {
+    href: "/about",
+    label: "About BG",
+    dropdown: [
+      { href: "/about", label: "About Us", description: "Mission, leadership, transparency" },
+      {
+        href: "/mission-vision",
+        label: "Our Mission and Our Vision",
+        description: "What we promise and where we are going",
+      },
+    ],
+  },
   { href: "/students", label: "Students" },
-  { href: "/donors", label: "Donors" },
+  { href: "/projects", label: "Projects" },
+  { href: "/testimonials", label: "Testimonial" },
   { href: "/blog", label: "Blog" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/donors", label: "Donors" },
 ];
 
 export const donateCta = {
@@ -17,7 +40,7 @@ export const donateCta = {
   label: "Donate",
 };
 
-// Mobile drawer groups. Desktop nav stays narrower (primaryNav above) — the
+// Mobile drawer groups. Desktop nav shows the primary items + dropdown; the
 // drawer surfaces every reachable destination so phone visitors don't need to
 // type URLs. Editorial grouping: Explore (the work), Recognize (the people),
 // Trust (legal + contact). Donate is rendered as a prominent CTA above the
@@ -29,22 +52,30 @@ export type NavGroup = {
 
 export const mobileNavGroups: NavGroup[] = [
   {
+    eyebrow: "About BG",
+    items: [
+      { href: "/about", label: "About Us" },
+      { href: "/mission-vision", label: "Our Mission and Our Vision" },
+    ],
+  },
+  {
     eyebrow: "Explore",
     items: [
-      { href: "/about", label: "About" },
-      { href: "/activities", label: "Activities" },
-      { href: "/projects", label: "Projects" },
       { href: "/students", label: "Students" },
+      { href: "/projects", label: "Projects" },
+      { href: "/projects/scholarships", label: "Scholarships" },
+      { href: "/activities", label: "Activities" },
       { href: "/success-stories", label: "Success Stories" },
       { href: "/blog", label: "Blog" },
       { href: "/gallery", label: "Gallery" },
+      { href: "/mentors", label: "Mentors" },
     ],
   },
   {
     eyebrow: "Recognize",
     items: [
       { href: "/donors", label: "Donors" },
-      { href: "/testimonials", label: "Testimonials" },
+      { href: "/testimonials", label: "Testimonial" },
     ],
   },
   {

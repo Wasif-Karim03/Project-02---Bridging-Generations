@@ -57,6 +57,19 @@ export const siteSettingsSingleton = singleton({
       description: "Routes to Resend.",
       validation: { isRequired: true, length: { min: 1 } },
     }),
+    secondaryEmail: fields.text({
+      label: "Secondary email",
+      description: "Optional. Shown alongside the primary contact email in the footer.",
+    }),
+    phoneNumber: fields.text({
+      label: "Phone number",
+      description: 'Display format including country code (e.g. "+8801898911452").',
+    }),
+    whatsappNumber: fields.text({
+      label: "WhatsApp number",
+      description:
+        'Digits only, including country code, no plus sign (e.g. "8801898911452"). Used by the floating WhatsApp button and the wa.me link.',
+    }),
     socialLinks: fields.object(
       {
         instagram: fields.url({ label: "Instagram URL" }),

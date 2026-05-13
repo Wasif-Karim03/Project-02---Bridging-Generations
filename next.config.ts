@@ -53,6 +53,31 @@ const nextConfig: NextConfig = {
         destination: "/donors",
         permanent: true,
       },
+      {
+        source: "/donate-us",
+        destination: "/donate",
+        permanent: true,
+      },
+      {
+        source: "/donate-us/:path*",
+        destination: "/donate/:path*",
+        permanent: true,
+      },
+      {
+        source: "/about-us",
+        destination: "/about",
+        permanent: true,
+      },
+      {
+        source: "/mission-vission",
+        destination: "/mission-vision",
+        permanent: true,
+      },
+      {
+        source: "/testimonial",
+        destination: "/testimonials",
+        permanent: true,
+      },
     ];
   },
   async headers() {
