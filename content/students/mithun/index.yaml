@@ -1,0 +1,19 @@
+displayName: Mithun
+schoolId: bandarban-school
+grade: 6
+community: mro
+quote: I like maths — and one day I will build bridges.
+portrait:
+  src: /student-3.jpg
+  alt: A student sits with an open book outdoors
+consent:
+  portraitReleaseStatus: granted
+  storyReleaseStatus: granted
+  signedDate: 2025-09-01
+  releaseFormId: BG-REL-2025-001
+  consentScope:
+    - website
+    - print-materials
+  revokable: true
+sponsorshipStatus: sponsored
+enrolledAt: 2023-01-12

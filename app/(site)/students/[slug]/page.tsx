@@ -1,0 +1,127 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { Link } from "next-view-transitions";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { StudentPlaceholder } from "@/components/ui/StudentPlaceholder";
+import { canShowPortrait, canShowStory } from "@/lib/content/canShowPortrait";
+import { getSchoolById } from "@/lib/content/schools";
+import { getAllStudents, getStudentBySlug } from "@/lib/content/students";
+import { breadcrumbList } from "@/lib/seo/jsonLd";
+import { SITE_URL } from "@/lib/seo/siteUrl";
+
+type Params = { slug: string };
+
+export async function generateStaticParams(): Promise<Params[]> {
+  const students = await getAllStudents();
+  return students.map((s) => ({ slug: s.id }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const { slug } = await params;
+  const student = await getStudentBySlug(slug);
+  if (!student) return { title: "Student" };
+  return {
+    title: `${student.displayName} — Sponsored student`,
+    description: `${student.displayName} is in grade ${student.grade} at a Bridging Generations partner school. First names only; portraits appear only with a written family release on file.`,
+    robots: { index: false, follow: true },
+  };
+}
+
+export default async function StudentProfilePage({ params }: { params: Promise<Params> }) {
+  const { slug } = await params;
+  const student = await getStudentBySlug(slug);
+  if (!student) {
+    notFound();
+  }
+
+  const school = student.schoolId ? await getSchoolById(student.schoolId) : null;
+  const portraitSrc = student.portrait?.src ?? null;
+  const allowPortrait = canShowPortrait(student.consent) && Boolean(portraitSrc);
+  const allowBio = canShowStory(student.consent) && Boolean(student.bio?.trim());
+  const sponsorshipLabel =
+    student.sponsorshipStatus === "sponsored" ? "Sponsored" : "Awaiting a sponsor";
+
+  const ldBreadcrumb = breadcrumbList(SITE_URL, [
+    { name: "Home", url: "/" },
+    { name: "Students", url: "/students" },
+    { name: student.displayName, url: `/students/${student.id}` },
+  ]);
+
+  return (
+    <main className="bg-ground">
+      <article className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-[6%] lg:py-24">
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <Link
+            href="/students"
+            className="text-meta uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent-2-text focus-visible:text-accent-2-text focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-accent"
+          >
+            ← Back to directory
+          </Link>
+        </nav>
+
+        <header className="grid grid-cols-1 gap-8 lg:grid-cols-[5fr_7fr] lg:items-end lg:gap-14">
+          <div className="relative aspect-[4/5] w-full overflow-hidden bg-ground-3">
+            {allowPortrait && portraitSrc ? (
+              <Image
+                src={portraitSrc}
+                alt={student.portrait?.alt ?? ""}
+                fill
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                className="object-cover"
+                priority
+                fetchPriority="high"
+              />
+            ) : (
+              <StudentPlaceholder sizes="(min-width: 1024px) 40vw, 100vw" />
+            )}
+          </div>
+          <div className="flex flex-col gap-4">
+            <p className="text-meta uppercase tracking-[0.12em] text-ink-2">{sponsorshipLabel}</p>
+            <h1 className="text-balance text-display-2 text-ink">{student.displayName}</h1>
+            <dl className="flex flex-col gap-2 border-t border-hairline pt-4 text-body text-ink-2">
+              <div className="flex justify-between gap-4">
+                <dt className="text-meta uppercase tracking-[0.08em]">Grade</dt>
+                <dd className="text-ink">{student.grade}</dd>
+              </div>
+              {school ? (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-meta uppercase tracking-[0.08em]">School</dt>
+                  <dd className="text-ink">{school.name}</dd>
+                </div>
+              ) : null}
+              {student.community ? (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-meta uppercase tracking-[0.08em]">Community</dt>
+                  <dd className="text-ink capitalize">{student.community}</dd>
+                </div>
+              ) : null}
+            </dl>
+          </div>
+        </header>
+
+        <section
+          aria-label={`About ${student.displayName}`}
+          className="mt-16 border-t border-hairline pt-12 lg:mt-24"
+        >
+          {allowBio ? (
+            <div className="max-w-[60ch] whitespace-pre-line text-body-lg text-ink">
+              {student.bio}
+            </div>
+          ) : (
+            <p className="max-w-[60ch] text-body-lg text-ink-2">
+              {student.displayName} hasn't shared a story yet — first-name-only listings stay
+              private until the family is comfortable saying more.
+            </p>
+          )}
+          {student.quote ? (
+            <p className="mt-8 max-w-[44ch] text-balance text-heading-3 text-ink">
+              &ldquo;{student.quote}&rdquo;
+            </p>
+          ) : null}
+        </section>
+      </article>
+      <JsonLd id="ld-student-breadcrumb" data={ldBreadcrumb} />
+    </main>
+  );
+}

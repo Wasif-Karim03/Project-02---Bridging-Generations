@@ -1,0 +1,16 @@
+displayName: Jyoti
+schoolId: bandarban-school
+grade: 10
+community: bawm
+quote: The best part of school is the morning hour, before it gets loud.
+consent:
+  portraitReleaseStatus: granted
+  storyReleaseStatus: granted
+  signedDate: 2024-09-01
+  releaseFormId: BG-REL-2024-007
+  consentScope:
+    - website
+  revokable: true
+  revokedAt: 2026-02-02
+sponsorshipStatus: sponsored
+enrolledAt: 2020-01-14

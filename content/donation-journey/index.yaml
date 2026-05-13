@@ -1,0 +1,66 @@
+headline: "Five years. Every student, still in school."
+intro: >-
+  Since 2021, Bridging Generations donors have funded tuition, daily meals,
+  books, and materials for children across the Chittagong Hill Tracts. Here
+  is how the programme has grown — year by year, gift by gift.
+totalRaisedAllTime: 111200
+totalDonorsAllTime: 178
+totalStudentsAllTime: 156
+yearlyEntries:
+  - year: 2021
+    totalRaised: 4200
+    studentCount: 12
+    donorCount: 8
+    milestone: >-
+      Programme launched with twelve students across two partner schools. The
+      founding eight donors covered a full school year of tuition and books.
+    milestoneTag: milestone
+    highlightQuote: >-
+      Knowing a child will show up to school because of what we gave — that
+      is everything.
+    quoteAttribution: "Founding donor, 2021"
+  - year: 2022
+    totalRaised: 9800
+    studentCount: 28
+    donorCount: 19
+    milestone: >-
+      Expanded to four schools and launched the daily meal programme at the
+      Khagrachari site. Student count more than doubled.
+    milestoneTag: fundraiser
+    highlightQuote: ""
+    quoteAttribution: ""
+  - year: 2023
+    totalRaised: 22400
+    studentCount: 67
+    donorCount: 51
+    milestone: >-
+      The girls' scholarship fund fully covered every enrolled girl for the
+      academic year — the first year with zero female dropouts recorded.
+    milestoneTag: scholarship
+    highlightQuote: >-
+      My daughter came home with a certificate. First in her class. I have
+      never felt anything like that.
+    quoteAttribution: "Parent, Khagrachari school"
+  - year: 2024
+    totalRaised: 38400
+    studentCount: 112
+    donorCount: 87
+    milestone: >-
+      A December fundraiser closed with $18,400 in new recurring sponsorships,
+      funding the Khagrachari kitchen through 2025 and launching the
+      Rangamati school meal run.
+    milestoneTag: fundraiser
+    highlightQuote: ""
+    quoteAttribution: ""
+  - year: 2025
+    totalRaised: 36400
+    studentCount: 156
+    donorCount: 178
+    milestone: >-
+      All five partner schools fully covered. The girls' scholarship fund,
+      library expansion, and spring supplies drive closed fully-funded for
+      the first time in the same calendar year.
+    milestoneTag: milestone
+    highlightQuote: >-
+      156 students. Every one of them showed up on the first day of term.
+    quoteAttribution: "Board report, January 2026"

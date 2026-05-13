@@ -1,0 +1,30 @@
+orgName: Bridging Generations
+missionShort: Sponsoring 156 students across the Chittagong Hill Tracts.
+missionFull: |-
+  Bridging Generations empowers underprivileged children in the Chittagong Hill Tracts through education sponsorship — tuition, books, meals, and the structural support that keeps students in the classroom instead of the workforce.
+visionFull: |-
+  A generation of Hill Tracts students who finish school, choose what comes next, and bring their education back to the communities that raised them.
+foundingYear: 2010
+ein: "00-0000000"
+form990Url: ""
+candidProfileUrl: ""
+mailingAddress: "[CONFIRM: mailing address]"
+contactEmail: info@bridginggenerations.org
+socialLinks:
+  instagram: ""
+  facebook: ""
+  linkedin: ""
+  youtube: ""
+metaDefaults:
+  title: Bridging Generations
+  description: Bridging Generations sponsors 156 students in the Chittagong Hill Tracts, Bangladesh — keeping kids in the classroom through tuition, books, daily meals, and materials.
+  twitterHandle: ""
+copy:
+  navDonateCta: Donate
+  footerTagline: Sponsoring 156 students across the Chittagong Hill Tracts.
+  donateButtonPrimary: Sponsor a student
+  donateButtonSecondary: Donate once
+  contactFormSuccess: Thanks — your message is in. We reply within two business days.
+  contactFormError: Something went wrong on our end. Please try again, or email info@bridginggenerations.org directly.
+  newsletterOptIn: Send me occasional updates from Bridging Generations.
+  placeholderAlt: Illustrated placeholder portrait used when a student has not granted photo release.

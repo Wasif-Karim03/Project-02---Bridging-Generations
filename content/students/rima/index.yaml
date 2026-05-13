@@ -1,0 +1,19 @@
+displayName: Rima
+schoolId: khagrachari-school
+grade: 9
+community: chakma
+quote: Reading with my sisters after school is my favourite time.
+portrait:
+  src: /student-2.jpg
+  alt: A young student in uniform reading a book
+consent:
+  portraitReleaseStatus: granted
+  storyReleaseStatus: granted
+  signedDate: 2025-09-01
+  releaseFormId: BG-REL-2025-001
+  consentScope:
+    - website
+    - print-materials
+  revokable: true
+sponsorshipStatus: sponsored
+enrolledAt: 2021-02-05

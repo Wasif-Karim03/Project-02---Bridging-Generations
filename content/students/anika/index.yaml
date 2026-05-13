@@ -1,0 +1,19 @@
+displayName: Anika
+schoolId: thanchi-high-school
+grade: 8
+community: marma
+quote: I want to become a teacher and open a library in my village.
+portrait:
+  src: /student-1.jpg
+  alt: A student reading at a classroom desk
+consent:
+  portraitReleaseStatus: granted
+  storyReleaseStatus: granted
+  signedDate: 2025-09-01
+  releaseFormId: BG-REL-2025-001
+  consentScope:
+    - website
+    - print-materials
+  revokable: true
+sponsorshipStatus: sponsored
+enrolledAt: 2022-01-10
