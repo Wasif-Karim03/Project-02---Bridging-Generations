@@ -1,8 +1,9 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { desc, eq, sql, sum } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
 import type { DonorProfile } from "@/db/schema";
-import { donorProfiles } from "@/db/schema";
+import { donations, donorProfiles, users } from "@/db/schema";
+import { type DonorListRow, MOCK_DONOR_LIST } from "@/lib/content/applicationsMock";
 
 export type DonorProfileShape = {
   legalName: string;
@@ -84,4 +85,53 @@ function rowToShape(row: DonorProfile): DonorProfileShape {
     dedicationText: row.dedicationText ?? "",
     photoUrl: row.photoUrl ?? "",
   };
+}
+
+/**
+ * Real donor list for the admin dashboard — joins users with their
+ * donor_profiles and sums up succeeded donations. Anyone with role=donor
+ * appears, even with zero gifts (so the admin can see who's signed up but
+ * not yet given). Falls back to MOCK_DONOR_LIST in preview mode.
+ */
+export async function listAllDonors(limit = 200): Promise<DonorListRow[]> {
+  if (!isDbConfigured()) return MOCK_DONOR_LIST;
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: users.id,
+      email: users.email,
+      displayName: users.displayName,
+      legalName: donorProfiles.legalName,
+      publicInitials: donorProfiles.publicInitials,
+      anonymous: donorProfiles.anonymous,
+      lifetimeCents: sum(donations.amountCents),
+      donationCount: sql<number>`count(${donations.id})::int`,
+    })
+    .from(users)
+    .leftJoin(donorProfiles, eq(donorProfiles.userId, users.id))
+    .leftJoin(
+      donations,
+      sql`${donations.donorUserId} = ${users.id} AND ${donations.status} = 'succeeded'`,
+    )
+    .where(eq(users.role, "donor"))
+    .groupBy(
+      users.id,
+      users.email,
+      users.displayName,
+      donorProfiles.legalName,
+      donorProfiles.publicInitials,
+      donorProfiles.anonymous,
+    )
+    .orderBy(desc(sum(donations.amountCents)))
+    .limit(limit);
+
+  return rows.map((r) => ({
+    id: r.id,
+    legalName: r.legalName ?? r.displayName ?? r.email,
+    publicInitials: r.publicInitials ?? "",
+    email: r.email,
+    lifetimeCents: Number(r.lifetimeCents ?? 0),
+    donationCount: Number(r.donationCount ?? 0),
+    anonymous: r.anonymous ?? true,
+  }));
 }

@@ -5,13 +5,9 @@ import { isDbConfigured } from "@/db/client";
 import { requireRole } from "@/lib/auth";
 import { getAllApplications } from "@/lib/db/queries/applications";
 import { thisMonthTotalCents } from "@/lib/db/queries/donations";
+import { listAllDonors } from "@/lib/db/queries/donorProfiles";
 import { ApplicationStatusControl } from "./_components/ApplicationStatusControl";
-import {
-  APPLICATION_KIND_LABEL,
-  APPLICATION_STATUS_LABEL,
-  formatDonationAmount,
-  MOCK_DONOR_LIST,
-} from "./_data";
+import { APPLICATION_KIND_LABEL, APPLICATION_STATUS_LABEL, formatDonationAmount } from "./_data";
 
 export const metadata: Metadata = {
   title: "Admin dashboard",
@@ -30,9 +26,10 @@ export default async function AdminDashboard() {
   await requireRole("admin");
 
   const usingMockData = !isDbConfigured();
-  const [applications, totalMonthCents] = await Promise.all([
+  const [applications, totalMonthCents, donorList] = await Promise.all([
     getAllApplications(),
     thisMonthTotalCents(),
+    listAllDonors(),
   ]);
   const newApps = applications.filter((a) => a.status === "submitted");
   const inReviewApps = applications.filter((a) => a.status === "under_review");
@@ -61,7 +58,7 @@ export default async function AdminDashboard() {
           value={formatDonationAmount(totalMonthCents)}
           sub="Donations received"
         />
-        <Stat label="Donors total" value={String(MOCK_DONOR_LIST.length)} sub="Active accounts" />
+        <Stat label="Donors total" value={String(donorList.length)} sub="Active accounts" />
       </section>
 
       <section aria-labelledby="applications-title" className="flex flex-col gap-4">
@@ -138,36 +135,43 @@ export default async function AdminDashboard() {
             </Link>
           </div>
         </header>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-body-sm">
-            <thead>
-              <tr className="border-b border-hairline text-meta uppercase tracking-[0.06em] text-ink-2">
-                <th className="py-3 pr-4 text-left">Legal name</th>
-                <th className="py-3 pr-4 text-left">Public</th>
-                <th className="py-3 pr-4 text-right">Lifetime</th>
-                <th className="py-3 pr-4 text-right">Gifts</th>
-                <th className="py-3 text-right">Visibility</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MOCK_DONOR_LIST.map((d) => (
-                <tr key={d.id} className="border-b border-hairline last:border-b-0">
-                  <td className="py-3 pr-4 text-ink">{d.legalName}</td>
-                  <td className="py-3 pr-4 text-ink-2">{d.publicInitials || "—"}</td>
-                  <td className="py-3 pr-4 text-right tabular-nums text-ink">
-                    {formatDonationAmount(d.lifetimeCents)}
-                  </td>
-                  <td className="py-3 pr-4 text-right tabular-nums text-ink-2">
-                    {d.donationCount}
-                  </td>
-                  <td className="py-3 text-right text-meta uppercase tracking-[0.06em] text-ink-2">
-                    {d.anonymous ? "Anon · initials only" : "Public · name shown"}
-                  </td>
+        {donorList.length === 0 ? (
+          <p className="text-body text-ink-2">
+            No donor accounts yet. As donors sign up at <code>/sign-up</code>, the Clerk webhook
+            syncs them here automatically with role <code>donor</code>.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-body-sm">
+              <thead>
+                <tr className="border-b border-hairline text-meta uppercase tracking-[0.06em] text-ink-2">
+                  <th className="py-3 pr-4 text-left">Legal name</th>
+                  <th className="py-3 pr-4 text-left">Public</th>
+                  <th className="py-3 pr-4 text-right">Lifetime</th>
+                  <th className="py-3 pr-4 text-right">Gifts</th>
+                  <th className="py-3 text-right">Visibility</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {donorList.map((d) => (
+                  <tr key={d.id} className="border-b border-hairline last:border-b-0">
+                    <td className="py-3 pr-4 text-ink">{d.legalName}</td>
+                    <td className="py-3 pr-4 text-ink-2">{d.publicInitials || "—"}</td>
+                    <td className="py-3 pr-4 text-right tabular-nums text-ink">
+                      {formatDonationAmount(d.lifetimeCents)}
+                    </td>
+                    <td className="py-3 pr-4 text-right tabular-nums text-ink-2">
+                      {d.donationCount}
+                    </td>
+                    <td className="py-3 text-right text-meta uppercase tracking-[0.06em] text-ink-2">
+                      {d.anonymous ? "Anon · initials only" : "Public · name shown"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <section aria-labelledby="management-title" className="flex flex-col gap-4">

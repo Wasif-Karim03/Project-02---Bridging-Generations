@@ -87,6 +87,54 @@ export default async function DonorDashboard() {
         </p>
       ) : null}
 
+      {/* First-time donor onboarding — only when they have zero gifts in the
+          real DB. Mock-mode users see demo data, so skip the prompt for them. */}
+      {!usingMockData && donations.length === 0 ? (
+        <section
+          aria-labelledby="get-started-title"
+          className="flex flex-col gap-4 border-2 border-accent bg-accent/5 px-5 py-6"
+        >
+          <h2 id="get-started-title" className="text-heading-4 text-ink">
+            Welcome — here's what comes next.
+          </h2>
+          <p className="max-w-[60ch] text-body text-ink-2">
+            Your donor account is live. To start sponsoring a student or supporting a project, pick
+            one of the paths below. Every gift shows up here within a minute, and you'll get a PDF
+            tax receipt automatically.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/students"
+              className="inline-flex min-h-[44px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
+            >
+              Sponsor a student →
+            </Link>
+            <Link
+              href="/projects"
+              className="inline-flex min-h-[44px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
+            >
+              Browse projects
+            </Link>
+            <Link
+              href="/donate"
+              className="inline-flex min-h-[44px] items-center border border-hairline px-5 text-nav-link uppercase text-ink hover:border-accent hover:text-accent"
+            >
+              General donation
+            </Link>
+          </div>
+          <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
+            Tip: edit your public profile on{" "}
+            <Link
+              href="/dashboard/donor/profile"
+              className="text-accent underline underline-offset-[3px] hover:no-underline"
+            >
+              the profile page
+            </Link>{" "}
+            to choose whether your name shows on /donors.
+          </p>
+        </section>
+      ) : null}
+
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat
           label="This month"

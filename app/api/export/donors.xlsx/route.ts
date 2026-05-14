@@ -1,12 +1,15 @@
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
-import { MOCK_DONOR_LIST } from "@/lib/content/applicationsMock";
+import { requireRole } from "@/lib/auth";
+import { listAllDonors } from "@/lib/db/queries/donorProfiles";
 
-// Admin export of donors. In preview mode (no DB) uses mock list. Phase 5
-// replaces with Drizzle reads from donor_profiles + a donations aggregate.
+// Admin export of donors — pulls real donor rows from Postgres (users joined
+// with donor_profiles + summed donations). In preview mode (no DB) the same
+// helper returns MOCK_DONOR_LIST so the download still works for demos.
 
 export async function GET() {
-  const donors = MOCK_DONOR_LIST;
+  await requireRole("admin");
+  const donors = await listAllDonors();
 
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "Bridging Generations";
