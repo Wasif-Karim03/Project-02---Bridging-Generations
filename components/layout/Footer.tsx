@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { footerContent } from "@/content/fixtures/footer";
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
@@ -23,7 +24,7 @@ type FooterProps = {
   };
 };
 
-export function Footer({
+export async function Footer({
   ein,
   mailingAddress,
   tagline,
@@ -36,6 +37,8 @@ export function Footer({
   socialLinks,
 }: FooterProps = {}) {
   const { brand, about, others, copyrightNote } = footerContent;
+  const tFooter = await getTranslations("footer");
+  const tLinks = await getTranslations("footer.links");
   const year = new Date().getFullYear();
   const einHasRealValue = !isPlaceholder(ein) && ein !== EIN_PLACEHOLDER;
   const showMailingAddress = !isPlaceholder(mailingAddress);
@@ -56,7 +59,7 @@ export function Footer({
           <p className="text-heading-6 font-bold">{brand.name}</p>
           {tagline ? <p className="mt-3 text-body-sm text-white">{tagline}</p> : null}
           <div className="mt-6 border-t border-white/15 pt-6">
-            <p className="text-eyebrow uppercase text-accent-3">Head Office</p>
+            <p className="text-eyebrow uppercase text-accent-3">{tFooter("headOffice")}</p>
             <ul className="mt-4 flex flex-col gap-3 text-body-sm">
               {phoneNumber ? (
                 <li>
@@ -123,7 +126,7 @@ export function Footer({
                     rel="noopener noreferrer"
                     className="underline underline-offset-[3px] transition-colors hover:text-accent-3 hover:no-underline"
                   >
-                    Form 990
+                    {tFooter("form990")}
                   </a>
                 </li>
               ) : null}
@@ -135,7 +138,7 @@ export function Footer({
                     rel="noopener noreferrer"
                     className="underline underline-offset-[3px] transition-colors hover:text-accent-3 hover:no-underline"
                   >
-                    Candid profile
+                    {tFooter("candidProfile")}
                   </a>
                 </li>
               ) : null}
@@ -201,15 +204,12 @@ export function Footer({
 
         {/* Column 2 — About */}
         <div>
-          <p className="text-eyebrow uppercase text-accent-3">About</p>
+          <p className="text-eyebrow uppercase text-accent-3">{tFooter("about")}</p>
           <ul className="mt-4 flex flex-col gap-2 text-body-sm">
             {about.map((link) => (
               <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-white transition-colors hover:text-accent-3"
-                >
-                  {link.label}
+                <Link href={link.href} className="text-white transition-colors hover:text-accent-3">
+                  {link.labelKey ? tLinks(link.labelKey) : link.label}
                 </Link>
               </li>
             ))}
@@ -218,15 +218,12 @@ export function Footer({
 
         {/* Column 3 — Others */}
         <div>
-          <p className="text-eyebrow uppercase text-accent-3">Others</p>
+          <p className="text-eyebrow uppercase text-accent-3">{tFooter("others")}</p>
           <ul className="mt-4 flex flex-col gap-2 text-body-sm">
             {others.map((link) => (
               <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="text-white transition-colors hover:text-accent-3"
-                >
-                  {link.label}
+                <Link href={link.href} className="text-white transition-colors hover:text-accent-3">
+                  {link.labelKey ? tLinks(link.labelKey) : link.label}
                 </Link>
               </li>
             ))}
@@ -242,7 +239,7 @@ export function Footer({
           </p>
           <div className="flex items-center gap-3">
             <span className="text-eyebrow uppercase tracking-[0.1em] text-white/70">
-              Payments accepted
+              {tFooter("paymentsAccepted")}
             </span>
             <Image
               src="/bkash-logo.svg"
@@ -251,7 +248,7 @@ export function Footer({
               height={20}
               className="h-5 w-auto"
             />
-            <span className="text-meta text-white/70">Card / Stripe</span>
+            <span className="text-meta text-white/70">{tFooter("cardStripe")}</span>
           </div>
         </div>
       </div>

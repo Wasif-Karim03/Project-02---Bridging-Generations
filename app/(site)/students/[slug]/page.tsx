@@ -80,23 +80,53 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
             <p className="text-meta uppercase tracking-[0.12em] text-ink-2">{sponsorshipLabel}</p>
             <h1 className="text-balance text-display-2 text-ink">{student.displayName}</h1>
             <dl className="flex flex-col gap-2 border-t border-hairline pt-4 text-body text-ink-2">
-              <div className="flex justify-between gap-4">
-                <dt className="text-meta uppercase tracking-[0.08em]">Grade</dt>
-                <dd className="text-ink">{student.grade}</dd>
-              </div>
+              <Row label="Grade" value={String(student.grade)} />
               {school ? (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-meta uppercase tracking-[0.08em]">School</dt>
-                  <dd className="text-ink">{school.name}</dd>
-                </div>
+                <Row
+                  label="School"
+                  value={
+                    <Link
+                      href={`/schools/${school.id}`}
+                      className="text-ink underline underline-offset-[3px] transition hover:text-accent hover:no-underline"
+                    >
+                      {school.name}
+                    </Link>
+                  }
+                />
               ) : null}
               {student.community ? (
-                <div className="flex justify-between gap-4">
-                  <dt className="text-meta uppercase tracking-[0.08em]">Community</dt>
-                  <dd className="text-ink capitalize">{student.community}</dd>
-                </div>
+                <Row
+                  label="Community"
+                  value={<span className="capitalize">{student.community}</span>}
+                />
+              ) : null}
+              {student.region ? <Row label="Region" value={student.region} /> : null}
+              {student.area ? <Row label="Area" value={student.area} /> : null}
+              {student.village ? <Row label="Village" value={student.village} /> : null}
+              {student.hobby ? <Row label="Hobby" value={student.hobby} /> : null}
+              {student.gpa ? <Row label="GPA" value={student.gpa} /> : null}
+              {student.lifeTarget ? <Row label="Life target" value={student.lifeTarget} /> : null}
+              {student.registrationCode ? (
+                <Row
+                  label="Registration code"
+                  value={<span className="font-mono">{student.registrationCode}</span>}
+                />
               ) : null}
             </dl>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href={`/donate?student=${encodeURIComponent(student.id)}`}
+                className="inline-flex min-h-[48px] items-center bg-accent-2 px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
+              >
+                Donate to {student.displayName}
+              </Link>
+              <Link
+                href="/students"
+                className="inline-flex min-h-[48px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
+              >
+                Browse all students
+              </Link>
+            </div>
           </div>
         </header>
 
@@ -123,5 +153,14 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
       </article>
       <JsonLd id="ld-student-breadcrumb" data={ldBreadcrumb} />
     </main>
+  );
+}
+
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex justify-between gap-4">
+      <dt className="text-meta uppercase tracking-[0.08em]">{label}</dt>
+      <dd className="text-right text-ink">{value}</dd>
+    </div>
   );
 }

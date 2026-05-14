@@ -16,6 +16,9 @@ function make(
     publishedAt,
     coverImage: { src: "/x.jpg", alt: "x" },
     relatedProjectId: null,
+    pdfUrl: null,
+    titleBn: "",
+    excerptBn: "",
   } as Activity;
 }
 

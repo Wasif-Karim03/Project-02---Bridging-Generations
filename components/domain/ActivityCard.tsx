@@ -1,3 +1,4 @@
+import { Link } from "next-view-transitions";
 import { Row } from "@/components/ui/editorial";
 import { Reveal } from "@/components/ui/Reveal";
 import type { Activity } from "@/lib/content/activities";
@@ -20,6 +21,11 @@ type ActivityCardProps = {
    * on the first above-the-fold card.
    */
   priority?: boolean;
+  /**
+   * When true, render a "Read more" link + (if pdfUrl is set) a PDF download
+   * link below the excerpt. Used by the homepage activity feed per spec.
+   */
+  showActions?: boolean;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -50,8 +56,9 @@ export function ActivityCard({
   as = "article",
   hideRule = false,
   priority = false,
+  showActions = false,
 }: ActivityCardProps) {
-  const { coverImage, title, excerpt, tag, publishedAt } = activity;
+  const { coverImage, title, excerpt, tag, publishedAt, pdfUrl } = activity;
   const stamp = relativeStamp(publishedAt);
   return (
     <Row as={as} hideRule={hideRule}>
@@ -72,6 +79,39 @@ export function ActivityCard({
         </Row.Eyebrow>
         <Row.Headline>{title}</Row.Headline>
         <Row.Lede>{excerpt}</Row.Lede>
+        {showActions ? (
+          <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-2 text-nav-link uppercase">
+            <Link
+              href="/activities"
+              className="inline-flex items-center gap-1 text-accent transition hover:text-accent-2-text"
+            >
+              Read More
+              <span aria-hidden="true">→</span>
+            </Link>
+            {pdfUrl ? (
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-accent-2-text underline underline-offset-[3px] transition hover:no-underline"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                Download Report (PDF)
+              </a>
+            ) : null}
+          </div>
+        ) : null}
       </Row.Body>
     </Row>
   );

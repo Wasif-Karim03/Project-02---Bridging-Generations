@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { TestimonialPanel } from "@/components/domain/TestimonialPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getAllBoardMembers } from "@/lib/content/boardMembers";
+import { getAllBoardMembers, getAllTeamMembersGrouped } from "@/lib/content/boardMembers";
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getAllTestimonials } from "@/lib/content/testimonials";
@@ -20,9 +20,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const [siteSettings, boardMembers, testimonials] = await Promise.all([
+  const [siteSettings, boardMembers, grouped, testimonials] = await Promise.all([
     getSiteSettings(),
     getAllBoardMembers(),
+    getAllTeamMembersGrouped(),
     getAllTestimonials(),
   ]);
 
@@ -69,7 +70,7 @@ export default async function AboutPage() {
         mailingAddress={siteSettings.mailingAddress}
         contactEmail={siteSettings.contactEmail}
       />
-      <AboutLeadership boardMembers={boardMembers} />
+      <AboutLeadership grouped={grouped} />
       {partnerQuote ? (
         <TestimonialPanel
           testimonial={partnerQuote}

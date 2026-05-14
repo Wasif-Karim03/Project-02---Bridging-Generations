@@ -13,64 +13,67 @@ export const donatePageSingleton = singleton({
       multiline: true,
       validation: { isRequired: true, length: { min: 1 } },
     }),
-    givebutterAccountId: fields.text({
-      label: "Givebutter account ID (acct= in embed code)",
-      description:
-        "From the Givebutter dashboard's embed snippet: the value in the acct= query param of the widget script URL. Both this and the campaign ID must be real before the donate form will mount — otherwise the site shows an email-us fallback.",
-      validation: { isRequired: true, length: { min: 1 } },
-    }),
-    givebutterCampaignId: fields.text({
-      label: "Givebutter campaign ID (widget id)",
-      description:
-        "From the Givebutter dashboard's embed snippet: the value on the <givebutter-widget id=...> element. A six-character code — verify it resolves at givebutter.com/<code> before pasting.",
-      validation: { isRequired: true, length: { min: 1 } },
-    }),
     monthlySuggestion: fields.integer({
       label: "Monthly suggestion (USD)",
       description: 'e.g. 30 — used in CTAs like "$30/month sponsors one student".',
       validation: { min: 0 },
     }),
+    suggestedAmounts: fields.text({
+      label: "Suggested donation amounts (USD, comma-separated)",
+      description:
+        'e.g. "15, 30, 60, 120, 250". Shown as quick-pick buttons on the Stripe donate form.',
+      defaultValue: "15, 30, 60, 120, 250",
+    }),
     transactionSource: fields.select({
       label: "Transaction source",
       description:
-        "How donations actually flow today. 'Givebutter' = embed IDs are real and the widget mounts; receipt-promise copy renders. 'Mailto' / 'Placeholder' = donations route through the contact email; receipt-promise copy is suppressed and the fallback copy below renders instead.",
+        "How donations flow today. 'Stripe' = real Stripe Checkout (requires STRIPE_SECRET_KEY in Vercel env). 'Givebutter' = legacy embed (deprecated). 'Mailto' = email-only fallback. 'Placeholder' = setup pending.",
       options: [
-        { label: "Givebutter (live widget)", value: "givebutter" },
+        { label: "Stripe Checkout (recommended)", value: "stripe" },
+        { label: "Givebutter (legacy embed)", value: "givebutter" },
         { label: "Mailto fallback", value: "mailto" },
         { label: "Placeholder (setup pending)", value: "placeholder" },
       ],
-      defaultValue: "placeholder",
+      defaultValue: "stripe",
+    }),
+    // Legacy Givebutter fields — kept so existing content doesn't break,
+    // can be deleted via Keystatic admin once Stripe is the only path.
+    givebutterAccountId: fields.text({
+      label: "Givebutter account ID (legacy)",
+      description: "Only used when transactionSource = 'givebutter'.",
+    }),
+    givebutterCampaignId: fields.text({
+      label: "Givebutter campaign ID (legacy)",
+      description: "Only used when transactionSource = 'givebutter'.",
     }),
     afterDonateNote: fields.text({
-      label: "After-donate note (Givebutter path)",
-      description: "Shown below the embed when transaction source is 'givebutter'.",
+      label: "After-donate note (live transaction path)",
+      description: "Shown below the donate form when Stripe or Givebutter is configured.",
       multiline: true,
     }),
     afterDonateNoteFallback: fields.text({
       label: "After-donate note (mailto / placeholder path)",
-      description:
-        "Shown below the embed when transaction source is not 'givebutter'. Should describe the mailto path honestly.",
+      description: "Shown below the donate form when no live transaction source is configured.",
       multiline: true,
       validation: { isRequired: true, length: { min: 1 } },
     }),
     thankYouBody: fields.text({
-      label: "Thank-you body (Givebutter path)",
+      label: "Thank-you body (live path)",
       description:
-        "Body copy for /donate/thank-you when transaction source is 'givebutter'. Avoid assuming donation completion — some visitors type the URL without donating.",
+        "Body copy for /donate/thank-you when Stripe / Givebutter is configured. Avoid assuming donation completion.",
       multiline: true,
       validation: { isRequired: true, length: { min: 1 } },
     }),
     thankYouBodyFallback: fields.text({
       label: "Thank-you body (mailto / placeholder path)",
-      description:
-        "Body copy for /donate/thank-you when transaction source is not 'givebutter'. No Givebutter receipt promise.",
+      description: "Body copy for /donate/thank-you when no live transaction source.",
       multiline: true,
       validation: { isRequired: true, length: { min: 1 } },
     }),
     transactionSourceNote: fields.text({
       label: "Transaction-source note (above FAQ)",
       description:
-        "Shown above the FAQ when transaction source is not 'givebutter' — flags that the FAQ describes the Givebutter path that isn't live yet.",
+        "Optional note shown above the FAQ when transactionSource is not the FAQ's authored path.",
       multiline: true,
       validation: { isRequired: true, length: { min: 1 } },
     }),

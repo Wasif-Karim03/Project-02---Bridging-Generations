@@ -1261,7 +1261,7 @@ p.dropcap::first-letter {
   }
 
   .lenis.lenis-scrolling iframe:not([data-lenis-interactive]) {
-    /* biome-ignore lint/complexity/noImportantStyles: Lenis only blocks iframe pointer events DURING active scroll gestures (.lenis-scrolling is on <html> mid-scroll only). Clicks on the Givebutter widget at /donate work between gestures because the class is removed within ~300ms of the last input. */
+    /* biome-ignore lint/complexity/noImportantStyles: Lenis only blocks iframe pointer events DURING active scroll gestures (.lenis-scrolling is on <html> mid-scroll only). Clicks on any embedded iframe widgets work between gestures because the class is removed within ~300ms of the last input. */
     pointer-events: none !important;
   }
 }

@@ -1,11 +1,11 @@
 orgName: Bridging Generations
-missionShort: Sponsoring 156 students across the Chittagong Hill Tracts.
+missionShort: Education without the barrier of poverty.
 missionFull: |-
-  Bridging Generations empowers underprivileged children in the Chittagong Hill Tracts through education sponsorship — tuition, books, meals, and the structural support that keeps students in the classroom instead of the workforce.
+  Establishing an enlightened generation through sustainable education bridging — and extending the helping hands to ensure poverty may not be the hindrance to the education of the unprivileged and neglected people.
 visionFull: |-
-  A generation of Hill Tracts students who finish school, choose what comes next, and bring their education back to the communities that raised them.
-foundingYear: 2010
-ein: "00-0000000"
+  Providing scholarships to the poor but talented students. Undertaking different projects and implementing them in the underprivileged group.
+foundingYear: 2019
+ein: "[CONFIRM: 9-digit EIN]"
 form990Url: ""
 candidProfileUrl: ""
 mailingAddress: "87-38 112th St, Richmond Hill NY 11418 USA"
@@ -15,19 +15,19 @@ phoneNumber: "+8801898911452"
 whatsappNumber: "8801898911452"
 socialLinks:
   instagram: ""
-  facebook: ""
+  facebook: "https://web.facebook.com/105308550996328/"
   linkedin: ""
   youtube: ""
 metaDefaults:
   title: Bridging Generations
-  description: Bridging Generations sponsors 156 students in the Chittagong Hill Tracts, Bangladesh — keeping kids in the classroom through tuition, books, daily meals, and materials.
+  description: Bridging Generations is an educational fundraising platform supporting underprivileged and orphan students across Bangladesh — tuition, exam fees, books, and the materials that keep students in the classroom.
   twitterHandle: ""
 copy:
   navDonateCta: Donate
-  footerTagline: Sponsoring 156 students across the Chittagong Hill Tracts.
+  footerTagline: Educational fundraising for underprivileged students in Bangladesh — since 2019.
   donateButtonPrimary: Sponsor a student
   donateButtonSecondary: Donate once
   contactFormSuccess: Thanks — your message is in. We reply within two business days.
-  contactFormError: Something went wrong on our end. Please try again, or email info@bridginggenerations.org directly.
+  contactFormError: Something went wrong on our end. Please try again, or email bridginggeneration20@gmail.com directly.
   newsletterOptIn: Send me occasional updates from Bridging Generations.
   placeholderAlt: Illustrated placeholder portrait used when a student has not granted photo release.

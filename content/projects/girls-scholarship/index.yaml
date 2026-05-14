@@ -1,11 +1,10 @@
-title: Girls' scholarship fund
-summary: Full-tuition sponsorships for girls whose families would otherwise stop schooling after grade five — keeping them in education through graduation.
-body: |-
-  In the Hill Tracts, girls are often pulled out of school after grade five to help at home. The Girls' Scholarship Fund covers full tuition, books, and uniforms through graduation, plus a small stipend that offsets the household labor a girl would otherwise be doing.
-fundingGoal: 15000
-fundingRaised: 15000
-status: funded
+title: "[PLACEHOLDER] Girls' scholarship fund — delete via Keystatic admin"
+summary: "Placeholder entry from the demo content. Delete this from the Keystatic admin once real Bridging Generations projects are confirmed."
+body: "[CONFIRM: This is a placeholder entry left over from the project demo. Please delete via the Keystatic admin (Projects collection)."
+fundingGoal: 1
+fundingRaised: 0
+status: paused
 heroImage:
   src: /project-scholarship.jpg
-  alt: A young girl writes in her notebook with books open around her
-order: 2
+  alt: "Placeholder — delete"
+order: 101

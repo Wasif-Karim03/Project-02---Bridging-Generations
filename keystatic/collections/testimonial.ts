@@ -23,14 +23,23 @@ export const testimonialCollection = collection({
       slug: { label: "Slug" },
     }),
     quote: fields.text({
-      label: "Quote",
+      label: "Quote (English)",
       description: "Up to 280 characters.",
       multiline: true,
       validation: { isRequired: true, length: { min: 1, max: 280 } },
     }),
+    quoteBn: fields.text({
+      label: "Quote (Bengali)",
+      description: "Optional. Falls back to English when empty.",
+      multiline: true,
+    }),
     speakerTitle: fields.text({
-      label: "Speaker title",
+      label: "Speaker title (English)",
       description: 'Free-form full title — e.g. "Principal, Thanchi High School".',
+    }),
+    speakerTitleBn: fields.text({
+      label: "Speaker title (Bengali)",
+      description: "Optional. Falls back to English when empty.",
     }),
     highlightWord: fields.text({
       label: "Highlight word",

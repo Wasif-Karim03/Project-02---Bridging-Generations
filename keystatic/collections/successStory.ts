@@ -18,14 +18,23 @@ export const successStoryCollection = collection({
       slug: { label: "Slug", description: "URL: /success-stories/<slug>" },
     }),
     subjectRole: fields.text({
-      label: "Subject role",
+      label: "Subject role (English)",
       description: 'e.g. "10th Grade, Bandarban".',
     }),
+    subjectRoleBn: fields.text({
+      label: "Subject role (Bengali)",
+      description: "Optional. Falls back to English when empty.",
+    }),
     pullQuote: fields.text({
-      label: "Pull quote",
+      label: "Pull quote (English)",
       description: "Featured quote on the story card.",
       multiline: true,
       validation: { isRequired: true, length: { min: 1 } },
+    }),
+    pullQuoteBn: fields.text({
+      label: "Pull quote (Bengali)",
+      description: "Optional. Falls back to English when empty.",
+      multiline: true,
     }),
     body: fields.mdx({
       label: "Body",

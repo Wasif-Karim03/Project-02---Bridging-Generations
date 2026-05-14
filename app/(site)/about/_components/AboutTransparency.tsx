@@ -96,8 +96,7 @@ export function AboutTransparency({
                 </p>
               )}
               <p>
-                Givebutter processes donations and issues automated receipts at the time of each
-                gift.
+                Stripe processes donations and issues automated receipts at the time of each gift.
               </p>
             </div>
           </Row>

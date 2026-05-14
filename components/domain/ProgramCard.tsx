@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { Link } from "next-view-transitions";
 import { Feature, Row } from "@/components/ui/editorial";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Reveal } from "@/components/ui/Reveal";
@@ -13,8 +15,11 @@ type ProgramCardProps = {
    * `row`     — list scale: hairline rule, image-left, heading-4 headline,
    *             progress bar inline. Default for /projects rest-of-list and
    *             FundedRecap entries.
+   * `card`    — compact grid scale: image on top, body below, progress bar,
+   *             per-project Donate Now button. Used by the homepage 3-col
+   *             projects grid (6 cards).
    */
-  scale?: "feature" | "row";
+  scale?: "feature" | "row" | "card";
   as?: "article" | "li";
   hideRule?: boolean;
 };
@@ -79,8 +84,75 @@ export function ProgramCard({
   const ariaLabel = `${project.title}, ${flags.ribbonLabel.toLowerCase()}`;
   if (scale === "feature")
     return <FeatureCard project={project} flags={flags} ariaLabel={ariaLabel} />;
+  if (scale === "card")
+    return <GridCard project={project} flags={flags} as={as} ariaLabel={ariaLabel} />;
   return (
     <RowCard project={project} flags={flags} as={as} hideRule={hideRule} ariaLabel={ariaLabel} />
+  );
+}
+
+const dollarsCompact = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+type GridCardProps = CardProps & { as: "article" | "li" };
+
+function GridCard({ project, flags, as: Tag, ariaLabel }: GridCardProps) {
+  const remaining = Math.max(project.fundingGoal - project.fundingRaised, 0);
+  const donateHref = `/donate?project=${encodeURIComponent(project.id)}`;
+  return (
+    <Tag
+      aria-label={ariaLabel}
+      className="group relative flex flex-col bg-ground-2 shape-bevel overflow-hidden shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-card-hover)]"
+    >
+      <span aria-hidden="true" className="program-ribbon" data-status={flags.ribbonStatus}>
+        {flags.ribbonLabel}
+      </span>
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-ground-3">
+        <Image
+          src={project.heroImage.src}
+          alt={project.heroImage.alt}
+          fill
+          sizes="(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw"
+          className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03]"
+        />
+      </div>
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <h3 className="text-balance text-heading-5 text-ink">{project.title}</h3>
+        <p className="line-clamp-2 text-body-sm text-ink-2">{project.summary}</p>
+        <div className="mt-auto flex flex-col gap-3 pt-2">
+          <ProgressBar
+            percentage={flags.percentage}
+            label={
+              flags.isFunded
+                ? "Fully funded"
+                : flags.isPaused
+                  ? "Paused"
+                  : `${flags.percentage}% · ${dollarsCompact.format(remaining)} to go`
+            }
+            tone={flags.progressTone}
+          />
+          {flags.isFunded ? (
+            <Link
+              href="/projects"
+              className="inline-flex min-h-[44px] items-center justify-center border border-accent px-4 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
+            >
+              See Outcome
+            </Link>
+          ) : (
+            <Link
+              href={donateHref}
+              className="inline-flex min-h-[44px] items-center justify-center bg-accent-2 px-4 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
+            >
+              Donate Now
+            </Link>
+          )}
+        </div>
+      </div>
+    </Tag>
   );
 }
 

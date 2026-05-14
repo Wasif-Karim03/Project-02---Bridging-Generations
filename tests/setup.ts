@@ -3,6 +3,23 @@ import { cleanup } from "@testing-library/react";
 import NextLink from "next/link";
 import type { ReactNode } from "react";
 import { afterEach, vi } from "vitest";
+import enMessages from "../messages/en.json";
+
+// Walks a "namespace.path.to.key" against the imported messages/en.json so
+// the next-intl mock returns the actual English copy. Falls back to the
+// raw key when the path is missing — same behaviour as the real lib.
+function lookupMessage(path: string): string {
+  const parts = path.split(".");
+  let cur: unknown = enMessages;
+  for (const p of parts) {
+    if (cur && typeof cur === "object" && p in (cur as Record<string, unknown>)) {
+      cur = (cur as Record<string, unknown>)[p];
+    } else {
+      return path;
+    }
+  }
+  return typeof cur === "string" ? cur : path;
+}
 
 vi.mock("next-view-transitions", () => ({
   Link: NextLink,
@@ -12,6 +29,37 @@ vi.mock("next-view-transitions", () => ({
 // `server-only` throws when imported outside a React Server Component. Stub it so
 // unit tests can exercise pure helpers that live alongside server-only accessors.
 vi.mock("server-only", () => ({}));
+
+// next-intl mock — resolves translation keys against the imported messages/en.json
+// so tests assert against the real English copy without needing a Provider.
+vi.mock("next-intl", () => ({
+  useTranslations: (namespace?: string) => {
+    const t = (key: string) => lookupMessage(namespace ? `${namespace}.${key}` : key);
+    return Object.assign(t, {
+      rich: t,
+      markup: t,
+      raw: t,
+    });
+  },
+  useLocale: () => "en",
+  NextIntlClientProvider: ({ children }: { children: ReactNode }) => children,
+}));
+
+vi.mock("next-intl/server", () => ({
+  getTranslations: (namespace?: string) => {
+    const t = (key: string) => lookupMessage(namespace ? `${namespace}.${key}` : key);
+    return Promise.resolve(t);
+  },
+  getLocale: () => Promise.resolve("en"),
+  getMessages: () => Promise.resolve(enMessages),
+}));
+
+// next/cache — revalidatePath is invoked by the locale switch server action.
+// In tests we just make it a no-op.
+vi.mock("next/cache", () => ({
+  revalidatePath: () => {},
+  revalidateTag: () => {},
+}));
 
 class StubIntersectionObserver {
   readonly root = null;

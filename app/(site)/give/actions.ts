@@ -33,7 +33,11 @@ export async function submitGiveForm(
 ): Promise<GiveActionState> {
   const honeypot = String(formData.get("company") ?? "");
   if (honeypot.length > 0) {
-    return { status: "success", message: "Profile submitted — we'll be in touch.", fieldErrors: {} };
+    return {
+      status: "success",
+      message: "Profile submitted — we'll be in touch.",
+      fieldErrors: {},
+    };
   }
 
   const isAnonymous = formData.get("visibility") === "anonymous";
@@ -88,7 +92,11 @@ export async function submitGiveForm(
   if (!apiKey) {
     console.warn("[give] RESEND_API_KEY not set; logged only.");
     console.info("[give] %s\n%s", subject, body);
-    return { status: "success", message: "Profile submitted — we'll be in touch.", fieldErrors: {} };
+    return {
+      status: "success",
+      message: "Profile submitted — we'll be in touch.",
+      fieldErrors: {},
+    };
   }
 
   try {

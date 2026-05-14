@@ -125,5 +125,36 @@ export const studentCollection = collection({
       defaultValue: "waiting",
     }),
     enrolledAt: fields.date({ label: "Enrolled on" }),
+    // Profile + filter fields (Task 14 / 15)
+    village: fields.text({
+      label: "Village",
+      description: "Filter on /students. Optional.",
+    }),
+    region: fields.text({
+      label: "Region",
+      description: 'Broad region (e.g. "Rangamati Sadar"). Used as a filter on /students.',
+    }),
+    area: fields.text({
+      label: "Area",
+      description:
+        'Narrower area inside the region (e.g. "Tabalchhari ward"). Filter on /students.',
+    }),
+    hobby: fields.text({
+      label: "Hobby",
+      description: 'Shown on the student profile (e.g. "Reading, cricket").',
+    }),
+    gpa: fields.text({
+      label: "GPA / Grade",
+      description: 'Most recent reported GPA or grade summary (e.g. "4.83 / 5.0").',
+    }),
+    lifeTarget: fields.text({
+      label: "Life target",
+      description: 'What this student is working toward (e.g. "Become a primary school teacher").',
+      multiline: true,
+    }),
+    registrationCode: fields.text({
+      label: "Registration code",
+      description: 'Internal student ID (e.g. "BG-2025-042"). Shown on the student profile.',
+    }),
   },
 });

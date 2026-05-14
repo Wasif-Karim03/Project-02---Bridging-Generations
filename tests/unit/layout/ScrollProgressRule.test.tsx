@@ -37,7 +37,7 @@ describe("ScrollProgressRule", () => {
     expect(rule).toHaveClass("scroll-progress-rule");
     expect(rule).toHaveClass("origin-left");
     expect(rule).toHaveClass("fixed");
-    expect(rule).toHaveClass("top-16");
+    expect(rule).toHaveClass("top-14");
   });
 
   it("skips the JS path when the browser supports animation-timeline", () => {

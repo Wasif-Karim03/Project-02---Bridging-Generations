@@ -1,49 +1,72 @@
 import { getRecentActivities } from "@/lib/content/activities";
-import { isPlaceholder } from "@/lib/content/isPlaceholder";
+import { getAllGalleryImages } from "@/lib/content/galleryImages";
 import { getFeaturedProjects } from "@/lib/content/projects";
-import { getAllSchools } from "@/lib/content/schools";
 import { getSiteSettings } from "@/lib/content/siteSettings";
-import { getStatsSnapshot } from "@/lib/content/statsSnapshot";
 import { getSpotlightStudents } from "@/lib/content/students";
-import { getFeaturedSuccessStory } from "@/lib/content/successStories";
+import { getFeaturedSuccessStories } from "@/lib/content/successStories";
 import { getFeaturedTestimonial } from "@/lib/content/testimonials";
 import { HomeActivities } from "./_components/HomeActivities";
 import { HomeCTAFooter } from "./_components/HomeCTAFooter";
-import { HomeHero } from "./_components/HomeHero";
+import { HomeGallery } from "./_components/HomeGallery";
+import { HomeHeroCarousel } from "./_components/HomeHeroCarousel";
 import { HomeMissionBand } from "./_components/HomeMissionBand";
+import { HomeNewsTicker } from "./_components/HomeNewsTicker";
 import { HomeProgramsGrid } from "./_components/HomeProgramsGrid";
 import { HomeSpotlightScroller } from "./_components/HomeSpotlightScroller";
 import { HomeSuccessPanel } from "./_components/HomeSuccessPanel";
 import { HomeTestimonialPanel } from "./_components/HomeTestimonialPanel";
 
 export default async function Home() {
-  const [stats, settings, projects, story, activities, students, testimonial, allSchools] =
-    await Promise.all([
-      getStatsSnapshot(),
-      getSiteSettings(),
-      getFeaturedProjects(2),
-      getFeaturedSuccessStory(),
-      getRecentActivities(2),
-      getSpotlightStudents(6),
-      getFeaturedTestimonial(),
-      getAllSchools(),
-    ]);
+  // Spec calls for: 7+ recent activities, 6 projects, 3 success stories, 3
+  // spotlight students, ~8 gallery photos, 1 testimonial. The hero carousel +
+  // ticker are self-contained.
+  const [
+    settings,
+    projects,
+    successStories,
+    activities,
+    tickerActivities,
+    students,
+    testimonial,
+    galleryImages,
+  ] = await Promise.all([
+    getSiteSettings(),
+    getFeaturedProjects(6),
+    getFeaturedSuccessStories(3),
+    getRecentActivities(7),
+    // Separate fetch keeps the ticker compact regardless of the activity feed
+    // depth. 8 keeps the marquee comfortably long.
+    getRecentActivities(8),
+    getSpotlightStudents(3),
+    getFeaturedTestimonial(),
+    getAllGalleryImages(),
+  ]);
 
-  // Match the /students + /about gate: schools whose description starts
-  // with [CONFIRM:] are unverified and excluded from the live count.
-  const confirmedSchoolCount = allSchools.filter(
-    (school) => !school.description || !isPlaceholder(school.description),
-  ).length;
-  const liveStats = { ...stats, schoolCount: confirmedSchoolCount };
+  const tickerItems = tickerActivities.map((a) => ({
+    id: a.id,
+    title: a.title,
+    href: "/activities",
+  }));
 
   return (
     <>
-      <HomeHero stats={liveStats} />
+      {/* 1. Scrolling news ticker */}
+      <HomeNewsTicker items={tickerItems} />
+      {/* 2. Hero slider (3 full-width slides) */}
+      <HomeHeroCarousel />
+      {/* 3. About BG section */}
       <HomeMissionBand missionFull={settings.missionFull} />
-      <HomeProgramsGrid projects={projects} />
-      {story ? <HomeSuccessPanel story={story} /> : null}
+      {/* 4. Success Stories — 3 cards */}
+      <HomeSuccessPanel stories={successStories} />
+      {/* 5. Recent Activities — 7+ entries with optional PDF */}
       <HomeActivities activities={activities} />
+      {/* 6. Students — 3 photos + Donate Now */}
       <HomeSpotlightScroller students={students} />
+      {/* 7. Projects — 6 cards with per-project Donate Now */}
+      <HomeProgramsGrid projects={projects} />
+      {/* 8. Gallery — tab filter + 8 photos */}
+      <HomeGallery images={galleryImages} />
+      {/* 9. Testimonial — spec heading + send-feedback CTA */}
       {testimonial ? <HomeTestimonialPanel testimonial={testimonial} /> : null}
       <HomeCTAFooter />
     </>

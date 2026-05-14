@@ -31,6 +31,13 @@ const withPortrait: Student = {
   },
   sponsorshipStatus: "sponsored",
   enrolledAt: "2025-01-01",
+  village: "",
+  region: "",
+  area: "",
+  hobby: "",
+  gpa: "",
+  lifeTarget: "",
+  registrationCode: "",
 };
 
 const withoutConsent: Student = {

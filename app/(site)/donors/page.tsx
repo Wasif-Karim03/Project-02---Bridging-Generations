@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
+import { JourneyHero } from "@/app/(site)/donation-journey/_components/JourneyHero";
+import { LifetimeImpact } from "@/app/(site)/donation-journey/_components/LifetimeImpact";
+import { YearTimeline } from "@/app/(site)/donation-journey/_components/YearTimeline";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getDonationJourney } from "@/lib/content/donationJourney";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
-import { JourneyHero } from "@/app/(site)/donation-journey/_components/JourneyHero";
-import { LifetimeImpact } from "@/app/(site)/donation-journey/_components/LifetimeImpact";
-import { YearTimeline } from "@/app/(site)/donation-journey/_components/YearTimeline";
 
 export const metadata: Metadata = {
   title: "Our Donation Journey",

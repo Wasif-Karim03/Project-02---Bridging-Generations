@@ -11,6 +11,8 @@ const sample: Testimonial = {
   speakerPhoto: { src: null, alt: "" },
   speakerRole: "alum",
   highlightWord: "",
+  quoteBn: "",
+  speakerTitleBn: "",
 };
 
 describe("TestimonialCard", () => {

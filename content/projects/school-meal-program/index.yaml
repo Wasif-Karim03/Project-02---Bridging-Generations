@@ -1,10 +1,10 @@
-title: School meal program
-summary: A hot meal every school day for all 156 students — so hunger never pulls a child out of the classroom.
-body: "[CONFIRM: meal program body — short paragraph that adds new context beyond the summary, e.g. cook ratio, kitchen locations, lean-season impact data]"
-fundingGoal: 12000
-fundingRaised: 8400
-status: active
+title: "[PLACEHOLDER] School meal program — delete via Keystatic admin"
+summary: "Placeholder entry from the demo content. Delete this from the Keystatic admin once real Bridging Generations projects are confirmed."
+body: "[CONFIRM: This is a placeholder entry left over from the project demo. Please delete via the Keystatic admin (Projects collection)."
+fundingGoal: 1
+fundingRaised: 0
+status: paused
 heroImage:
   src: /project-meal.jpg
-  alt: Children share a midday meal around a classroom table
-order: 1
+  alt: "Placeholder — delete"
+order: 103

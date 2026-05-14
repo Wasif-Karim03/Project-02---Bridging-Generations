@@ -15,6 +15,9 @@ function make(id: string, status: Project["status"], order: number): Project {
     boardOwnerName: "",
     lastUpdated: null,
     mathLineItem: "",
+    titleBn: "",
+    summaryBn: "",
+    bodyBn: "",
   };
 }
 

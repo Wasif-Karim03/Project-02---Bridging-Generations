@@ -21,6 +21,9 @@ const activities: Activity[] = [
     publishedAt: "2026-03-28",
     coverImage: { src: "/activity-distribution.jpg", alt: "Supplies" },
     relatedProjectId: null,
+    pdfUrl: null,
+    titleBn: "",
+    excerptBn: "",
   },
   {
     id: "board-visit-rangpur-2026",
@@ -31,6 +34,9 @@ const activities: Activity[] = [
     publishedAt: "2026-02-14",
     coverImage: { src: "/activity-visit.jpg", alt: "Visit" },
     relatedProjectId: null,
+    pdfUrl: null,
+    titleBn: "",
+    excerptBn: "",
   },
 ];
 

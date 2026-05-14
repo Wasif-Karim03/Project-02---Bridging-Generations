@@ -13,6 +13,9 @@ function make(id: string, tag: Activity["tag"]): Activity {
     publishedAt: "2026-01-01",
     coverImage: { src: "/x.jpg", alt: "cover" },
     relatedProjectId: null,
+    pdfUrl: null,
+    titleBn: "",
+    excerptBn: "",
   } as Activity;
 }
 

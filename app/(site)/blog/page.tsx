@@ -3,10 +3,12 @@ import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Feature, Row } from "@/components/ui/editorial";
 import { Reveal } from "@/components/ui/Reveal";
+import { BLOG_CATEGORY_OPTIONS, type BlogCategory } from "@/keystatic/collections/blogPost";
 import { getAllBlogPosts, getFeaturedBlogPost } from "@/lib/content/blogPosts";
 import { getAllBoardMembers } from "@/lib/content/boardMembers";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
+import { BlogCategoryFilter } from "./_components/BlogCategoryFilter";
 import { BlogHero } from "./_components/BlogHero";
 import { BlogPagination } from "./_components/BlogPagination";
 
@@ -25,13 +27,30 @@ function formatDate(iso: string | null | undefined): string {
 
 const POSTS_PER_PAGE = 12;
 
+const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
+  BLOG_CATEGORY_OPTIONS.map((c) => [c.value, c.label]),
+);
+
 export const metadata: Metadata = {
   title: "Blog",
   description:
     "Field updates and transparency notes from Bridging Generations — written by the board and partner-school staff.",
 };
 
-export default async function BlogPage() {
+type SearchParams = {
+  category?: string;
+};
+
+export default async function BlogPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const sp = await searchParams;
+  const validCategoryValues = BLOG_CATEGORY_OPTIONS.map((c) => c.value);
+  const rawCategory = sp.category ?? "";
+  const activeCategory: BlogCategory | "" = validCategoryValues.includes(
+    rawCategory as BlogCategory,
+  )
+    ? (rawCategory as BlogCategory)
+    : "";
+
   const [posts, featured, board] = await Promise.all([
     getAllBlogPosts(),
     getFeaturedBlogPost(),
@@ -41,8 +60,21 @@ export default async function BlogPage() {
   const authorName = (id?: string | null) =>
     board.find((m) => m.id === id)?.name ?? "The Bridging Generations team";
 
-  const featuredSlug = featured?.slug;
-  const rest = posts.filter((p) => p.slug !== featuredSlug);
+  // Counts power the chip labels — derived from the unfiltered set so each
+  // chip shows total posts in that category.
+  const counts: Record<string, number> = { __all__: posts.length };
+  for (const c of BLOG_CATEGORY_OPTIONS) {
+    counts[c.value] = posts.filter((p) => p.category === c.value).length;
+  }
+
+  // Filtered list (after category, before pagination).
+  const filtered = activeCategory ? posts.filter((p) => p.category === activeCategory) : posts;
+
+  // Featured: only honor when "All" filter is active — feels wrong to lead
+  // with a featured post that doesn't match the filter.
+  const showFeatured = !activeCategory && featured;
+  const featuredSlug = showFeatured ? featured?.slug : undefined;
+  const rest = filtered.filter((p) => p.slug !== featuredSlug);
   const pageCount = Math.max(1, Math.ceil(rest.length / POSTS_PER_PAGE));
   const pageOne = rest.slice(0, POSTS_PER_PAGE);
 
@@ -62,7 +94,23 @@ export default async function BlogPage() {
   return (
     <>
       <BlogHero count={posts.length} mostRecent={mostRecent} />
-      {featured ? (
+
+      <section
+        aria-label="Filter blog posts"
+        className="bg-ground px-4 pb-8 sm:px-6 lg:px-[6%] lg:pb-12"
+      >
+        <div className="mx-auto max-w-[1280px] border-t border-hairline pt-8">
+          <BlogCategoryFilter counts={counts} active={activeCategory} />
+          {activeCategory ? (
+            <p className="mt-4 text-meta uppercase tracking-[0.06em] text-ink-2">
+              Showing {filtered.length} {filtered.length === 1 ? "post" : "posts"} in{" "}
+              {CATEGORY_LABEL[activeCategory]}
+            </p>
+          ) : null}
+        </div>
+      </section>
+
+      {showFeatured && featured ? (
         <section
           aria-label="Featured blog post"
           className="bg-ground px-4 pb-16 sm:px-6 lg:px-[6%] lg:pb-24"
@@ -80,7 +128,10 @@ export default async function BlogPage() {
               </Reveal>
               <Feature.Body>
                 {featured.publishedAt ? (
-                  <Feature.Eyebrow>{formatDate(featured.publishedAt)}</Feature.Eyebrow>
+                  <Feature.Eyebrow>
+                    {formatDate(featured.publishedAt)} ·{" "}
+                    {CATEGORY_LABEL[featured.category] ?? "Update"}
+                  </Feature.Eyebrow>
                 ) : null}
                 <Feature.Headline as="h2" href={`/blog/${featured.slug}`}>
                   {featured.title}
@@ -107,6 +158,8 @@ export default async function BlogPage() {
                   <Row.Eyebrow>
                     {post.publishedAt ? formatDate(post.publishedAt) : ""}
                     {post.publishedAt ? <span aria-hidden="true"> · </span> : null}
+                    <span>{CATEGORY_LABEL[post.category] ?? "Update"}</span>
+                    <span aria-hidden="true"> · </span>
                     <span>{authorName(post.author)}</span>
                   </Row.Eyebrow>
                   <Row.Headline href={`/blog/${post.slug}`}>{post.title}</Row.Headline>
@@ -116,7 +169,22 @@ export default async function BlogPage() {
             ))}
           </ul>
         </section>
-      ) : null}
+      ) : (
+        <section className="bg-ground px-4 pb-20 sm:px-6 lg:px-[6%] lg:pb-28">
+          <div className="mx-auto max-w-[1280px]">
+            <p className="text-body text-ink-2">
+              No posts in this category yet.{" "}
+              <a
+                href="/blog"
+                className="text-accent underline underline-offset-[3px] hover:no-underline"
+              >
+                View all posts
+              </a>
+              .
+            </p>
+          </div>
+        </section>
+      )}
       <BlogPagination currentPage={1} pageCount={pageCount} />
       <CTAFooterPanel
         headline="Get the field updates before they land in the blog."

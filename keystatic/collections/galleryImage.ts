@@ -1,6 +1,18 @@
 import { collection, fields } from "@keystatic/core";
 import { requiredImageWithAlt } from "../fields";
 
+// Spec gallery categories: All / Humanity / Activities / Projects / Students / Publication.
+// "All" is a derived UI filter, not a category value.
+export const GALLERY_CATEGORY_OPTIONS = [
+  { label: "Humanity", value: "humanity" },
+  { label: "Activities", value: "activities" },
+  { label: "Projects", value: "projects" },
+  { label: "Students", value: "students" },
+  { label: "Publication", value: "publication" },
+] as const;
+
+export type GalleryCategory = (typeof GALLERY_CATEGORY_OPTIONS)[number]["value"];
+
 export const galleryImageCollection = collection({
   label: "Gallery images",
   path: "content/gallery/*/",
@@ -25,6 +37,13 @@ export const galleryImageCollection = collection({
       label: "Height (pixels)",
       description: "Intrinsic pixel height of the image.",
       validation: { isRequired: true, min: 1 },
+    }),
+    category: fields.select({
+      label: "Category",
+      description:
+        "Filter tab on the homepage gallery grid and /gallery. Editors pick exactly one.",
+      options: GALLERY_CATEGORY_OPTIONS,
+      defaultValue: "activities",
     }),
     takenAt: fields.date({ label: "Taken on" }),
     location: fields.text({ label: "Location" }),

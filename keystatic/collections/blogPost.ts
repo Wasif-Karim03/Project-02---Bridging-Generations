@@ -1,6 +1,16 @@
 import { collection, fields } from "@keystatic/core";
 import { optionalImageWithAlt, requiredImageWithAlt } from "../fields";
 
+// Spec categories: success stories / recent activities / event news.
+// "All" is a derived UI filter, not a category value.
+export const BLOG_CATEGORY_OPTIONS = [
+  { label: "Success story", value: "success-story" },
+  { label: "Recent activity", value: "recent-activity" },
+  { label: "Event news", value: "event-news" },
+] as const;
+
+export type BlogCategory = (typeof BLOG_CATEGORY_OPTIONS)[number]["value"];
+
 export const blogPostCollection = collection({
   label: "Blog posts",
   path: "content/blog-posts/*/",
@@ -9,18 +19,33 @@ export const blogPostCollection = collection({
   columns: ["publishedAt", "published"],
   schema: {
     title: fields.slug({
-      name: { label: "Title", validation: { isRequired: true, length: { min: 1 } } },
+      name: { label: "Title (English)", validation: { isRequired: true, length: { min: 1 } } },
       slug: { label: "Slug", description: "URL: /blog/<slug>" },
     }),
+    titleBn: fields.text({
+      label: "Title (Bengali)",
+      description: "Optional. Shown when locale is Bengali. Falls back to English when empty.",
+    }),
     excerpt: fields.text({
-      label: "Excerpt",
+      label: "Excerpt (English)",
       description: "Up to 280 characters — used on cards and as default meta description.",
       multiline: true,
       validation: { isRequired: true, length: { min: 1, max: 280 } },
     }),
+    excerptBn: fields.text({
+      label: "Excerpt (Bengali)",
+      description: "Optional. Falls back to English when empty.",
+      multiline: true,
+    }),
     body: fields.mdx({
-      label: "Body",
+      label: "Body (English)",
       options: { image: { directory: "public/images/blog", publicPath: "/images/blog/" } },
+    }),
+    bodyBn: fields.text({
+      label: "Body (Bengali) — optional",
+      description:
+        "Plain markdown supported (headings, bold, links). The English body remains the canonical body when this is empty.",
+      multiline: true,
     }),
     coverImage: requiredImageWithAlt({ label: "Cover image", dir: "blog" }),
     coverMobileFocalPoint: fields.object(
@@ -44,6 +69,12 @@ export const blogPostCollection = collection({
           "Drives object-position on the cover at <640px viewports. Defaults to {x:50, y:30}.",
       },
     ),
+    category: fields.select({
+      label: "Category",
+      description: "Drives the filter chips on /blog.",
+      options: BLOG_CATEGORY_OPTIONS,
+      defaultValue: "recent-activity",
+    }),
     author: fields.relationship({ label: "Author", collection: "boardMember" }),
     published: fields.checkbox({
       label: "Published",

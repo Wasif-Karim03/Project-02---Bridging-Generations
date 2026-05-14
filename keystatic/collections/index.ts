@@ -7,4 +7,5 @@ export { projectCollection } from "./project";
 export { schoolCollection } from "./school";
 export { studentCollection } from "./student";
 export { successStoryCollection } from "./successStory";
+export { teacherCollection } from "./teacher";
 export { testimonialCollection } from "./testimonial";

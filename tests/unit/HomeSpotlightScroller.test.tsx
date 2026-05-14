@@ -31,6 +31,13 @@ const students: Student[] = [
     },
     sponsorshipStatus: "sponsored",
     enrolledAt: "2022-01-10",
+    village: "",
+    region: "",
+    area: "",
+    hobby: "",
+    gpa: "",
+    lifeTarget: "",
+    registrationCode: "",
   },
 ];
 
@@ -39,7 +46,7 @@ describe("HomeSpotlightScroller", () => {
     const { container } = render(<HomeSpotlightScroller students={students} />);
     const section = container.querySelector("section[aria-labelledby='home-spotlight-title']");
     expect(section).not.toBeNull();
-    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("The 156, up close");
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("The students, up close");
   });
 
   it("surfaces the consent disclaimer near the scroller", () => {

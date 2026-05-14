@@ -14,9 +14,15 @@ import type { BoardMember } from "@/lib/content/boardMembers";
 const withPortrait: BoardMember = {
   id: "jane-doe",
   name: "Jane Doe",
+  team: "board",
   role: "Founder & President",
+  occupation: "",
+  country: "",
+  educationStatus: "",
   bio: "Jane founded the organization after years of working in the Hill Tracts.",
   portrait: { src: "/images/board/jane.jpg", alt: "Jane Doe" },
+  startDate: null,
+  endDate: null,
   order: 1,
 };
 

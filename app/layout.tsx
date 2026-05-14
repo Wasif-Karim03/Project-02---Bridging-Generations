@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
+import { ClerkProviderGate } from "@/components/layout/ClerkProviderGate";
 import { ViewTransitionRoot } from "@/components/layout/ViewTransitionRoot";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import "./globals.css";
@@ -18,22 +21,35 @@ export const metadata: Metadata = {
     template: "%s — Bridging Generations",
   },
   description:
-    "Bridging Generations sponsors 156 students in the Chittagong Hill Tracts, Bangladesh — keeping kids in the classroom through tuition, books, daily meals, and materials.",
+    "Bridging Generations sponsors students in the Chittagong Hill Tracts, Bangladesh — keeping kids in the classroom through tuition, books, daily meals, and materials.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Locale resolved from NEXT_LOCALE cookie (see i18n/request.ts).
+  // Bengali script falls back to system fonts if Jakarta doesn't cover the
+  // glyph range — that's acceptable for v1.
+  const locale = await getLocale();
+  const messages = await getMessages();
   return (
     <ViewTransitionRoot>
-      <html lang="en" className={`${plusJakartaSans.variable} h-full antialiased`}>
+      <html lang={locale} className={`${plusJakartaSans.variable} h-full antialiased`}>
         <head>
-          <link rel="preconnect" href="https://widgets.givebutter.com" crossOrigin="" />
-          <link rel="dns-prefetch" href="https://givebutter.com" />
+          {/* Stripe Checkout is hosted at checkout.stripe.com — preconnect so
+              the redirect on submit has DNS/TLS already warmed. */}
+          <link rel="preconnect" href="https://checkout.stripe.com" crossOrigin="" />
+          <link rel="dns-prefetch" href="https://js.stripe.com" />
         </head>
-        <body className="flex min-h-full flex-col bg-ground text-body text-ink">{children}</body>
+        <body className="flex min-h-full flex-col bg-ground text-body text-ink">
+          <ClerkProviderGate>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              {children}
+            </NextIntlClientProvider>
+          </ClerkProviderGate>
+        </body>
       </html>
     </ViewTransitionRoot>
   );

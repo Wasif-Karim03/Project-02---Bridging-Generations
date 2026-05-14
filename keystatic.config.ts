@@ -9,6 +9,7 @@ import {
   schoolCollection,
   studentCollection,
   successStoryCollection,
+  teacherCollection,
   testimonialCollection,
 } from "./keystatic/collections";
 import {
@@ -16,8 +17,11 @@ import {
   donatePageSingleton,
   donationJourneySingleton,
   donorsPageSingleton,
+  projectsPageSingleton,
+  scholarshipsPageSingleton,
   siteSettingsSingleton,
   statsSnapshotSingleton,
+  studentsPageSingleton,
   termsPageSingleton,
 } from "./keystatic/singletons";
 
@@ -46,6 +50,7 @@ export default config({
     testimonial: testimonialCollection,
     galleryImage: galleryImageCollection,
     boardMember: boardMemberCollection,
+    teacher: teacherCollection,
     donorProfile: donorProfileCollection,
   },
   singletons: {
@@ -56,5 +61,8 @@ export default config({
     donationJourney: donationJourneySingleton,
     contactPage: contactPageSingleton,
     termsPage: termsPageSingleton,
+    studentsPage: studentsPageSingleton,
+    projectsPage: projectsPageSingleton,
+    scholarshipsPage: scholarshipsPageSingleton,
   },
 });

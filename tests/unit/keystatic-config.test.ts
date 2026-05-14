@@ -11,6 +11,8 @@ const EXPECTED_COLLECTIONS = [
   "testimonial",
   "galleryImage",
   "boardMember",
+  "donorProfile",
+  "teacher",
 ] as const;
 
 const EXPECTED_SINGLETONS = [
@@ -18,17 +20,21 @@ const EXPECTED_SINGLETONS = [
   "statsSnapshot",
   "donorsPage",
   "donatePage",
+  "donationJourney",
   "contactPage",
   "termsPage",
+  "studentsPage",
+  "projectsPage",
+  "scholarshipsPage",
 ] as const;
 
 describe("keystatic config", () => {
-  it("registers all 9 collections per CONTENT-MODEL.md", () => {
+  it("registers every CMS-managed collection", () => {
     const keys = Object.keys(keystaticConfig.collections ?? {}).sort();
     expect(keys).toEqual([...EXPECTED_COLLECTIONS].sort());
   });
 
-  it("registers the 6 keystatic-managed singletons (nav + footer are fixture-driven)", () => {
+  it("registers every Keystatic-managed singleton (nav + footer are fixture-driven)", () => {
     const keys = Object.keys(keystaticConfig.singletons ?? {}).sort();
     expect(keys).toEqual([...EXPECTED_SINGLETONS].sort());
   });

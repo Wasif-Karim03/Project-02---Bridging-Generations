@@ -17,14 +17,23 @@ export const activityCollection = collection({
   columns: ["tag", "publishedAt"],
   schema: {
     title: fields.slug({
-      name: { label: "Title", validation: { isRequired: true, length: { min: 1 } } },
+      name: { label: "Title (English)", validation: { isRequired: true, length: { min: 1 } } },
       slug: { label: "Slug" },
     }),
+    titleBn: fields.text({
+      label: "Title (Bengali)",
+      description: "Optional. Shown when locale is Bengali.",
+    }),
     excerpt: fields.text({
-      label: "Excerpt",
+      label: "Excerpt (English)",
       description: "Up to 240 characters — shown on cards.",
       multiline: true,
       validation: { isRequired: true, length: { min: 1, max: 240 } },
+    }),
+    excerptBn: fields.text({
+      label: "Excerpt (Bengali)",
+      description: "Optional. Falls back to English when empty.",
+      multiline: true,
     }),
     tag: fields.select({
       label: "Tag",
@@ -45,6 +54,11 @@ export const activityCollection = collection({
     relatedProjectId: fields.relationship({
       label: "Related project",
       collection: "project",
+    }),
+    pdfUrl: fields.url({
+      label: "Report PDF URL",
+      description:
+        "Optional. When set, the homepage activity entry shows a 'Download report (PDF)' link.",
     }),
   },
 });

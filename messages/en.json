@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "aboutBG": "About BG",
+    "aboutBGDropdown": {
+      "aboutUs": "About Us",
+      "aboutUsDesc": "Mission, leadership, transparency",
+      "missionVision": "Our Mission and Our Vision",
+      "missionVisionDesc": "What we promise and where we are going"
+    },
+    "students": "Students",
+    "projects": "Projects",
+    "testimonial": "Testimonial",
+    "blog": "Blog",
+    "gallery": "Gallery",
+    "donors": "Donors",
+    "donate": "Donate",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "whatsAppLabel": "Chat with us on WhatsApp",
+    "questions": "Questions?",
+    "languageToggle": "Language",
+    "switchToEnglish": "English",
+    "switchToBangla": "বাংলা",
+    "mobileDrawerWhereTo": "Where would you like to go?",
+    "drawerGroupAboutBG": "About BG",
+    "drawerGroupExplore": "Explore",
+    "drawerGroupRecognize": "Recognize",
+    "drawerGroupTrust": "Trust"
+  },
+  "footer": {
+    "headOffice": "Head Office",
+    "about": "About",
+    "others": "Others",
+    "paymentsAccepted": "Payments accepted",
+    "cardStripe": "Card / Stripe",
+    "links": {
+      "aboutUs": "About Us",
+      "missionVision": "Our Mission and Our Vision",
+      "recentActivities": "Recent Activities",
+      "successStories": "Success Stories",
+      "projects": "Projects",
+      "students": "Students",
+      "mentors": "Mentors",
+      "termsAndConditions": "Terms and Conditions",
+      "donors": "Donors",
+      "testimonial": "Testimonial",
+      "blog": "Blog",
+      "gallery": "Gallery",
+      "contact": "Contact"
+    },
+    "form990": "Form 990",
+    "candidProfile": "Candid profile",
+    "taxLine": "501(c)(3) · EIN {ein} · Tax-deductible"
+  },
+  "common": {
+    "donateNow": "Donate Now",
+    "readMore": "Read More",
+    "seeAll": "See all",
+    "downloadReport": "Download Report (PDF)",
+    "loading": "Loading…",
+    "all": "All",
+    "language": "Language"
+  }
+}

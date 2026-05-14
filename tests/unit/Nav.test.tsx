@@ -25,16 +25,18 @@ describe("Nav", () => {
     render(<Nav />);
     const projects = screen.getByRole("link", { name: "Projects" });
     expect(projects).toHaveAttribute("aria-current", "page");
-    const about = screen.getByRole("link", { name: "About" });
-    expect(about).not.toHaveAttribute("aria-current");
+    // About BG is a dropdown button on desktop, not a plain link.
+    const aboutDropdown = screen.getAllByRole("button", { name: /About BG/i })[0];
+    expect(aboutDropdown).toBeInTheDocument();
+    expect(aboutDropdown).not.toHaveAttribute("aria-current");
   });
 
-  it("renders the .nav-active-motif notch only on the active link", () => {
+  it("renders the .nav-active-motif notch only on the active item", () => {
     render(<Nav />);
     const projects = screen.getByRole("link", { name: "Projects" });
     expect(projects.querySelector(".nav-active-motif")).not.toBeNull();
-    const about = screen.getByRole("link", { name: "About" });
-    expect(about.querySelector(".nav-active-motif")).toBeNull();
+    const aboutDropdown = screen.getAllByRole("button", { name: /About BG/i })[0];
+    expect(aboutDropdown.querySelector(".nav-active-motif")).toBeNull();
   });
 
   it("renders Donate links to /donate at desktop and mobile-bar widths", () => {

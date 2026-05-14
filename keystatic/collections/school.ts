@@ -17,8 +17,13 @@ export const schoolCollection = collection({
       validation: { isRequired: true, length: { min: 1 } },
     }),
     description: fields.text({
-      label: "Description",
+      label: "Description (English)",
       description: "1–2 sentences for /about or /students section headers",
+      multiline: true,
+    }),
+    descriptionBn: fields.text({
+      label: "Description (Bengali)",
+      description: "Optional. Falls back to English when empty.",
       multiline: true,
     }),
     establishedYear: fields.integer({
@@ -26,5 +31,20 @@ export const schoolCollection = collection({
       validation: { min: 1800, max: 2100 },
     }),
     heroImage: optionalImageWithAlt({ label: "Hero image", dir: "schools" }),
+    studentCountOverride: fields.integer({
+      label: "Student count (override)",
+      description:
+        "Optional. When unset, the /schools/[slug] page derives the count from the student collection (consent-gated).",
+    }),
+    overview: fields.mdx({
+      label: "Overview",
+      description: "Long-form description shown on /schools/[slug]. Markdown supported.",
+      options: {
+        image: {
+          directory: "public/images/schools",
+          publicPath: "/images/schools/",
+        },
+      },
+    }),
   },
 });

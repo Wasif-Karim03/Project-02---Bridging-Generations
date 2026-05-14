@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "aboutBG": "আমাদের সম্পর্কে",
+    "aboutBGDropdown": {
+      "aboutUs": "আমরা কারা",
+      "aboutUsDesc": "মিশন, নেতৃত্ব ও স্বচ্ছতা",
+      "missionVision": "আমাদের মিশন ও ভিশন",
+      "missionVisionDesc": "আমরা যা প্রতিশ্রুতি দিই এবং যেদিকে যাচ্ছি"
+    },
+    "students": "শিক্ষার্থী",
+    "projects": "প্রকল্প",
+    "testimonial": "অভিমত",
+    "blog": "ব্লগ",
+    "gallery": "গ্যালারি",
+    "donors": "দাতা",
+    "donate": "দান করুন",
+    "openMenu": "মেনু খুলুন",
+    "closeMenu": "মেনু বন্ধ করুন",
+    "whatsAppLabel": "WhatsApp-এ আমাদের সঙ্গে যোগাযোগ করুন",
+    "questions": "প্রশ্ন আছে?",
+    "languageToggle": "ভাষা",
+    "switchToEnglish": "English",
+    "switchToBangla": "বাংলা",
+    "mobileDrawerWhereTo": "কোথায় যেতে চান?",
+    "drawerGroupAboutBG": "আমাদের সম্পর্কে",
+    "drawerGroupExplore": "ঘুরে দেখুন",
+    "drawerGroupRecognize": "স্বীকৃতি",
+    "drawerGroupTrust": "বিশ্বাস"
+  },
+  "footer": {
+    "headOffice": "প্রধান কার্যালয়",
+    "about": "আমাদের সম্পর্কে",
+    "others": "অন্যান্য",
+    "paymentsAccepted": "পেমেন্ট মাধ্যম",
+    "cardStripe": "কার্ড / Stripe",
+    "links": {
+      "aboutUs": "আমরা কারা",
+      "missionVision": "আমাদের মিশন ও ভিশন",
+      "recentActivities": "সাম্প্রতিক কার্যক্রম",
+      "successStories": "সফলতার গল্প",
+      "projects": "প্রকল্প",
+      "students": "শিক্ষার্থী",
+      "mentors": "মেন্টর",
+      "termsAndConditions": "শর্তাবলী",
+      "donors": "দাতা",
+      "testimonial": "অভিমত",
+      "blog": "ব্লগ",
+      "gallery": "গ্যালারি",
+      "contact": "যোগাযোগ"
+    },
+    "form990": "Form 990",
+    "candidProfile": "Candid প্রোফাইল",
+    "taxLine": "501(c)(3) · EIN {ein} · কর-ছাড়যোগ্য"
+  },
+  "common": {
+    "donateNow": "এখনই দান করুন",
+    "readMore": "আরও পড়ুন",
+    "seeAll": "সবগুলো দেখুন",
+    "downloadReport": "প্রতিবেদন ডাউনলোড করুন (PDF)",
+    "loading": "লোড হচ্ছে…",
+    "all": "সব",
+    "language": "ভাষা"
+  }
+}

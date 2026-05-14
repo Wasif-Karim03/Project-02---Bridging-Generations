@@ -1,20 +1,20 @@
 import withBundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
-// Allowlist covers Givebutter embed (Phase 8). Analytics deferred.
-// Resend is server-side only and does not require CSP entries.
+// Reads locale from NEXT_LOCALE cookie via i18n/request.ts.
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+// CSP — Stripe Checkout takes the user to a Stripe-hosted page (no iframe
+// needed), so we only need form-action + connect-src for the Stripe.js
+// confirmation network call. Resend is server-side only and needs no entry.
 //
-// connect-src is intentionally narrow today — Givebutter widget fetches must be
-// captured from a real /donate network trace once accountId/campaignId stop being
-// [CONFIRM:] stubs. R3.2 added widgets.givebutter.com (the script host); api.* /
-// stripe.* / analytics endpoints will be appended once verifiable in the browser.
-//
-// 'unsafe-eval' is dev-only — Next.js HMR relies on dynamic code generation for
-// module replacement. Prod builds don't, so prod CSP omits it.
+// 'unsafe-eval' is dev-only — Next.js HMR relies on dynamic code generation
+// for module replacement. Prod builds don't, so prod CSP omits it.
 const isDev = process.env.NODE_ENV !== "production";
 const scriptSrc = isDev
-  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://givebutter.com https://widgets.givebutter.com"
-  : "script-src 'self' 'unsafe-inline' https://givebutter.com https://widgets.givebutter.com";
+  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com"
+  : "script-src 'self' 'unsafe-inline' https://js.stripe.com";
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -22,11 +22,11 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://widgets.givebutter.com",
-  "frame-src 'self' https://givebutter.com https://widgets.givebutter.com",
+  "connect-src 'self' https://api.stripe.com https://m.stripe.com https://m.stripe.network",
+  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
-  "form-action 'self' https://givebutter.com",
+  "form-action 'self' https://checkout.stripe.com",
   "object-src 'none'",
 ].join("; ");
 
@@ -95,4 +95,4 @@ const analyze = withBundleAnalyzer({
   openAnalyzer: false,
 });
 
-export default analyze(nextConfig);
+export default withNextIntl(analyze(nextConfig));

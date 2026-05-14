@@ -24,6 +24,9 @@ const sample: Project = {
   boardOwnerName: "",
   lastUpdated: null,
   mathLineItem: "",
+  titleBn: "",
+  summaryBn: "",
+  bodyBn: "",
 };
 
 describe("ProgramCard", () => {

@@ -24,6 +24,13 @@ function make(id: string, schoolId: string, grade: number, displayName: string):
     consent: baseConsent,
     sponsorshipStatus: "sponsored",
     enrolledAt: null,
+    village: "",
+    region: "",
+    area: "",
+    hobby: "",
+    gpa: "",
+    lifeTarget: "",
+    registrationCode: "",
   };
 }
 

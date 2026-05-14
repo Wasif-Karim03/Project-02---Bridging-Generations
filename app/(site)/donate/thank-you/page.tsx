@@ -24,8 +24,9 @@ export default async function DonateThankYouPage({ searchParams }: ThankYouPageP
     searchParams.then((params) => getGiftContext(params)),
   ]);
 
-  const isGivebutter = donatePage.transactionSource === "givebutter";
-  const body = isGivebutter ? donatePage.thankYouBody : donatePage.thankYouBodyFallback;
+  const isLive =
+    donatePage.transactionSource === "stripe" || donatePage.transactionSource === "givebutter";
+  const body = isLive ? donatePage.thankYouBody : donatePage.thankYouBodyFallback;
 
   return (
     <>

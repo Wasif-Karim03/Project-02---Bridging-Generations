@@ -38,6 +38,11 @@ export async function getFeaturedSuccessStory(): Promise<SuccessStory | undefine
   return published[0];
 }
 
+export async function getFeaturedSuccessStories(limit = 3): Promise<SuccessStory[]> {
+  const published = await getAllSuccessStoriesPublished();
+  return published.slice(0, limit);
+}
+
 export async function getSuccessStoryBySlug(slug: string): Promise<SuccessStory | null> {
   const entry = await reader.collections.successStory.read(slug);
   if (!entry) return null;

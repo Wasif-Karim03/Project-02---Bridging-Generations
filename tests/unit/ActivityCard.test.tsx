@@ -20,6 +20,9 @@ const sample: Activity = {
   publishedAt: "2026-03-15",
   coverImage: { src: "/demo.jpg", alt: "Demo cover" },
   relatedProjectId: null,
+  pdfUrl: null,
+  titleBn: "",
+  excerptBn: "",
 };
 
 describe("ActivityCard", () => {

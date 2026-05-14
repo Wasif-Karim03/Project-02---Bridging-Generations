@@ -25,6 +25,9 @@ const projects: Project[] = [
     boardOwnerName: "",
     lastUpdated: null,
     mathLineItem: "",
+    titleBn: "",
+    summaryBn: "",
+    bodyBn: "",
   },
   {
     id: "girls-scholarship",
@@ -39,6 +42,9 @@ const projects: Project[] = [
     boardOwnerName: "",
     lastUpdated: null,
     mathLineItem: "",
+    titleBn: "",
+    summaryBn: "",
+    bodyBn: "",
   },
 ];
 
@@ -49,13 +55,13 @@ describe("HomeProgramsGrid", () => {
     expect(section).toHaveAttribute("aria-labelledby", "home-programs-title");
     const heading = screen.getByRole("heading", { level: 2 });
     expect(heading).toHaveAttribute("id", "home-programs-title");
-    expect(heading).toHaveTextContent("Our programs");
+    expect(heading).toHaveTextContent("Our projects");
   });
 
-  it("renders the eyebrow and 'See all programs' tertiary link", () => {
+  it("renders the eyebrow and 'See all projects' tertiary link", () => {
     render(<HomeProgramsGrid projects={projects} />);
     expect(screen.getByText("How we help")).toBeInTheDocument();
-    const seeAll = screen.getByRole("link", { name: /see all programs/i });
+    const seeAll = screen.getByRole("link", { name: /see all projects/i });
     expect(seeAll).toHaveAttribute("href", "/projects");
   });
 

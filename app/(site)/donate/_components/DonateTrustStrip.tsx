@@ -2,7 +2,7 @@ import { isPlaceholder } from "@/lib/content/isPlaceholder";
 
 const EIN_PLACEHOLDER = "00-0000000";
 
-export type TransactionSource = "givebutter" | "mailto" | "placeholder";
+export type TransactionSource = "stripe" | "givebutter" | "mailto" | "placeholder";
 
 type DonateTrustStripProps = {
   ein: string;
@@ -12,7 +12,8 @@ type DonateTrustStripProps = {
 
 export function DonateTrustStrip({ ein, contactEmail, transactionSource }: DonateTrustStripProps) {
   const showEin = !isPlaceholder(ein) && ein !== EIN_PLACEHOLDER;
-  const showFallbackPath = transactionSource !== "givebutter";
+  // Fallback path = transaction source is not live (i.e. not stripe / givebutter).
+  const showFallbackPath = transactionSource === "mailto" || transactionSource === "placeholder";
 
   return (
     <section aria-labelledby="donate-trust-title" className="bg-ground px-4 sm:px-6 lg:px-[6%]">
@@ -46,7 +47,7 @@ export function DonateTrustStrip({ ein, contactEmail, transactionSource }: Donat
                 While we're set up
               </dt>
               <dd className="text-body-lg text-ink">
-                The Givebutter campaign is being stood up. In the meantime, write to{" "}
+                Our Stripe donation form is being finalised. In the meantime, write to{" "}
                 <a
                   href={`mailto:${contactEmail}`}
                   className="text-accent underline underline-offset-[3px] transition hover:text-accent-2-text"

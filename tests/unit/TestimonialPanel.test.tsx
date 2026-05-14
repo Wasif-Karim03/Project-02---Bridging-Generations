@@ -11,6 +11,8 @@ const sample: Testimonial = {
   speakerRole: "board",
   speakerPhoto: { src: null, alt: "" },
   highlightWord: "",
+  quoteBn: "",
+  speakerTitleBn: "",
 };
 
 const AMBER_MARK_VIEWBOX = "0 0 400 14";

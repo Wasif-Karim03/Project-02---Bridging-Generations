@@ -49,6 +49,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# drizzle — keep schema.ts in source; ignore generated migrations until we
+# decide they should be tracked (once Phase 4 starts running migrations).
+/db/migrations/
+/.drizzle/
+
 # spec docs live one level above site/ — defense-in-depth so they never enter the repo
 /doc/
 _specs/
