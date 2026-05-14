@@ -85,6 +85,23 @@ export default async function AdminSignInPage() {
         Admin accounts are issued by an existing admin from /dashboard/admin/users — not via
         self-registration.
       </p>
+
+      <p className="mt-6 text-center text-meta uppercase tracking-[0.06em] text-white/50">
+        Wrong place?{" "}
+        <Link
+          href="/sign-in"
+          className="text-accent-3 underline underline-offset-[3px] hover:no-underline"
+        >
+          Donor sign-in
+        </Link>{" "}
+        ·{" "}
+        <Link
+          href="/mentor-login"
+          className="text-accent-3 underline underline-offset-[3px] hover:no-underline"
+        >
+          Mentor sign-in
+        </Link>
+      </p>
     </main>
   );
 }
