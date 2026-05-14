@@ -1,5 +1,8 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import { isDbConfigured } from "@/db/client";
+import type { User } from "@/db/schema";
+import { getUserByClerkId, upsertUserFromClerk } from "@/lib/db/queries/users";
 
 // Env-gated Clerk integration. Every helper checks for CLERK_SECRET_KEY first
 // so the site keeps working without Clerk credentials — pages render a clear
@@ -12,9 +15,11 @@ export function isClerkConfigured(): boolean {
   return Boolean(process.env.CLERK_SECRET_KEY);
 }
 
+export type Role = "donor" | "mentor" | "admin" | "it";
+
 export type AuthedUser = {
   userId: string;
-  role?: "donor" | "mentor" | "admin" | "it";
+  role?: Role;
 };
 
 /**
@@ -51,24 +56,69 @@ export async function requireUserId(): Promise<string> {
 }
 
 /**
- * Enforce a specific role. Reads the user record from the local DB (Drizzle)
- * if DATABASE_URL is set; otherwise falls back to letting any signed-in user
- * through (dev-only convenience) and logs a warning.
- *
- * Phase 4 wires the real Drizzle lookup; until then this is a stub.
+ * Resolve the local users row for the currently signed-in Clerk user. If the
+ * Clerk webhook hasn't yet seeded the row (race on first sign-in), do a
+ * just-in-time upsert so dashboard requests never 500 on a brand-new account.
+ * Returns null when the DB isn't configured (preview mode) or Clerk metadata
+ * is missing.
  */
-export async function requireRole(role: NonNullable<AuthedUser["role"]>): Promise<AuthedUser> {
+export async function getCurrentDbUser(): Promise<User | null> {
+  if (!isClerkConfigured() || !isDbConfigured()) return null;
+  const { auth, currentUser } = await import("@clerk/nextjs/server");
+  const { userId } = await auth();
+  if (!userId) return null;
+  const existing = await getUserByClerkId(userId);
+  if (existing) return existing;
+  // Webhook hasn't fired yet (or was misconfigured) — backfill from the live
+  // Clerk session so the donor's first dashboard hit still works.
+  const clerkUser = await currentUser();
+  if (!clerkUser) return null;
+  const email =
+    clerkUser.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+    clerkUser.emailAddresses[0]?.emailAddress;
+  if (!email) return null;
+  const displayName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || null;
+  return upsertUserFromClerk({ clerkUserId: userId, email, displayName });
+}
+
+/**
+ * Hard-require sign-in and a specific role. Reads the user record from the
+ * local DB (Drizzle) and enforces `users.role`. When DATABASE_URL is unset
+ * (preview mode), allows any signed-in user through with a warning so the
+ * dashboard remains demoable.
+ */
+export async function requireRole(role: Role): Promise<AuthedUser> {
   const userId = await requireUserId();
-  // Hook this up to Drizzle in Phase 4. For now:
-  //   - DB not configured: log a warning and allow through
-  //   - DB configured: read users.role and enforce
-  // The dashboard pages call this; the warning only prints in dev.
-  if (!process.env.DATABASE_URL) {
+  if (!isDbConfigured()) {
     console.warn(
       `[auth] DATABASE_URL not set; allowing user ${userId} to access ${role}-gated page without role check.`,
     );
     return { userId, role };
   }
-  // Phase 4: replace with real Drizzle query against users table.
-  return { userId, role };
+  const dbUser = await getCurrentDbUser();
+  if (!dbUser) {
+    // Signed in to Clerk but missing from the local mirror and we couldn't
+    // backfill (e.g. no email). Treat as unauthorized.
+    redirect("/sign-in");
+  }
+  const allowed = roleSatisfies(dbUser.role, role);
+  if (!allowed) {
+    // The user is signed in but lacks the required role — send them home
+    // rather than 403 to keep the experience friendly.
+    redirect("/dashboard/donor");
+  }
+  return { userId, role: dbUser.role as Role };
+}
+
+// Role hierarchy: admin/it ≥ mentor ≥ donor. Anything beneath the required
+// role is rejected; anything at or above is allowed through.
+const ROLE_RANK: Record<string, number> = {
+  donor: 1,
+  mentor: 2,
+  admin: 3,
+  it: 3,
+};
+
+function roleSatisfies(actual: string, required: Role): boolean {
+  return (ROLE_RANK[actual] ?? 0) >= (ROLE_RANK[required] ?? 0);
 }

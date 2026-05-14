@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
 
 export type ReceiptData = {
   donationId: string;
+  donorCode?: string; // human-readable donor ID e.g. "BG-A1B2C3D4"
   donorName: string;
   donorEmail: string;
   amountUSD: number;
@@ -110,6 +111,12 @@ export function ReceiptDocument({ data }: { data: ReceiptData }) {
               {data.donorEmail ? `  ·  ${data.donorEmail}` : ""}
             </Text>
           </View>
+          {data.donorCode ? (
+            <View style={styles.row}>
+              <Text style={styles.label}>Donor ID</Text>
+              <Text style={styles.value}>{data.donorCode}</Text>
+            </View>
+          ) : null}
           <View style={styles.row}>
             <Text style={styles.label}>Designated to</Text>
             <Text style={styles.value}>{data.targetLabel}</Text>

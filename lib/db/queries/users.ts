@@ -14,6 +14,25 @@ export async function getUserByClerkId(clerkUserId: string): Promise<User | null
   return rows[0] ?? null;
 }
 
+// Lookup by email — used as the fallback attribution path in the Stripe
+// webhook when a checkout event has a donor email but no clerkUserId
+// (anonymous donor, or donation made before account creation).
+export async function getUserByEmail(email: string): Promise<User | null> {
+  if (!isDbConfigured()) return null;
+  const db = getDb();
+  const rows = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return rows[0] ?? null;
+}
+
+// Lookup by primary key — used by the receipt route to resolve a donation's
+// owner record for the receipt header.
+export async function getUserById(id: string): Promise<User | null> {
+  if (!isDbConfigured()) return null;
+  const db = getDb();
+  const rows = await db.select().from(users).where(eq(users.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
 // Idempotent upsert — called by the Clerk webhook + as a safety net at the
 // start of dashboard requests when the local mirror is stale.
 export async function upsertUserFromClerk(args: {

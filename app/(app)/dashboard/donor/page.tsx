@@ -2,14 +2,16 @@ import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isDbConfigured } from "@/db/client";
-import { isClerkConfigured, requireUserId } from "@/lib/auth";
+import { getCurrentDbUser, isClerkConfigured, requireUserId } from "@/lib/auth";
 import {
   donationsForCurrentMonth,
   donationsForPreviousMonth,
   formatDonationAmount,
   totalCents,
 } from "@/lib/content/donationsMock";
-import { getDonationsForUser } from "@/lib/db/queries/donations";
+import { getAllStudents } from "@/lib/content/students";
+import { getDonationsForUser, getStudentsSponsoredByUser } from "@/lib/db/queries/donations";
+import { donorCodeForUuid } from "@/lib/donor/donorCode";
 
 export const metadata: Metadata = {
   title: "Donor dashboard",
@@ -25,12 +27,22 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export default async function DonorDashboard() {
-  const userId = await requireUserId();
-
-  // getDonationsForUser returns mock data when DATABASE_URL is unset and the
-  // user's real donations when it is — same shape either way.
+  // Enforce Clerk sign-in. For DB-backed mode we additionally resolve the
+  // local users row so queries can scope by the canonical UUID (not the Clerk
+  // ID, which is a different namespace).
+  const clerkUserId = await requireUserId();
   const usingMockData = !isDbConfigured();
-  const donations = await getDonationsForUser(userId);
+  const dbUser = usingMockData ? null : await getCurrentDbUser();
+  const queryUserId = dbUser?.id ?? clerkUserId;
+  const donorCode = donorCodeForUuid(dbUser?.id ?? clerkUserId);
+  const donorName = dbUser?.displayName ?? null;
+
+  const [donations, sponsoredStudents, allStudents] = await Promise.all([
+    getDonationsForUser(queryUserId),
+    getStudentsSponsoredByUser(queryUserId),
+    getAllStudents(),
+  ]);
+  const studentBySlug = new Map(allStudents.map((s) => [s.id, s]));
 
   const thisMonth = donationsForCurrentMonth(donations);
   const lastMonth = donationsForPreviousMonth(donations);
@@ -40,9 +52,23 @@ export default async function DonorDashboard() {
     <div className="flex flex-col gap-10">
       <header className="flex flex-col gap-2">
         <Eyebrow>Donor dashboard</Eyebrow>
-        <h1 className="text-balance text-heading-1 text-ink">Your impact.</h1>
+        <h1 className="text-balance text-heading-1 text-ink">
+          {donorName ? `Welcome, ${donorName}.` : "Your impact."}
+        </h1>
         <p className="text-body text-ink-2">
-          Donation history, receipts, and the public donor profile we display on /donors.
+          Your donor ID, the students you sponsor, your full transaction history, and your public
+          profile on{" "}
+          <Link
+            href="/donors"
+            className="text-accent underline underline-offset-[3px] hover:no-underline"
+          >
+            /donors
+          </Link>
+          .
+        </p>
+        <p className="mt-2 inline-flex items-center gap-2 self-start border border-hairline bg-ground-2 px-3 py-1.5 font-mono text-meta uppercase tracking-[0.08em] text-ink">
+          <span className="text-ink-2">Donor ID</span>
+          <span className="text-ink">{donorCode}</span>
         </p>
       </header>
 
@@ -68,6 +94,58 @@ export default async function DonorDashboard() {
           value={formatDonationAmount(lifetime)}
           sub={`${donations.length} gift${donations.length === 1 ? "" : "s"}`}
         />
+      </section>
+
+      <section aria-labelledby="students-supported-title" className="flex flex-col gap-4">
+        <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
+          <h2 id="students-supported-title" className="text-heading-3 text-ink">
+            Students you support
+          </h2>
+          <span className="text-meta uppercase tracking-[0.06em] text-ink-2">
+            {sponsoredStudents.length} {sponsoredStudents.length === 1 ? "student" : "students"}
+          </span>
+        </header>
+        {sponsoredStudents.length === 0 ? (
+          <p className="text-body text-ink-2">
+            You haven't sponsored a specific student yet.{" "}
+            <Link
+              href="/students"
+              className="text-accent underline underline-offset-[3px] hover:no-underline"
+            >
+              Browse students
+            </Link>{" "}
+            and pick someone whose story moves you.
+          </p>
+        ) : (
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {sponsoredStudents.map((s) => {
+              const student = studentBySlug.get(s.studentSlug);
+              const displayName = student?.displayName ?? s.studentSlug;
+              return (
+                <li
+                  key={s.studentSlug}
+                  className="flex flex-col gap-2 border border-hairline bg-ground-2 p-4"
+                >
+                  <Link
+                    href={`/students/${s.studentSlug}`}
+                    className="text-heading-5 text-ink hover:text-accent"
+                  >
+                    {displayName}
+                  </Link>
+                  <p className="text-display-3 tabular-nums text-ink">
+                    {formatDonationAmount(s.totalCents)}
+                  </p>
+                  <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
+                    {s.giftCount} {s.giftCount === 1 ? "gift" : "gifts"} · last{" "}
+                    <time dateTime={s.lastGiftAt.toISOString()}>
+                      {dateFormatter.format(s.lastGiftAt)}
+                    </time>
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <section aria-labelledby="donations-table-title" className="flex flex-col gap-4">
@@ -116,7 +194,7 @@ export default async function DonorDashboard() {
                           href={`/students/${d.studentSlug}`}
                           className="text-accent underline underline-offset-[3px] hover:no-underline"
                         >
-                          {d.studentSlug}
+                          {studentBySlug.get(d.studentSlug)?.displayName ?? d.studentSlug}
                         </Link>
                       ) : d.projectSlug ? (
                         <Link

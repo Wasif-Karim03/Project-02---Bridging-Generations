@@ -1,7 +1,27 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { insertDonation } from "@/lib/db/queries/donations";
+import { getUserByClerkId, getUserByEmail } from "@/lib/db/queries/users";
 import { getStripe } from "@/lib/payments/stripe";
+
+// Resolve a checkout / invoice event back to a local users.id. Prefer the
+// clerkUserId we stuffed into Stripe metadata at checkout-session time; fall
+// back to email lookup so donations made before sign-up still attach when
+// the donor later creates an account with the same email.
+async function resolveDonorUserId(args: {
+  clerkUserId: string | null | undefined;
+  email: string | null | undefined;
+}): Promise<string | null> {
+  if (args.clerkUserId) {
+    const u = await getUserByClerkId(args.clerkUserId);
+    if (u) return u.id;
+  }
+  if (args.email) {
+    const u = await getUserByEmail(args.email);
+    if (u) return u.id;
+  }
+  return null;
+}
 
 // Stripe webhook endpoint — receives checkout.session.completed and
 // invoice.paid events. Persists each to the donations table when
@@ -67,6 +87,11 @@ export async function POST(req: Request) {
         // skip the DB insert for subscription-mode sessions and let
         // invoice.paid persist the row instead.
         if (!recurring) {
+          const donorEmail = session.customer_email ?? null;
+          const donorUserId = await resolveDonorUserId({
+            clerkUserId: meta.clerkUserId || null,
+            email: donorEmail,
+          });
           await insertDonation({
             amountCents,
             currency,
@@ -74,7 +99,8 @@ export async function POST(req: Request) {
             source: "stripe",
             externalReference: session.id,
             status: "succeeded",
-            donorEmail: session.customer_email ?? null,
+            donorUserId,
+            donorEmail,
             studentSlug: studentId,
             projectSlug: projectId,
             dedicationText,
@@ -112,6 +138,11 @@ export async function POST(req: Request) {
       );
 
       try {
+        const donorEmail = invoice.customer_email ?? null;
+        const donorUserId = await resolveDonorUserId({
+          clerkUserId: meta.clerkUserId || null,
+          email: donorEmail,
+        });
         await insertDonation({
           amountCents,
           currency,
@@ -119,7 +150,8 @@ export async function POST(req: Request) {
           source: "stripe",
           externalReference: subscriptionId || invoice.id || null,
           status: "succeeded",
-          donorEmail: invoice.customer_email ?? null,
+          donorUserId,
+          donorEmail,
           studentSlug: studentId,
           projectSlug: projectId,
           dedicationText,

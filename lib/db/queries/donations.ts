@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, gte, lt, sum } from "drizzle-orm";
+import { and, desc, eq, gte, isNotNull, lt, max, sql, sum } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
 import type { Donation, NewDonation } from "@/db/schema";
 import { donations } from "@/db/schema";
@@ -10,6 +10,13 @@ import {
   MOCK_DONATIONS,
   totalCents,
 } from "@/lib/content/donationsMock";
+
+export type SponsoredStudentSummary = {
+  studentSlug: string;
+  totalCents: number;
+  giftCount: number;
+  lastGiftAt: Date;
+};
 
 /**
  * Per-user donation history, newest first. In preview mode (no DB) returns
@@ -106,6 +113,67 @@ export async function lastMonthTotalCents(userId?: string): Promise<number> {
   return Number(result[0]?.total ?? 0);
 }
 
+/**
+ * Roll up the unique students this donor has sponsored, with totals. Drives the
+ * "Students you support" section on the donor dashboard. Donations to general
+ * fund / project-only (no studentSlug) are excluded.
+ */
+export async function getStudentsSponsoredByUser(
+  userId: string,
+): Promise<SponsoredStudentSummary[]> {
+  if (!isDbConfigured()) {
+    // Mock-mode roll-up — group MOCK_DONATIONS the same way the real query would.
+    const buckets = new Map<string, SponsoredStudentSummary>();
+    for (const d of MOCK_DONATIONS) {
+      if (!d.studentSlug) continue;
+      const slot = buckets.get(d.studentSlug);
+      if (slot) {
+        slot.totalCents += d.amountCents;
+        slot.giftCount += 1;
+        if (d.occurredAt > slot.lastGiftAt) slot.lastGiftAt = d.occurredAt;
+      } else {
+        buckets.set(d.studentSlug, {
+          studentSlug: d.studentSlug,
+          totalCents: d.amountCents,
+          giftCount: 1,
+          lastGiftAt: d.occurredAt,
+        });
+      }
+    }
+    return [...buckets.values()].sort((a, b) => b.totalCents - a.totalCents);
+  }
+
+  const db = getDb();
+  const rows = await db
+    .select({
+      studentSlug: donations.studentSlug,
+      totalCents: sum(donations.amountCents),
+      giftCount: sql<number>`count(*)::int`,
+      lastGiftAt: max(donations.occurredAt),
+    })
+    .from(donations)
+    .where(
+      and(
+        eq(donations.donorUserId, userId),
+        eq(donations.status, "succeeded"),
+        isNotNull(donations.studentSlug),
+      ),
+    )
+    .groupBy(donations.studentSlug)
+    .orderBy(desc(sum(donations.amountCents)));
+
+  return rows
+    .filter((r): r is typeof r & { studentSlug: string; lastGiftAt: Date } =>
+      Boolean(r.studentSlug && r.lastGiftAt),
+    )
+    .map((r) => ({
+      studentSlug: r.studentSlug,
+      totalCents: Number(r.totalCents ?? 0),
+      giftCount: Number(r.giftCount ?? 0),
+      lastGiftAt: r.lastGiftAt,
+    }));
+}
+
 // Map a DB row into the shape the donor dashboard / mock already consume.
 function rowToDonationRow(row: Donation): DonationRow {
   return {
@@ -120,5 +188,6 @@ function rowToDonationRow(row: Donation): DonationRow {
     studentSlug: row.studentSlug,
     projectSlug: row.projectSlug,
     dedicationText: row.dedicationText,
+    donorUserId: row.donorUserId,
   };
 }

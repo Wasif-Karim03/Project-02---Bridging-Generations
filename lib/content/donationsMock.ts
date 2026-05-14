@@ -14,6 +14,7 @@ export type DonationRow = {
   studentSlug: string | null;
   projectSlug: string | null;
   dedicationText: string | null;
+  donorUserId: string | null;
 };
 
 function daysAgo(n: number): Date {
@@ -35,6 +36,7 @@ export const MOCK_DONATIONS: DonationRow[] = [
     studentSlug: "priyonti-barua",
     projectSlug: null,
     dedicationText: "For Priyonti — keep going",
+    donorUserId: null,
   },
   {
     id: "demo-2",
@@ -48,6 +50,7 @@ export const MOCK_DONATIONS: DonationRow[] = [
     studentSlug: "priyonti-barua",
     projectSlug: null,
     dedicationText: "For Priyonti — keep going",
+    donorUserId: null,
   },
   {
     id: "demo-3",
@@ -61,6 +64,7 @@ export const MOCK_DONATIONS: DonationRow[] = [
     studentSlug: null,
     projectSlug: "shobhana-mahathera-school",
     dedicationText: "Materials drive — happy to help",
+    donorUserId: null,
   },
   {
     id: "demo-4",
@@ -74,6 +78,7 @@ export const MOCK_DONATIONS: DonationRow[] = [
     studentSlug: null,
     projectSlug: "educational-fundraising",
     dedicationText: null,
+    donorUserId: null,
   },
 ];
 

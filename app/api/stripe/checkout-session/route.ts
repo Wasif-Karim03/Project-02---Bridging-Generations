@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getUserIdOptional } from "@/lib/auth";
 import { getStripe } from "@/lib/payments/stripe";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 
@@ -46,6 +47,11 @@ export async function POST(req: Request) {
   const studentId = (body.studentId ?? "").trim().slice(0, 80);
   const dedicationText = (body.dedicationText ?? "").trim().slice(0, 280);
 
+  // Attach the signed-in donor's Clerk ID to metadata so the webhook can link
+  // the donation to their local users row. Anonymous (signed-out) donations
+  // still work — they're attributed by donorEmail only.
+  const clerkUserId = await getUserIdOptional();
+
   const successUrl = `${SITE_URL}/donate/thank-you?session_id={CHECKOUT_SESSION_ID}`;
   const cancelUrl = `${SITE_URL}/donate?canceled=1`;
 
@@ -85,6 +91,7 @@ export async function POST(req: Request) {
         dedicationText,
         recurring: recurring ? "1" : "0",
         source: "donate-page",
+        clerkUserId: clerkUserId ?? "",
       },
       // Pre-fill donor email if provided.
       customer_email: body.donorEmail || undefined,
@@ -97,6 +104,7 @@ export async function POST(req: Request) {
               studentId,
               dedicationText,
               source: "donate-page",
+              clerkUserId: clerkUserId ?? "",
             },
           }
         : undefined,
