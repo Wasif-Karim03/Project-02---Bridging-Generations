@@ -34,7 +34,10 @@ export default async function DonorDashboard() {
   const usingMockData = !isDbConfigured();
   const dbUser = usingMockData ? null : await getCurrentDbUser();
   const queryUserId = dbUser?.id ?? clerkUserId;
-  const donorCode = donorCodeForUuid(dbUser?.id ?? clerkUserId);
+  // Donor codes are derived from the local users.id UUID. In preview mode
+  // (no DB) we don't yet have a UUID, so show "pending sync" instead of
+  // deriving something malformed from the Clerk ID.
+  const donorCode = dbUser ? donorCodeForUuid(dbUser.id) : null;
   const donorName = dbUser?.displayName ?? null;
 
   const [donations, sponsoredStudents, allStudents] = await Promise.all([
@@ -66,10 +69,16 @@ export default async function DonorDashboard() {
           </Link>
           .
         </p>
-        <p className="mt-2 inline-flex items-center gap-2 self-start border border-hairline bg-ground-2 px-3 py-1.5 font-mono text-meta uppercase tracking-[0.08em] text-ink">
-          <span className="text-ink-2">Donor ID</span>
-          <span className="text-ink">{donorCode}</span>
-        </p>
+        {donorCode ? (
+          <p className="mt-2 inline-flex items-center gap-2 self-start border border-hairline bg-ground-2 px-3 py-1.5 font-mono text-meta uppercase tracking-[0.08em] text-ink">
+            <span className="text-ink-2">Donor ID</span>
+            <span className="text-ink">{donorCode}</span>
+          </p>
+        ) : (
+          <p className="mt-2 inline-flex items-center gap-2 self-start border border-hairline bg-ground-2 px-3 py-1.5 text-meta uppercase tracking-[0.08em] text-ink-2">
+            Donor ID issues once your account syncs to the database (needs Neon + Clerk webhook).
+          </p>
+        )}
       </header>
 
       {usingMockData ? (
