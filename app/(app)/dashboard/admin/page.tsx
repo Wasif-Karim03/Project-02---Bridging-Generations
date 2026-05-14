@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isDbConfigured } from "@/db/client";
-import { requireRole } from "@/lib/auth";
 import { getAllApplications } from "@/lib/db/queries/applications";
 import { thisMonthTotalCents } from "@/lib/db/queries/donations";
 import { listAllDonors } from "@/lib/db/queries/donorProfiles";
@@ -23,8 +21,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export default async function AdminDashboard() {
-  await requireRole("admin");
-
+  // Role check is enforced by the parent admin layout — no need to repeat.
   const usingMockData = !isDbConfigured();
   const [applications, totalMonthCents, donorList] = await Promise.all([
     getAllApplications(),
@@ -37,16 +34,16 @@ export default async function AdminDashboard() {
   return (
     <div className="flex flex-col gap-10">
       <header className="flex flex-col gap-2">
-        <Eyebrow>Admin</Eyebrow>
-        <h1 className="text-balance text-heading-1 text-ink">Org dashboard.</h1>
-        <p className="text-body text-ink-2">
-          Review applications, manage donor visibility, assign mentors, and export rosters.
+        <h1 className="text-balance text-heading-1 text-ink">Org overview.</h1>
+        <p className="max-w-[60ch] text-body text-ink-2">
+          Review applications, manage donor visibility, assign mentors, and export rosters. Anything
+          you change here takes effect immediately for the affected donor or applicant.
         </p>
       </header>
 
       {usingMockData ? (
         <p className="border border-accent-3 bg-accent-3/10 px-4 py-3 text-meta uppercase tracking-[0.06em] text-ink-2">
-          Preview mode — real data appears once DATABASE_URL is set and Phase 4/5 reads land.
+          Preview mode — real data appears once DATABASE_URL is set. Numbers below are mock.
         </p>
       ) : null}
 

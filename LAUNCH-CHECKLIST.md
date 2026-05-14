@@ -109,12 +109,17 @@ Unlocks: real donor / mentor / admin dashboards, role-based access.
 - [ ] In Netlify env: `CLERK_WEBHOOK_SECRET` = the signing secret
 - [ ] Redeploy. New Clerk sign-ups now sync to your `users` table automatically.
 
-### C3. Grant yourself admin
+### C3. Grant yourself admin (one-time bootstrap)
 - [ ] Sign up at `https://<your-domain>/sign-up`
 - [ ] Webhook fires; you appear in the `users` table with role `donor`
 - [ ] Locally, run `npm run db:studio` → open `users` table → edit your row → set `role = admin`
-  (or, if you have another admin, they can promote you via `/dashboard/admin/users`)
-- [ ] Reload the site → you can now access `/dashboard/admin`
+  (or, in Neon dashboard → SQL Editor → `UPDATE users SET role = 'admin' WHERE email = 'your@email';`)
+- [ ] Reload the site
+
+### C4. Admin sign-in URL
+- [ ] Bookmark **`https://<your-domain>/admin-login`** — this is the dedicated staff sign-in (Clerk underneath, but separate from the donor `/sign-in` so donors never see it).
+- [ ] After sign-in you're routed to `/dashboard/admin` which now shows: a "Staff portal" badge with your name, sign-out button, section nav (Overview / Applications / Donors / Users & roles / Exports), and the polished admin tooling.
+- [ ] Every subsequent admin/mentor/IT role is granted from `/dashboard/admin/users` — no DB editing required ever again.
 
 ✅ Donor / mentor / admin dashboards are fully functional. Promote approved mentor applicants to the `mentor` role via `/dashboard/admin/users`.
 

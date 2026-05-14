@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { Link } from "next-view-transitions";
-import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isDbConfigured } from "@/db/client";
-import { requireRole } from "@/lib/auth";
 import { listAllUsers } from "@/lib/db/queries/users";
 import { UserRoleSelect } from "./_components/UserRoleSelect";
 
@@ -20,23 +17,14 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export default async function AdminUsersPage() {
-  await requireRole("admin");
+  // Role check is enforced by the parent admin layout.
   const dbReady = isDbConfigured();
   const users = await listAllUsers();
 
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-2">
-        <nav aria-label="Breadcrumb">
-          <Link
-            href="/dashboard/admin"
-            className="text-meta uppercase tracking-[0.08em] text-ink-2 hover:text-accent"
-          >
-            ← Admin dashboard
-          </Link>
-        </nav>
-        <Eyebrow>Users</Eyebrow>
-        <h1 className="text-balance text-heading-1 text-ink">Roles & access.</h1>
+        <h1 className="text-balance text-heading-1 text-ink">Users & roles.</h1>
         <p className="max-w-[60ch] text-body text-ink-2">
           Promote a donor to mentor after their application is approved, or grant admin / IT access
           to board members. Roles take effect on the next page load for that user.
