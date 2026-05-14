@@ -6,7 +6,7 @@ import { deleteUserByClerkId, upsertUserFromClerk } from "@/lib/db/queries/users
 // (Webhooks → Add endpoint) pointing at:
 //   {NEXT_PUBLIC_SITE_URL}/api/clerk/webhook
 // Subscribe to events: user.created, user.updated, user.deleted.
-// Then paste the Signing Secret into CLERK_WEBHOOK_SECRET in Vercel env.
+// Then paste the Signing Secret into CLERK_WEBHOOK_SECRET in Netlify env.
 
 type ClerkUserPayload = {
   id: string;

@@ -27,7 +27,7 @@ export const donatePageSingleton = singleton({
     transactionSource: fields.select({
       label: "Transaction source",
       description:
-        "How donations flow today. 'Stripe' = real Stripe Checkout (requires STRIPE_SECRET_KEY in Vercel env). 'Givebutter' = legacy embed (deprecated). 'Mailto' = email-only fallback. 'Placeholder' = setup pending.",
+        "How donations flow today. 'Stripe' = real Stripe Checkout (requires STRIPE_SECRET_KEY in Netlify env). 'Givebutter' = legacy embed (deprecated). 'Mailto' = email-only fallback. 'Placeholder' = setup pending.",
       options: [
         { label: "Stripe Checkout (recommended)", value: "stripe" },
         { label: "Givebutter (legacy embed)", value: "givebutter" },

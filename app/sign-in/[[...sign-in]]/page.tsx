@@ -73,7 +73,7 @@ function SetupPendingPanel({ kind }: { kind: "sign-in" | "sign-up" }) {
           </li>
         </ul>
         <div className="mt-6 border-t border-hairline pt-4 text-meta uppercase tracking-[0.06em] text-ink-2">
-          Owner: set CLERK_SECRET_KEY + NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in Vercel env to enable.
+          Owner: set CLERK_SECRET_KEY + NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in Netlify env (or .env.local for local dev) to enable.
         </div>
       </div>
     </main>

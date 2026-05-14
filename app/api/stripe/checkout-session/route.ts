@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   const stripe = getStripe();
   if (!stripe) {
     return bad(
-      "Stripe is not yet configured. Set STRIPE_SECRET_KEY in Vercel environment variables.",
+      "Stripe is not yet configured. Set STRIPE_SECRET_KEY in Netlify environment variables.",
       503,
     );
   }
