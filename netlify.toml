@@ -1,0 +1,40 @@
+# Netlify build configuration for Bridging Generations.
+#
+# Netlify auto-detects Next.js and installs @netlify/plugin-nextjs for SSR +
+# ISR + image optimization. The plugin is also listed as a devDependency so
+# CI on GitHub can resolve it deterministically.
+#
+# Deployment flow:
+#   1. Connect this repo at app.netlify.com → New site from Git.
+#   2. Netlify reads this file, sets the build command + publish dir.
+#   3. Set environment variables in Site settings → Environment variables.
+#      The list mirrors .env.example.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # package.json engines pins Node 24; pin CI to the same line.
+  NODE_VERSION = "24"
+  # Skip Husky-style postinstall checks that don't apply in CI.
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# The Netlify Next.js runtime handles routing, ISR, and image optimization.
+# Listed by name; the package itself is in package.json devDependencies so
+# Netlify pins the exact version on every deploy.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Long-cache static assets shipped under /_next/static/* — they have content
+# hashes in the filename so far-future immutable is safe.
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Optimized images are also content-hashed.
+[[headers]]
+  for = "/_next/image/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

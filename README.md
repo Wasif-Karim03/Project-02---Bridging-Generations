@@ -133,7 +133,7 @@ EN is the default; users toggle to BN via the language switch in the nav. Bengal
 
 ## Deployment
 
-Deploys to Vercel. Every PR gets a preview URL; merging to `main` triggers a production deploy. CI runs typecheck + lint + tests on every push.
+Deploys to **Netlify free tier** (`netlify.toml` is the source of truth for build config). Every PR gets a preview URL; merging to `main` triggers a production deploy. CI on GitHub Actions runs typecheck + lint + tests on every push. See [LAUNCH-CHECKLIST.md](./LAUNCH-CHECKLIST.md) for the full setup walkthrough.
 
 ## License
 

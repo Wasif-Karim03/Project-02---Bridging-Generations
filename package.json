@@ -60,6 +60,7 @@
     "@axe-core/playwright": "^4.11.2",
     "@axe-core/react": "^4.11.2",
     "@biomejs/biome": "2.4.13",
+    "@netlify/plugin-nextjs": "^5.13.6",
     "@next/bundle-analyzer": "^16.2.4",
     "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",

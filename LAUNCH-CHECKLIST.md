@@ -2,24 +2,26 @@
 
 Owner-facing checklist for taking the site from preview to production. Items are ordered so the site picks up new capability as each is completed — you can launch at any point and still have a working site, just with less functionality unlocked.
 
+**Hosting target:** Netlify free tier — commercial use allowed, $0/month forever for this org's scale. The only annual cost is domain renewal (~$12/yr for `brigen.org`).
+
 ---
 
 ## Phase A — minimum viable launch (~30 minutes)
 
-Just the public marketing site, contact form, application forms (email-only), and Stripe donation flow.
+Just the public marketing site, contact form, application forms (email-only), and Stripe donation flow. **Hosted on Netlify's free tier** (commercial use allowed, ~$0/month forever for this org's scale).
 
-### A1. Connect repo to Vercel
-- [ ] Sign in at https://vercel.com
-- [ ] **Add New → Project** → import `Wasif-Karim03/Project-02---Bridging-Generations`
-- [ ] Framework auto-detects as **Next.js**
-- [ ] Leave build command default (`next build`)
-- [ ] **Deploy** — the first build will succeed even with zero env vars; the site renders in preview mode
+### A1. Connect repo to Netlify
+- [ ] Sign in at https://app.netlify.com (free, sign up with GitHub for one-click repo access)
+- [ ] **Add new site → Import from Git → GitHub** → pick `Wasif-Karim03/Project-02---Bridging-Generations`
+- [ ] Netlify auto-detects Next.js and reads `netlify.toml`. Leave defaults — build command `npm run build`, publish dir `.next`
+- [ ] **Deploy site** — the first build will succeed even with zero env vars; the site renders in preview mode
 
 ### A2. Configure your custom domain (optional but recommended)
-- [ ] Vercel project → **Settings → Domains** → add `brigen.org` (or your domain)
-- [ ] Add the DNS records Vercel shows you (apex A record + `www` CNAME)
+- [ ] Netlify site → **Domain management → Add custom domain** → enter `brigen.org`
+- [ ] Add the DNS records Netlify shows you (apex A record + `www` CNAME, or Netlify-managed DNS)
+- [ ] Netlify auto-provisions a Let's Encrypt SSL cert
 - [ ] Wait for DNS propagation (~5–30 minutes)
-- [ ] In Vercel env, set `NEXT_PUBLIC_SITE_URL=https://brigen.org`
+- [ ] In Netlify **Site settings → Environment variables**, set `NEXT_PUBLIC_SITE_URL=https://brigen.org`
 
 ### A3. Resend for transactional email
 - [ ] Sign up at https://resend.com (free tier: 3,000 emails/month)
@@ -27,7 +29,7 @@ Just the public marketing site, contact form, application forms (email-only), an
 - [ ] Add the SPF / DKIM / DMARC DNS records Resend shows you
 - [ ] Wait for "Verified" status (~1 hour)
 - [ ] **API Keys → Create API Key** → copy
-- [ ] In Vercel env:
+- [ ] In Netlify env (Site settings → Environment variables):
   - [ ] `RESEND_API_KEY` = the key
   - [ ] `RESEND_FROM_EMAIL` = e.g. `noreply@brigen.org` (any address on the verified domain)
 - [ ] Redeploy. Now contact + application forms send real emails.
@@ -39,7 +41,7 @@ Just the public marketing site, contact form, application forms (email-only), an
   - URL: `https://<your-domain>/api/stripe/webhook`
   - Events: `checkout.session.completed`, `invoice.paid`
   - Copy the **Signing secret** (`whsec_…`)
-- [ ] In Vercel env:
+- [ ] In Netlify env:
   - [ ] `STRIPE_SECRET_KEY` = sk_test_… (then sk_live_… at launch)
   - [ ] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` = pk_test_…
   - [ ] `STRIPE_WEBHOOK_SECRET` = whsec_…
@@ -52,7 +54,7 @@ Just the public marketing site, contact form, application forms (email-only), an
 - [ ] Homepage URL: `https://<your-domain>`
 - [ ] Authorization callback URL: `https://<your-domain>/api/keystatic/github/oauth/callback`
 - [ ] Register, then generate a **client secret**
-- [ ] In Vercel env:
+- [ ] In Netlify env:
   - [ ] `KEYSTATIC_GITHUB_CLIENT_ID` = the Client ID
   - [ ] `KEYSTATIC_GITHUB_CLIENT_SECRET` = the secret
   - [ ] `KEYSTATIC_SECRET` = `openssl rand -base64 32` (32+ random chars)
@@ -68,10 +70,11 @@ Just the public marketing site, contact form, application forms (email-only), an
 Unlocks: forms persist as queryable rows, admin queue shows real submissions, donor dashboard shows real donation history.
 
 ### B1. Provision Neon Postgres
-- [ ] Vercel project → **Storage → Connect Store → Neon**
-- [ ] Click **Create New** → keep defaults → **Create**
-- [ ] Vercel auto-injects `DATABASE_URL` into the project environment
-- [ ] Locally, copy that `DATABASE_URL` into `.env.local` (you'll need it to push the schema)
+- [ ] Sign up at https://console.neon.tech (free tier: 0.5 GB storage, always free, no credit card)
+- [ ] **New Project** → name `bridging-generations`, region nearest your users (e.g. AWS us-east-2)
+- [ ] **Connection Details** → copy the connection string (starts with `postgresql://`)
+- [ ] In Netlify env (Site settings → Environment variables), set `DATABASE_URL` to that string
+- [ ] Locally, copy the same `DATABASE_URL` into `.env.local` (you'll need it to push the schema)
 
 ### B2. Push the schema
 ```bash
@@ -94,7 +97,7 @@ Unlocks: real donor / mentor / admin dashboards, role-based access.
 - [ ] **Create application** → name: `Bridging Generations`
 - [ ] Enable sign-in methods you want (Email + password, Google, magic link recommended)
 - [ ] **API Keys** → copy `pk_test_…` + `sk_test_…`
-- [ ] In Vercel env:
+- [ ] In Netlify env:
   - [ ] `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` = pk_…
   - [ ] `CLERK_SECRET_KEY` = sk_…
 
@@ -103,7 +106,7 @@ Unlocks: real donor / mentor / admin dashboards, role-based access.
 - [ ] URL: `https://<your-domain>/api/clerk/webhook`
 - [ ] Subscribe to: `user.created`, `user.updated`, `user.deleted`
 - [ ] Copy the **Signing secret**
-- [ ] In Vercel env: `CLERK_WEBHOOK_SECRET` = the signing secret
+- [ ] In Netlify env: `CLERK_WEBHOOK_SECRET` = the signing secret
 - [ ] Redeploy. New Clerk sign-ups now sync to your `users` table automatically.
 
 ### C3. Grant yourself admin
@@ -123,15 +126,17 @@ Unlocks: real donor / mentor / admin dashboards, role-based access.
 - [ ] Stripe dashboard → toggle to **Live mode**
 - [ ] Generate new live API keys (`sk_live_…`, `pk_live_…`)
 - [ ] Create a new webhook endpoint with the live signing secret
-- [ ] Update Vercel env:
+- [ ] Update Netlify env:
   - [ ] `STRIPE_SECRET_KEY` = sk_live_…
   - [ ] `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` = pk_live_…
   - [ ] `STRIPE_WEBHOOK_SECRET` = the live signing secret
 - [ ] Redeploy
 
-### D2. Vercel Blob (donor photos + mentor report attachments)
-- [ ] Vercel project → **Storage → Connect Store → Blob → Create new**
-- [ ] `BLOB_READ_WRITE_TOKEN` auto-injected
+### D2. File uploads (donor photos + mentor report attachments)
+- [ ] Sign up at https://uploadthing.com or https://cloudinary.com (both free tiers fit this scale)
+- [ ] Generate API keys
+- [ ] In Netlify env, set the relevant tokens for your chosen provider
+- [ ] Update `lib/storage/` to point at the chosen provider (this is the only host-coupled piece — Vercel Blob was the original; we're not married to it)
 
 ### D3. Pre-launch content sweep (via Keystatic)
 - [ ] Set real **EIN** in `siteSettings`
@@ -193,11 +198,11 @@ Blocked on bKash merchant account approval (paperwork-heavy). Once you have the 
 
 | Symptom | Where to look |
 |---|---|
-| Build failing on Vercel | Vercel project → Deployments → click the failed deploy → build logs |
+| Build failing on Netlify | Netlify site → Deploys → click the failed deploy → build log |
 | Form submissions not landing in email | Resend dashboard → Logs (look for the matching email) |
 | Donations not showing in donor dashboard | Stripe dashboard → Webhooks → check the endpoint is "Active" and recent events succeeded |
 | User signed up but doesn't appear in /dashboard/admin/users | Clerk dashboard → Webhooks → check delivery to /api/clerk/webhook |
-| Content edits not appearing on the public site | Wait ~1 minute for Vercel to redeploy the new git commit Keystatic just made |
+| Content edits not appearing on the public site | Wait ~1 minute for Netlify to redeploy the new git commit Keystatic just made |
 | Bengali content not switching | Verify the BN field is non-empty in Keystatic; empty falls back to EN |
 
 For anything else: check the relevant CI log + Vercel runtime logs first; the error message usually points at the missing env var or misconfigured webhook.
