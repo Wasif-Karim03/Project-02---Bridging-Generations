@@ -40,7 +40,7 @@ export function HomeSpotlightScroller({ students }: HomeSpotlightScrollerProps) 
           </Link>
           <Link
             href="/students"
-            className="inline-flex min-h-[44px] items-center bg-accent-2 px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
+            className="inline-flex min-h-[44px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
           >
             Donate Now
           </Link>

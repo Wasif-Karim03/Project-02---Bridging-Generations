@@ -208,7 +208,7 @@ export function HomeHeroCarousel() {
         </button>
       </div>
 
-      <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+      <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 items-center">
         {SLIDES.map((s, i) => (
           <button
             type="button"
@@ -216,12 +216,17 @@ export function HomeHeroCarousel() {
             aria-label={`Go to slide ${i + 1}: ${s.headline}`}
             aria-current={i === index ? "true" : undefined}
             onClick={() => goTo(i)}
-            className={
-              i === index
-                ? "h-2 w-8 bg-white transition-all"
-                : "h-2 w-2 bg-white/50 transition-all hover:bg-white/80"
-            }
-          />
+            className="flex size-6 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            <span
+              aria-hidden="true"
+              className={
+                i === index
+                  ? "block h-2 w-8 bg-white transition-all"
+                  : "block h-2 w-2 bg-white/50 transition-all hover:bg-white/80"
+              }
+            />
+          </button>
         ))}
       </div>
     </section>

@@ -231,7 +231,7 @@ export function Nav({ contactEmail, phoneNumber, whatsappNumber }: NavProps = {}
               <li>
                 <Link
                   href={donateCta.href}
-                  className="inline-flex h-9 items-center bg-accent-2 px-4 text-nav-link font-bold uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
+                  className="inline-flex h-9 items-center bg-accent-2-text px-4 text-nav-link font-bold uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
                 >
                   {t("donate")}
                 </Link>

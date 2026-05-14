@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { submitWeeklyReportAction } from "../actions";
 
 type WeeklyReportFormProps = {
   studentSlug: string;
@@ -16,9 +17,9 @@ const ATTENDANCE_OPTIONS = [
   { value: "unknown", label: "Did not check in" },
 ] as const;
 
-// Mentor weekly report form. Phase 6 wires this to a server action that
-// writes a row into weekly_reports (Drizzle). Today it logs the would-be
-// save and shows a success state so the UI is fully demoable.
+// Mentor weekly report form. Calls submitWeeklyReportAction which writes
+// into weekly_reports via Drizzle when DATABASE_URL is set, or returns a
+// success no-op in preview mode so the UI stays usable.
 export function WeeklyReportForm({ studentSlug }: WeeklyReportFormProps) {
   const today = new Date().toISOString().slice(0, 10);
   const [weekOf, setWeekOf] = useState<string>(today);
@@ -27,29 +28,39 @@ export function WeeklyReportForm({ studentSlug }: WeeklyReportFormProps) {
   const [actionItems, setActionItems] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     setSubmitting(true);
-    console.info("[mentor/report] would save:", {
-      studentSlug,
-      weekOf,
-      attendance,
-      studyNotes,
-      actionItems,
-    });
-    await new Promise((r) => setTimeout(r, 400));
-    setSubmitted(true);
-    setSubmitting(false);
+    try {
+      const result = await submitWeeklyReportAction({
+        studentSlug,
+        weekOf,
+        attendance,
+        studyNotes,
+        actionItems,
+      });
+      if (result.status === "success") {
+        setSubmitted(true);
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      console.error("[mentor/report] submit failed", err);
+      setError("Could not file the report right now. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
     return (
       <div className="border border-accent bg-accent/5 p-6 text-body text-ink">
-        <p className="text-heading-5 text-accent">Report filed (preview).</p>
+        <p className="text-heading-5 text-accent">Report filed.</p>
         <p className="mt-2 text-body-sm text-ink-2">
-          Phase 6 will persist this to the database and notify the board if the report flags any
-          issues. For now this is a UI preview only.
+          The board will see this in the mentor reports feed. Thanks for keeping us posted.
         </p>
         <button
           type="button"
@@ -57,6 +68,7 @@ export function WeeklyReportForm({ studentSlug }: WeeklyReportFormProps) {
             setSubmitted(false);
             setStudyNotes("");
             setActionItems("");
+            setError(null);
           }}
           className="mt-4 inline-flex min-h-[40px] items-center border border-accent px-4 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
         >
@@ -126,6 +138,12 @@ export function WeeklyReportForm({ studentSlug }: WeeklyReportFormProps) {
           />
         )}
       </Field>
+
+      {error ? (
+        <p role="alert" className="text-body-sm text-accent-2-text">
+          {error}
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-4 border-t border-hairline pt-5">
         <button

@@ -170,6 +170,30 @@ export default async function AdminDashboard() {
         </div>
       </section>
 
+      <section aria-labelledby="management-title" className="flex flex-col gap-4">
+        <header className="flex items-baseline justify-between border-b border-hairline pb-3">
+          <h2 id="management-title" className="text-heading-3 text-ink">
+            Management
+          </h2>
+        </header>
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <li>
+            <Link
+              href="/dashboard/admin/users"
+              className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
+            >
+              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">
+                Users & roles
+              </span>
+              <span className="text-heading-5 text-ink group-hover:text-accent">Manage roles</span>
+              <span className="text-body-sm text-ink-2">
+                Promote approved mentor applicants to the mentor role; grant admin / IT access.
+              </span>
+            </Link>
+          </li>
+        </ul>
+      </section>
+
       <section aria-labelledby="exports-title" className="flex flex-col gap-4">
         <header className="flex items-baseline justify-between border-b border-hairline pb-3">
           <h2 id="exports-title" className="text-heading-3 text-ink">

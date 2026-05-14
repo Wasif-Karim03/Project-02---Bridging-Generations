@@ -6,8 +6,9 @@ const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 const ROUTES = ["/donate", "/donate/thank-you", "/contact", "/terms"] as const;
 
 test.beforeEach(async ({ page }) => {
-  // Block the external Givebutter widget so the a11y run does not depend on a third-party CDN.
-  await page.route(/widgets\.givebutter\.com/, (route) => route.abort());
+  // Block any external donation-widget / Stripe scripts so the a11y run does
+  // not depend on a third-party CDN.
+  await page.route(/widgets\.givebutter\.com|js\.stripe\.com/, (route) => route.abort());
 });
 
 for (const route of ROUTES) {
@@ -29,11 +30,11 @@ for (const route of ROUTES) {
 
 test("/donate renders the donate surface and FAQ toggles without JS", async ({ page }) => {
   await page.goto("/donate");
-  // The donate surface is either the Givebutter widget (when real credentials
-  // are wired) or the setup fallback CTA (when the campaign id is a placeholder
-  // — current state as of PRs #82, #83). Accept either.
+  // The donate surface is the Stripe Checkout submit button when keys are
+  // configured, or the mailto fallback when running in preview mode without
+  // STRIPE_SECRET_KEY. Either is acceptable for the a11y smoke check.
   const donateSurface = page
-    .locator("main givebutter-widget, main a[href^='mailto:info@bridginggenerations.org']")
+    .locator("main button[type='submit'], main a[href^='mailto:info@bridginggenerations.org']")
     .first();
   await expect(donateSurface).toBeVisible();
 
@@ -50,6 +51,8 @@ test("/donate?project=<unknown> still renders cleanly", async ({ page }) => {
 
 test("/contact valid submission shows the success state", async ({ page }) => {
   await page.goto("/contact");
+  // Pick any audience option (radio group is required per the action validator).
+  await page.locator('input[name="audience"][value="donor"]').check({ force: true });
   await page.fill('input[name="name"]', "Test Name");
   await page.fill('input[name="email"]', "test@example.com");
   await page.fill('textarea[name="message"]', "A real looking message.");

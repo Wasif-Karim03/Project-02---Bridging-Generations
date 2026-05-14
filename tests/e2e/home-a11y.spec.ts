@@ -33,8 +33,8 @@ test("hero CTAs, nav brand, and closing CTA are keyboard reachable", async ({ pa
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
-  await expect(page.getByRole("link", { name: "Sponsor a Student" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Donate now" })).toBeVisible();
+  // Hero carousel renders one "Donate Now" CTA per slide; only the active one is visible.
+  await expect(page.getByRole("link", { name: "Donate Now" }).first()).toBeVisible();
 
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: /skip to main content/i })).toBeFocused();
@@ -58,7 +58,11 @@ test("all hero copy is visible under reduced motion (no invisible opacity-0 elem
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   const heading = page.getByRole("heading", { level: 1 });
-  await expect(heading).toContainText("156 students.");
+  // The carousel cycles through three headlines; assert it matches any one of
+  // them rather than the older static "156 students." headline.
+  await expect(heading).toContainText(
+    /Make a Better World|Make the Children Smile|Save the Children/,
+  );
   const opacity = await heading.evaluate((el) => window.getComputedStyle(el).opacity);
   expect(Number(opacity)).toBe(1);
 });

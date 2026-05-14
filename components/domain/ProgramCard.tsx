@@ -145,7 +145,7 @@ function GridCard({ project, flags, as: Tag, ariaLabel }: GridCardProps) {
           ) : (
             <Link
               href={donateHref}
-              className="inline-flex min-h-[44px] items-center justify-center bg-accent-2 px-4 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
+              className="inline-flex min-h-[44px] items-center justify-center bg-accent-2-text px-4 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
             >
               Donate Now
             </Link>

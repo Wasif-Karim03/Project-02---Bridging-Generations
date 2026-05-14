@@ -46,9 +46,9 @@ export function HomeProgramsGrid({ projects }: HomeProgramsGridProps) {
           <Reveal cascade cascadeDelay={100}>
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
               {projects.slice(0, 6).map((project) => (
-                <div key={project.id} data-reveal-item className="flex">
-                  <ProgramCard project={project} scale="card" as="li" />
-                </div>
+                <li key={project.id} data-reveal-item className="flex">
+                  <ProgramCard project={project} scale="card" />
+                </li>
               ))}
             </ul>
           </Reveal>
