@@ -5,6 +5,8 @@ type CTAFooterPanelProps = {
   body: string;
   ctaLabel: string;
   ctaHref: string;
+  secondaryCtaLabel?: string;
+  secondaryCtaHref?: string;
   tone?: "cream" | "teal";
   titleId?: string;
   id?: string;
@@ -15,6 +17,8 @@ export function CTAFooterPanel({
   body,
   ctaLabel,
   ctaHref,
+  secondaryCtaLabel,
+  secondaryCtaHref,
   tone = "cream",
   titleId = "cta-footer-title",
   id,
@@ -34,9 +38,16 @@ export function CTAFooterPanel({
           {headline}
         </h2>
         <p className={`max-w-[56ch] text-body-lg ${bodyClass}`}>{body}</p>
-        <Button variant="primary" href={ctaHref}>
-          {ctaLabel}
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="primary" href={ctaHref}>
+            {ctaLabel}
+          </Button>
+          {secondaryCtaLabel && secondaryCtaHref ? (
+            <Button variant="secondary" href={secondaryCtaHref}>
+              {secondaryCtaLabel}
+            </Button>
+          ) : null}
+        </div>
       </div>
     </section>
   );
