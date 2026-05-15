@@ -64,18 +64,6 @@ export function SheetDrawer({
         if (!el.isConnected || el.open) return;
         el.showModal();
         if (window.scrollY !== prevScrollY) window.scrollTo(0, prevScrollY);
-        if (process.env.NODE_ENV !== "production") {
-          const cs = getComputedStyle(el);
-          // Diagnostic: lets a real-device tester confirm the dialog actually
-          // promoted (display !== none, opacity !== 0). Drop after iPhone fix
-          // is verified.
-          console.warn("[SheetDrawer] showModal", {
-            open: el.open,
-            display: cs.display,
-            visibility: cs.visibility,
-            opacity: cs.opacity,
-          });
-        }
       });
       return () => {
         html.style.overflow = prevHtml;

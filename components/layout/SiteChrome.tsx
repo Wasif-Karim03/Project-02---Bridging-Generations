@@ -2,18 +2,22 @@ import { Footer } from "@/components/layout/Footer";
 import { Nav } from "@/components/layout/Nav";
 import { ScrollProgressRule } from "@/components/layout/ScrollProgressRule";
 import { SkipLink } from "@/components/layout/SkipLink";
-import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 
 // Site chrome (Nav, main, Footer + scroll behaviors). Used by the (site)
 // route-group layout AND by the global app/not-found.tsx so the 404 page
 // keeps the same chrome without duplicating server-fetch logic.
+//
+// SmoothScroll (Lenis) is intentionally NOT rendered here: it intercepts
+// wheel events across the page and was causing scroll jank on dashboard
+// surfaces with forms / scrollable tables / Clerk widgets. Native scroll
+// is the reliable default. Re-enable per-route only if a marketing page
+// genuinely needs the wheel smoothing (it almost never does).
 export async function SiteChrome({ children }: { children: React.ReactNode }) {
   const siteSettings = await getSiteSettings();
   return (
     <>
       <ScrollProgressRule />
-      <SmoothScroll />
       <SkipLink />
       <header>
         <Nav
