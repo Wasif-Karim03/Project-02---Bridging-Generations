@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { adminSetDonorRoleAction, adminUpdateDonorProfileAction } from "../actions";
 
-type Role = "anonymous" | "donor" | "mentor" | "admin" | "it";
+type Role = "anonymous" | "donor" | "mentor" | "admin" | "it" | "student";
 
 type Props = {
   donorUserId: string;

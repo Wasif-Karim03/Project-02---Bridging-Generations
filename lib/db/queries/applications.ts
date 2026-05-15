@@ -1,9 +1,28 @@
 import "server-only";
 import { desc, eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
+import type { StudentRegistration } from "@/db/schema";
 import { mentorApplications, scholarshipApplications, studentRegistrations } from "@/db/schema";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { MOCK_APPLICATIONS } from "@/lib/content/applicationsMock";
+
+/**
+ * Most recent student registration submitted by a given user. Drives the
+ * /dashboard/student page's "application pending" / "approved" state.
+ */
+export async function getLatestStudentRegistrationForUser(
+  userId: string,
+): Promise<StudentRegistration | null> {
+  if (!isDbConfigured()) return null;
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(studentRegistrations)
+    .where(eq(studentRegistrations.applicantUserId, userId))
+    .orderBy(desc(studentRegistrations.submittedAt))
+    .limit(1);
+  return rows[0] ?? null;
+}
 
 /**
  * Merged feed of every application kind, newest first. Drives the admin

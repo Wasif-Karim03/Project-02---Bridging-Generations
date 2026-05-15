@@ -15,7 +15,7 @@ export function isClerkConfigured(): boolean {
   return Boolean(process.env.CLERK_SECRET_KEY);
 }
 
-export type Role = "donor" | "mentor" | "admin" | "it";
+export type Role = "donor" | "mentor" | "admin" | "it" | "student";
 
 export type AuthedUser = {
   userId: string;
@@ -119,7 +119,10 @@ export async function requireRole(role: Role): Promise<AuthedUser> {
 
 // Role hierarchy: admin/it ≥ mentor ≥ donor. Anything beneath the required
 // role is rejected; anything at or above is allowed through.
+// Students sit in their own track outside the donor → mentor → admin ladder.
+// They never need elevated access; they only ever see their own dashboard.
 const ROLE_RANK: Record<string, number> = {
+  student: 1,
   donor: 1,
   mentor: 2,
   admin: 3,

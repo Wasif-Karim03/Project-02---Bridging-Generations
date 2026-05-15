@@ -80,7 +80,7 @@ export async function deleteUserByClerkId(clerkUserId: string): Promise<void> {
 // Admin-only utility — promote a user to a new role.
 export async function setUserRole(
   userId: string,
-  role: "donor" | "mentor" | "admin" | "it",
+  role: "donor" | "mentor" | "admin" | "it" | "student",
 ): Promise<void> {
   if (!isDbConfigured()) return;
   const db = getDb();
@@ -106,4 +106,30 @@ export async function listAllMentors(limit = 200): Promise<User[]> {
     .where(eq(users.role, "mentor"))
     .orderBy(desc(users.createdAt))
     .limit(limit);
+}
+
+// List every student-role user. Drives /dashboard/admin/students — the
+// admin's surface for reviewing pending student applications and linking
+// approved accounts to Keystatic student slugs.
+export async function listAllStudentUsers(limit = 500): Promise<User[]> {
+  if (!isDbConfigured()) return [];
+  const db = getDb();
+  return db
+    .select()
+    .from(users)
+    .where(eq(users.role, "student"))
+    .orderBy(desc(users.createdAt))
+    .limit(limit);
+}
+
+// Admin-only: set a student account's Keystatic slug link. Setting it to
+// null effectively un-links the account (puts them back into the pending
+// state on /dashboard/student).
+export async function setUserStudentSlug(
+  userId: string,
+  studentSlug: string | null,
+): Promise<void> {
+  if (!isDbConfigured()) return;
+  const db = getDb();
+  await db.update(users).set({ studentSlug, updatedAt: new Date() }).where(eq(users.id, userId));
 }

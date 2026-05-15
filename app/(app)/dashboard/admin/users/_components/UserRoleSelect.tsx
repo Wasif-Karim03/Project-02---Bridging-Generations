@@ -3,8 +3,8 @@
 import { useTransition } from "react";
 import { setUserRoleAction } from "../actions";
 
-type Role = "donor" | "mentor" | "admin" | "it";
-const ROLES: Role[] = ["donor", "mentor", "admin", "it"];
+type Role = "donor" | "mentor" | "admin" | "it" | "student";
+const ROLES: Role[] = ["donor", "mentor", "admin", "it", "student"];
 
 type Props = {
   userId: string;

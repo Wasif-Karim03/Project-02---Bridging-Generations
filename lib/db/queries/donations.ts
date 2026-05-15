@@ -2,7 +2,7 @@ import "server-only";
 import { and, desc, eq, gte, isNotNull, lt, max, sql, sum } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
 import type { Donation, NewDonation } from "@/db/schema";
-import { donations } from "@/db/schema";
+import { donations, donorProfiles, users } from "@/db/schema";
 import type { DonationRow } from "@/lib/content/donationsMock";
 
 export type SponsoredStudentSummary = {
@@ -10,6 +10,16 @@ export type SponsoredStudentSummary = {
   totalCents: number;
   giftCount: number;
   lastGiftAt: Date;
+};
+
+export type DonorForStudentSummary = {
+  // What to display on the student-facing dashboard. "Anonymous donor" if
+  // the donor opted into anonymity on their profile; otherwise full name.
+  display: string;
+  totalCents: number;
+  giftCount: number;
+  lastGiftAt: Date;
+  anonymous: boolean;
 };
 
 /**
@@ -141,6 +151,63 @@ export async function getStudentsSponsoredByUser(
       giftCount: Number(r.giftCount ?? 0),
       lastGiftAt: r.lastGiftAt,
     }));
+}
+
+/**
+ * Donors who have given to a specific student, grouped + summed by donor.
+ * Drives the "Your sponsors" section on the student dashboard. Donor names
+ * are masked when the donor's profile has anonymous=true (matches the
+ * privacy rule on the public /donors page).
+ */
+export async function getDonorsForStudent(studentSlug: string): Promise<DonorForStudentSummary[]> {
+  if (!isDbConfigured() || !studentSlug) return [];
+  const db = getDb();
+  const rows = await db
+    .select({
+      donorUserId: donations.donorUserId,
+      donorEmail: donations.donorEmail,
+      legalName: donorProfiles.legalName,
+      displayName: users.displayName,
+      publicInitials: donorProfiles.publicInitials,
+      anonymous: donorProfiles.anonymous,
+      totalCents: sum(donations.amountCents),
+      giftCount: sql<number>`count(${donations.id})::int`,
+      lastGiftAt: max(donations.occurredAt),
+    })
+    .from(donations)
+    .leftJoin(users, eq(users.id, donations.donorUserId))
+    .leftJoin(donorProfiles, eq(donorProfiles.userId, donations.donorUserId))
+    .where(and(eq(donations.studentSlug, studentSlug), eq(donations.status, "succeeded")))
+    .groupBy(
+      donations.donorUserId,
+      donations.donorEmail,
+      donorProfiles.legalName,
+      users.displayName,
+      donorProfiles.publicInitials,
+      donorProfiles.anonymous,
+    )
+    .orderBy(desc(sum(donations.amountCents)));
+
+  return rows
+    .filter((r): r is typeof r & { lastGiftAt: Date } => Boolean(r.lastGiftAt))
+    .map((r) => {
+      // If we have a real users row + profile, honor anonymity. If the
+      // donation came from a guest (no donorUserId), it's anonymous by default.
+      const isAnon = r.anonymous ?? !r.donorUserId;
+      let display: string;
+      if (isAnon) {
+        display = r.publicInitials ? `Anonymous · ${r.publicInitials}` : "Anonymous donor";
+      } else {
+        display = r.legalName ?? r.displayName ?? r.donorEmail ?? "Donor";
+      }
+      return {
+        display,
+        totalCents: Number(r.totalCents ?? 0),
+        giftCount: Number(r.giftCount ?? 0),
+        lastGiftAt: r.lastGiftAt,
+        anonymous: isAnon,
+      };
+    });
 }
 
 // Map a DB row into the shape the donor dashboard / mock already consume.

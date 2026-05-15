@@ -201,6 +201,20 @@ export default async function AdminDashboard() {
           </li>
           <li>
             <Link
+              href="/dashboard/admin/students"
+              className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
+            >
+              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">Students</span>
+              <span className="text-heading-5 text-ink group-hover:text-accent">
+                Link applicants
+              </span>
+              <span className="text-body-sm text-ink-2">
+                Review student applications and link approved accounts to their Keystatic record.
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
               href="/dashboard/admin/mentors"
               className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
             >

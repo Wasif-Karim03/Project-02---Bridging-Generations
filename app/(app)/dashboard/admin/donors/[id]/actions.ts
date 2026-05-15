@@ -47,7 +47,7 @@ export async function adminUpdateDonorProfileAction(
 // donor to mentor / admin without leaving the detail page.
 export async function adminSetDonorRoleAction(
   donorUserId: string,
-  role: "anonymous" | "donor" | "mentor" | "admin" | "it",
+  role: "anonymous" | "donor" | "mentor" | "admin" | "it" | "student",
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   await requireRole("admin");
   if (!donorUserId) return { ok: false, error: "Invalid donor id." };

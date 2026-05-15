@@ -9,10 +9,10 @@ export type RoleChangeResult = {
   message: string;
 };
 
-// Promote / demote a user. Admin-only. Roles: donor / mentor / admin / it.
+// Promote / demote a user. Admin-only.
 export async function setUserRoleAction(
   userId: string,
-  role: "donor" | "mentor" | "admin" | "it",
+  role: "donor" | "mentor" | "admin" | "it" | "student",
 ): Promise<RoleChangeResult> {
   await requireRole("admin");
   try {

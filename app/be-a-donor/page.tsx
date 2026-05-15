@@ -57,6 +57,15 @@ export default function BeADonorPage() {
       </div>
 
       <p className="mt-10 text-center text-meta uppercase tracking-[0.06em] text-ink-2">
+        Are you a student?{" "}
+        <Link
+          href="/student-signup"
+          className="text-accent underline underline-offset-[3px] hover:no-underline"
+        >
+          Apply for a scholarship →
+        </Link>
+      </p>
+      <p className="mt-3 text-center text-meta uppercase tracking-[0.06em] text-ink-2">
         Are you a mentor or board member?{" "}
         <Link
           href="/mentor-login"

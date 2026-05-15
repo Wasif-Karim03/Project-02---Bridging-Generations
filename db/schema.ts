@@ -26,7 +26,14 @@ import {
 
 // ---------- Enums ----------
 
-export const userRoleEnum = pgEnum("user_role", ["anonymous", "donor", "mentor", "admin", "it"]);
+export const userRoleEnum = pgEnum("user_role", [
+  "anonymous",
+  "donor",
+  "mentor",
+  "admin",
+  "it",
+  "student",
+]);
 
 export const applicationStatusEnum = pgEnum("application_status", [
   "submitted",
@@ -58,11 +65,17 @@ export const users = pgTable(
     role: userRoleEnum("role").notNull().default("anonymous"),
     email: varchar("email", { length: 255 }).notNull(),
     displayName: varchar("display_name", { length: 120 }),
+    // For accounts with role=student. Links the account to a Keystatic
+    // student record (content/students/<slug>/) so the dashboard can pull
+    // their public profile and the donations attributed to their slug.
+    // Admin sets this on approval; null until then ("application pending").
+    studentSlug: varchar("student_slug", { length: 80 }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     byEmail: index("users_email_idx").on(t.email),
+    byStudentSlug: index("users_student_slug_idx").on(t.studentSlug),
   }),
 );
 
@@ -157,6 +170,11 @@ export const mentorApplications = pgTable("mentor_applications", {
 export const studentRegistrations = pgTable("student_registrations", {
   id: uuid("id").defaultRandom().primaryKey(),
   submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
+  // When a registration comes from an authenticated student account (the
+  // /student-signup flow), link it back so the admin can promote the
+  // matching users row + assign a Keystatic slug on approval. Null for
+  // anonymous applications submitted via the public form.
+  applicantUserId: uuid("applicant_user_id").references(() => users.id, { onDelete: "set null" }),
   studentName: varchar("student_name", { length: 120 }).notNull(),
   dateOfBirth: varchar("date_of_birth", { length: 40 }),
   grade: varchar("grade", { length: 40 }).notNull(),
@@ -171,6 +189,8 @@ export const studentRegistrations = pgTable("student_registrations", {
   phone: varchar("phone", { length: 40 }),
   email: varchar("email", { length: 255 }),
   message: text("message"),
+  hobby: varchar("hobby", { length: 200 }),
+  lifeTarget: text("life_target"),
   status: applicationStatusEnum("status").notNull().default("submitted"),
 });
 

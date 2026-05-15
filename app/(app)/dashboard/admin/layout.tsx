@@ -59,6 +59,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/dashboard/admin#donors-title" className="text-ink-2 hover:text-accent">
           Donors
         </Link>
+        <Link href="/dashboard/admin/students" className="text-ink-2 hover:text-accent">
+          Students
+        </Link>
         <Link href="/dashboard/admin/mentors" className="text-ink-2 hover:text-accent">
           Mentors
         </Link>
