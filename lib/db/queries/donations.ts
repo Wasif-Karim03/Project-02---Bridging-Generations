@@ -3,13 +3,7 @@ import { and, desc, eq, gte, isNotNull, lt, max, sql, sum } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
 import type { Donation, NewDonation } from "@/db/schema";
 import { donations } from "@/db/schema";
-import {
-  type DonationRow,
-  donationsForCurrentMonth,
-  donationsForPreviousMonth,
-  MOCK_DONATIONS,
-  totalCents,
-} from "@/lib/content/donationsMock";
+import type { DonationRow } from "@/lib/content/donationsMock";
 
 export type SponsoredStudentSummary = {
   studentSlug: string;
@@ -20,14 +14,13 @@ export type SponsoredStudentSummary = {
 
 /**
  * Per-user donation history, newest first. In preview mode (no DB) returns
- * the mock dataset so the donor dashboard is fully usable; with DB returns
- * the real rows scoped to this user.
+ * an empty list so a freshly-simulated donor signup looks like a real fresh
+ * account — no synthetic "you've already given before" history. The mock
+ * dataset is still exported (MOCK_DONATIONS) for design-system demos.
  */
 export async function getDonationsForUser(userId: string): Promise<DonationRow[]> {
   if (!isDbConfigured()) {
-    // The mock data isn't user-scoped — show it to every preview user as a
-    // demo; donors only ever see this when the org hasn't provisioned the DB.
-    return MOCK_DONATIONS;
+    return [];
   }
   const db = getDb();
   const rows = await db
@@ -39,9 +32,7 @@ export async function getDonationsForUser(userId: string): Promise<DonationRow[]
 }
 
 export async function getDonationById(id: string): Promise<DonationRow | null> {
-  if (!isDbConfigured()) {
-    return MOCK_DONATIONS.find((d) => d.id === id) ?? null;
-  }
+  if (!isDbConfigured()) return null;
   const db = getDb();
   const rows = await db.select().from(donations).where(eq(donations.id, id)).limit(1);
   const row = rows[0];
@@ -65,12 +56,7 @@ export async function insertDonation(payload: NewDonation): Promise<Donation | n
  * "this month" stat on the donor dashboard + admin dashboard.
  */
 export async function thisMonthTotalCents(userId?: string): Promise<number> {
-  if (!isDbConfigured()) {
-    const list = userId
-      ? MOCK_DONATIONS // mock doesn't filter by user; preview demo
-      : MOCK_DONATIONS;
-    return totalCents(donationsForCurrentMonth(list));
-  }
+  if (!isDbConfigured()) return 0;
   const db = getDb();
   const now = new Date();
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
@@ -91,9 +77,7 @@ export async function thisMonthTotalCents(userId?: string): Promise<number> {
 }
 
 export async function lastMonthTotalCents(userId?: string): Promise<number> {
-  if (!isDbConfigured()) {
-    return totalCents(donationsForPreviousMonth(MOCK_DONATIONS));
-  }
+  if (!isDbConfigured()) return 0;
   const db = getDb();
   const now = new Date();
   const prevMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
@@ -122,25 +106,10 @@ export async function getStudentsSponsoredByUser(
   userId: string,
 ): Promise<SponsoredStudentSummary[]> {
   if (!isDbConfigured()) {
-    // Mock-mode roll-up — group MOCK_DONATIONS the same way the real query would.
-    const buckets = new Map<string, SponsoredStudentSummary>();
-    for (const d of MOCK_DONATIONS) {
-      if (!d.studentSlug) continue;
-      const slot = buckets.get(d.studentSlug);
-      if (slot) {
-        slot.totalCents += d.amountCents;
-        slot.giftCount += 1;
-        if (d.occurredAt > slot.lastGiftAt) slot.lastGiftAt = d.occurredAt;
-      } else {
-        buckets.set(d.studentSlug, {
-          studentSlug: d.studentSlug,
-          totalCents: d.amountCents,
-          giftCount: 1,
-          lastGiftAt: d.occurredAt,
-        });
-      }
-    }
-    return [...buckets.values()].sort((a, b) => b.totalCents - a.totalCents);
+    // Preview mode: fresh accounts don't have sponsored students. Returning
+    // [] makes the dashboard show its empty "Browse students" prompt instead
+    // of demo data that looks like the user already gave to someone.
+    return [];
   }
 
   const db = getDb();

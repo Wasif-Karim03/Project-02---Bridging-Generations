@@ -123,13 +123,15 @@ export default async function DonorDashboard({
 
       {usingMockData ? (
         <p className="border border-accent-3 bg-accent-3/10 px-4 py-3 text-meta uppercase tracking-[0.06em] text-ink-2">
-          Preview data — real donation history appears once the database is provisioned (Phase 5).
+          Preview mode — no database yet, so your dashboard starts empty. Donations + sponsored
+          students appear once the org provisions Neon and you make your first gift.
         </p>
       ) : null}
 
-      {/* First-time donor onboarding — only when they have zero gifts in the
-          real DB. Mock-mode users see demo data, so skip the prompt for them. */}
-      {!usingMockData && donations.length === 0 ? (
+      {/* First-time donor onboarding — fires whenever the donor has no gifts
+          on record, whether that's because they're brand-new (DB-mode) or
+          because we're in preview mode with empty queries. */}
+      {donations.length === 0 ? (
         <section
           aria-labelledby="get-started-title"
           className="flex flex-col gap-4 border-2 border-accent bg-accent/5 px-5 py-6"
@@ -138,28 +140,22 @@ export default async function DonorDashboard({
             Welcome — here's what comes next.
           </h2>
           <p className="max-w-[60ch] text-body text-ink-2">
-            Your donor account is live. To start sponsoring a student or supporting a project, pick
-            one of the paths below. Every gift shows up here within a minute, and you'll get a PDF
-            tax receipt automatically.
+            Your donor account is live. Scroll down to "Browse students" to pick someone whose story
+            moves you. Every gift shows up here within a minute, and you'll get a PDF tax receipt
+            automatically.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/students"
+              href="#available-students-title"
               className="inline-flex min-h-[44px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
             >
-              Sponsor a student →
+              Browse students ↓
             </Link>
             <Link
               href="/projects"
               className="inline-flex min-h-[44px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
             >
               Browse projects
-            </Link>
-            <Link
-              href="/donate"
-              className="inline-flex min-h-[44px] items-center border border-hairline px-5 text-nav-link uppercase text-ink hover:border-accent hover:text-accent"
-            >
-              General donation
             </Link>
           </div>
           <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
