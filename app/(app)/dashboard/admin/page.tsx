@@ -152,7 +152,14 @@ export default async function AdminDashboard() {
               <tbody>
                 {donorList.map((d) => (
                   <tr key={d.id} className="border-b border-hairline last:border-b-0">
-                    <td className="py-3 pr-4 text-ink">{d.legalName}</td>
+                    <td className="py-3 pr-4 text-ink">
+                      <Link
+                        href={`/dashboard/admin/donors/${d.id}`}
+                        className="text-accent underline underline-offset-[3px] hover:no-underline"
+                      >
+                        {d.legalName}
+                      </Link>
+                    </td>
                     <td className="py-3 pr-4 text-ink-2">{d.publicInitials || "—"}</td>
                     <td className="py-3 pr-4 text-right tabular-nums text-ink">
                       {formatDonationAmount(d.lifetimeCents)}
@@ -189,6 +196,20 @@ export default async function AdminDashboard() {
               <span className="text-heading-5 text-ink group-hover:text-accent">Manage roles</span>
               <span className="text-body-sm text-ink-2">
                 Promote approved mentor applicants to the mentor role; grant admin / IT access.
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/dashboard/admin/mentors"
+              className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
+            >
+              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">Mentors</span>
+              <span className="text-heading-5 text-ink group-hover:text-accent">
+                Assign students
+              </span>
+              <span className="text-body-sm text-ink-2">
+                See every mentor, pair them with students, and review their weekly reports.
               </span>
             </Link>
           </li>

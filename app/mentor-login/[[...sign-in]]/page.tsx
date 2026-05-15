@@ -58,9 +58,9 @@ export default async function MentorSignInPage() {
         path="/mentor-login"
         routing="path"
         forceRedirectUrl="/dashboard/mentor"
-        // Send curious "sign up" clickers to the mentor application, not to
-        // a generic Clerk sign-up — we don't want to auto-create mentor accounts.
-        signUpUrl="/apply/mentor"
+        // Send curious "sign up" clickers to the dedicated mentor-signup
+        // flow rather than the generic donor sign-up.
+        signUpUrl="/mentor-signup"
         appearance={{
           variables: {
             colorPrimary: "#0f4c5c",
@@ -71,10 +71,10 @@ export default async function MentorSignInPage() {
       <p className="mt-8 max-w-[44ch] text-center text-meta uppercase tracking-[0.06em] text-ink-2">
         Not a mentor yet?{" "}
         <Link
-          href="/apply/mentor"
+          href="/mentor-signup"
           className="text-accent underline underline-offset-[3px] hover:no-underline"
         >
-          Apply to mentor →
+          Create a mentor account →
         </Link>
       </p>
 

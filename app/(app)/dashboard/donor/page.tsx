@@ -26,11 +26,17 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   day: "numeric",
 });
 
-export default async function DonorDashboard() {
+export default async function DonorDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
   // Enforce Clerk sign-in. For DB-backed mode we additionally resolve the
   // local users row so queries can scope by the canonical UUID (not the Clerk
   // ID, which is a different namespace).
   const clerkUserId = await requireUserId();
+  const { welcome } = await searchParams;
+  const showMentorPending = welcome === "mentor";
   const usingMockData = !isDbConfigured();
   const dbUser = usingMockData ? null : await getCurrentDbUser();
   const queryUserId = dbUser?.id ?? clerkUserId;
@@ -80,6 +86,25 @@ export default async function DonorDashboard() {
           </p>
         )}
       </header>
+
+      {showMentorPending ? (
+        <div className="border-2 border-accent bg-accent/5 px-5 py-4">
+          <p className="text-eyebrow uppercase tracking-[0.1em] text-accent">
+            Mentor application · Under review
+          </p>
+          <p className="mt-2 text-body text-ink">
+            Thanks for signing up to mentor. Our team reviews new mentor accounts within a few
+            business days. You'll get an email once you're approved — then visit{" "}
+            <Link
+              href="/mentor-login"
+              className="text-accent underline underline-offset-[3px] hover:no-underline"
+            >
+              /mentor-login
+            </Link>{" "}
+            to access your mentor dashboard.
+          </p>
+        </div>
+      ) : null}
 
       {usingMockData ? (
         <p className="border border-accent-3 bg-accent-3/10 px-4 py-3 text-meta uppercase tracking-[0.06em] text-ink-2">

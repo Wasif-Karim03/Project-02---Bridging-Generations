@@ -94,3 +94,16 @@ export async function listAllUsers(limit = 200): Promise<User[]> {
   const db = getDb();
   return db.select().from(users).orderBy(desc(users.createdAt)).limit(limit);
 }
+
+// List all users currently holding the mentor role. Empty list in preview
+// mode (no DB).
+export async function listAllMentors(limit = 200): Promise<User[]> {
+  if (!isDbConfigured()) return [];
+  const db = getDb();
+  return db
+    .select()
+    .from(users)
+    .where(eq(users.role, "mentor"))
+    .orderBy(desc(users.createdAt))
+    .limit(limit);
+}

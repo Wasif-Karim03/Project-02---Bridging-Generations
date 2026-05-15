@@ -41,12 +41,19 @@ export async function getUserIdOptional(): Promise<string | null> {
 }
 
 /**
- * Hard-require sign-in. Redirects to /sign-in when no one is signed in (or
- * Clerk isn't configured, which renders the "auth not yet configured" page).
+ * Hard-require sign-in. Redirects to /sign-in when no one is signed in.
+ *
+ * In local dev (NODE_ENV=development) with Clerk NOT configured, returns a
+ * synthetic user id so dashboard routes are demoable without auth. This is
+ * the same "preview mode" requireRole() falls back to. Production deploys
+ * always have Clerk configured (per LAUNCH-CHECKLIST.md Phase C), so this
+ * branch never fires in production.
  */
 export async function requireUserId(): Promise<string> {
   if (!isClerkConfigured()) {
-    // Send to sign-in, which itself shows the "not configured" panel.
+    if (process.env.NODE_ENV === "development") {
+      return "preview-dev-user";
+    }
     redirect("/sign-in");
   }
   const { auth } = await import("@clerk/nextjs/server");
