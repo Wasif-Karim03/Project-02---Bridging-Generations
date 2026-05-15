@@ -91,6 +91,37 @@ export async function getAssignmentsForMentor(mentorUserId: string): Promise<str
 }
 
 /**
+ * Most recent mentor report per student, keyed by studentSlug. Used by the
+ * donor dashboard to show donors when their sponsored student was last
+ * checked in on by a mentor. Returns an empty object in preview mode.
+ */
+export async function getLatestReportPerStudent(
+  studentSlugs: string[],
+): Promise<Record<string, { weekOf: Date; attendance: string | null } | undefined>> {
+  if (!isDbConfigured() || studentSlugs.length === 0) return {};
+  const db = getDb();
+  // Pull every report for these students, ordered desc by weekOf, then keep
+  // only the first one per slug. For a small org this is fine; if reports
+  // grow large we can switch to a DISTINCT ON query.
+  const rows = await db
+    .select({
+      studentSlug: weeklyReports.studentSlug,
+      weekOf: weeklyReports.weekOf,
+      attendance: weeklyReports.attendance,
+    })
+    .from(weeklyReports)
+    .orderBy(desc(weeklyReports.weekOf));
+  const map: Record<string, { weekOf: Date; attendance: string | null }> = {};
+  for (const r of rows) {
+    if (!studentSlugs.includes(r.studentSlug)) continue;
+    if (!map[r.studentSlug]) {
+      map[r.studentSlug] = { weekOf: r.weekOf, attendance: r.attendance };
+    }
+  }
+  return map;
+}
+
+/**
  * Get-or-create the mentors row for a user. Called when an admin first
  * touches a mentor (assign students, edit bio). New mentors don't get a
  * mentors row at role-promotion time; this lazy upsert avoids needing an

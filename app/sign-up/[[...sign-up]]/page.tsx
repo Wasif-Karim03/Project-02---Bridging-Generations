@@ -45,7 +45,7 @@ export default async function SignUpPage() {
   const { SignUp } = await import("@clerk/nextjs");
   return (
     <main className="flex min-h-[80vh] items-center justify-center bg-ground px-4 py-16">
-      <SignUp signInUrl="/sign-in" forceRedirectUrl="/dashboard" />
+      <SignUp signInUrl="/sign-in" forceRedirectUrl="/sign-in?welcome=1" />
     </main>
   );
 }

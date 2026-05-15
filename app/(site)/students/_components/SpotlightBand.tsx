@@ -36,10 +36,10 @@ export function SpotlightBand({ eyebrow, headline, body, students }: SpotlightBa
             <li key={student.id} className="flex flex-col gap-2">
               <StudentCard student={student} />
               <Link
-                href={`/donate?student=${encodeURIComponent(student.id)}`}
+                href="/be-a-donor"
                 className="inline-flex min-h-[40px] items-center justify-center bg-accent-2-text px-3 text-meta uppercase tracking-[0.08em] text-white transition-colors hover:bg-accent-2-hover"
               >
-                Donate
+                Be a Donor
               </Link>
             </li>
           ))}

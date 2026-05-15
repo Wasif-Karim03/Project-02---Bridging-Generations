@@ -39,10 +39,10 @@ export function HomeSpotlightScroller({ students }: HomeSpotlightScrollerProps) 
             See all students
           </Link>
           <Link
-            href="/students"
+            href="/be-a-donor"
             className="inline-flex min-h-[44px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
           >
-            Donate Now
+            Be a Donor
           </Link>
         </div>
       </div>

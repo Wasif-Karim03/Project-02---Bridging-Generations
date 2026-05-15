@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isDbConfigured } from "@/db/client";
@@ -9,8 +10,10 @@ import {
   formatDonationAmount,
   totalCents,
 } from "@/lib/content/donationsMock";
+import { getAllSchools } from "@/lib/content/schools";
 import { getAllStudents } from "@/lib/content/students";
 import { getDonationsForUser, getStudentsSponsoredByUser } from "@/lib/db/queries/donations";
+import { getLatestReportPerStudent } from "@/lib/db/queries/weeklyReports";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
 
 export const metadata: Metadata = {
@@ -46,12 +49,24 @@ export default async function DonorDashboard({
   const donorCode = dbUser ? donorCodeForUuid(dbUser.id) : null;
   const donorName = dbUser?.displayName ?? null;
 
-  const [donations, sponsoredStudents, allStudents] = await Promise.all([
+  const [donations, sponsoredStudents, allStudents, allSchools] = await Promise.all([
     getDonationsForUser(queryUserId),
     getStudentsSponsoredByUser(queryUserId),
     getAllStudents(),
+    getAllSchools(),
   ]);
   const studentBySlug = new Map(allStudents.map((s) => [s.id, s]));
+  const schoolById = new Map(allSchools.map((s) => [s.id, s]));
+  // Fetch latest mentor reports for sponsored students only — cheap.
+  const sponsoredSlugs = sponsoredStudents.map((s) => s.studentSlug);
+  const latestReports = await getLatestReportPerStudent(sponsoredSlugs);
+
+  // "Available students" = waiting-for-sponsor students this donor is NOT
+  // already supporting. Surfaces in the "Browse students" section.
+  const sponsoredSet = new Set(sponsoredSlugs);
+  const availableStudents = allStudents.filter(
+    (s) => s.sponsorshipStatus === "waiting" && !sponsoredSet.has(s.id),
+  );
 
   const thisMonth = donationsForCurrentMonth(donations);
   const lastMonth = donationsForPreviousMonth(donations);
@@ -189,45 +204,178 @@ export default async function DonorDashboard({
         </header>
         {sponsoredStudents.length === 0 ? (
           <p className="text-body text-ink-2">
-            You haven't sponsored a specific student yet.{" "}
-            <Link
-              href="/students"
-              className="text-accent underline underline-offset-[3px] hover:no-underline"
-            >
-              Browse students
-            </Link>{" "}
-            and pick someone whose story moves you.
+            You haven't sponsored a specific student yet. Pick one from the "Browse students"
+            section below.
           </p>
         ) : (
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {sponsoredStudents.map((s) => {
               const student = studentBySlug.get(s.studentSlug);
               const displayName = student?.displayName ?? s.studentSlug;
+              const school = student?.schoolId ? schoolById.get(student.schoolId) : undefined;
+              const portraitOk =
+                student?.consent?.portraitReleaseStatus === "granted" && student?.portrait?.src;
+              const lastReport = latestReports[s.studentSlug];
               return (
                 <li
                   key={s.studentSlug}
-                  className="flex flex-col gap-2 border border-hairline bg-ground-2 p-4"
+                  className="flex flex-col gap-3 border border-hairline bg-ground-2 p-4"
                 >
-                  <Link
-                    href={`/students/${s.studentSlug}`}
-                    className="text-heading-5 text-ink hover:text-accent"
-                  >
-                    {displayName}
-                  </Link>
-                  <p className="text-display-3 tabular-nums text-ink">
-                    {formatDonationAmount(s.totalCents)}
-                  </p>
-                  <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
-                    {s.giftCount} {s.giftCount === 1 ? "gift" : "gifts"} · last{" "}
-                    <time dateTime={s.lastGiftAt.toISOString()}>
-                      {dateFormatter.format(s.lastGiftAt)}
-                    </time>
-                  </p>
+                  {portraitOk ? (
+                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-ground">
+                      <Image
+                        src={student.portrait?.src ?? ""}
+                        alt={student.portrait?.alt ?? displayName}
+                        fill
+                        sizes="(min-width: 1024px) 280px, (min-width: 640px) 45vw, 90vw"
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex aspect-[4/5] w-full items-center justify-center bg-ground text-meta uppercase tracking-[0.08em] text-ink-2">
+                      Photo private
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <Link
+                      href={`/students/${s.studentSlug}`}
+                      className="text-heading-5 text-ink hover:text-accent"
+                    >
+                      {displayName}
+                    </Link>
+                    <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
+                      Grade {student?.grade ?? "—"} · {school?.name ?? "School TBC"}
+                    </p>
+                  </div>
+                  <dl className="flex flex-col gap-1 text-body-sm">
+                    <div className="flex justify-between">
+                      <dt className="text-ink-2">Your contribution</dt>
+                      <dd className="tabular-nums text-ink">
+                        {formatDonationAmount(s.totalCents)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-ink-2">Gifts</dt>
+                      <dd className="text-ink">
+                        {s.giftCount} · last {dateFormatter.format(s.lastGiftAt)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-ink-2">GPA</dt>
+                      <dd className="text-ink">{student?.gpa ?? "—"}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt className="text-ink-2">Status</dt>
+                      <dd className="text-ink">
+                        {student?.sponsorshipStatus === "sponsored" ? "Sponsored" : "Waiting"}
+                      </dd>
+                    </div>
+                    {lastReport ? (
+                      <div className="flex justify-between">
+                        <dt className="text-ink-2">Last mentor update</dt>
+                        <dd className="text-ink">
+                          <time dateTime={lastReport.weekOf.toISOString()}>
+                            {dateFormatter.format(lastReport.weekOf)}
+                          </time>
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
                 </li>
               );
             })}
           </ul>
         )}
+      </section>
+
+      <section aria-labelledby="available-students-title" className="flex flex-col gap-4">
+        <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
+          <h2 id="available-students-title" className="text-heading-3 text-ink">
+            Browse students
+          </h2>
+          <span className="text-meta uppercase tracking-[0.06em] text-ink-2">
+            {availableStudents.length} waiting for a sponsor
+          </span>
+        </header>
+        {availableStudents.length === 0 ? (
+          <p className="text-body text-ink-2">
+            Every student is currently sponsored. Check back soon — new students join each term.
+          </p>
+        ) : (
+          <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {availableStudents.slice(0, 12).map((student) => {
+              const school = student.schoolId ? schoolById.get(student.schoolId) : undefined;
+              const portraitOk =
+                student.consent?.portraitReleaseStatus === "granted" && student.portrait?.src;
+              return (
+                <li
+                  key={student.id}
+                  className="flex flex-col gap-3 border border-hairline bg-ground-2 p-4"
+                >
+                  {portraitOk ? (
+                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-ground">
+                      <Image
+                        src={student.portrait?.src ?? ""}
+                        alt={student.portrait?.alt ?? student.displayName}
+                        fill
+                        sizes="(min-width: 1024px) 280px, (min-width: 640px) 45vw, 90vw"
+                        className="object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex aspect-[4/5] w-full items-center justify-center bg-ground text-meta uppercase tracking-[0.08em] text-ink-2">
+                      Photo private
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <Link
+                      href={`/students/${student.id}`}
+                      className="text-heading-5 text-ink hover:text-accent"
+                    >
+                      {student.displayName}
+                    </Link>
+                    <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
+                      Grade {student.grade ?? "—"} · {school?.name ?? "School TBC"}
+                    </p>
+                  </div>
+                  {student.hobby ? (
+                    <p className="text-body-sm text-ink-2">
+                      <span className="text-ink-2">Hobby:</span> {student.hobby}
+                    </p>
+                  ) : null}
+                  {student.lifeTarget ? (
+                    <p className="text-body-sm text-ink-2 italic">
+                      "{student.lifeTarget.slice(0, 120)}
+                      {student.lifeTarget.length > 120 ? "…" : ""}"
+                    </p>
+                  ) : null}
+                  <div className="mt-auto flex flex-col gap-2 pt-2">
+                    <Link
+                      href={`/donate?student=${encodeURIComponent(student.id)}`}
+                      className="inline-flex min-h-[40px] items-center justify-center bg-accent-2-text px-4 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
+                    >
+                      Sponsor {student.displayName?.split(" ")[0] ?? "this student"}
+                    </Link>
+                    <Link
+                      href={`/students/${student.id}`}
+                      className="text-meta uppercase tracking-[0.08em] text-accent hover:text-accent-2-text"
+                    >
+                      Full profile →
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        {availableStudents.length > 12 ? (
+          <Link
+            href="/students"
+            className="self-start text-nav-link uppercase text-accent hover:text-accent-2-text"
+          >
+            See all {availableStudents.length} students waiting →
+          </Link>
+        ) : null}
       </section>
 
       <section aria-labelledby="donations-table-title" className="flex flex-col gap-4">

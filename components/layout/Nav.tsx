@@ -64,7 +64,8 @@ export function Nav({ contactEmail, phoneNumber, whatsappNumber }: NavProps = {}
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const isOnDonate = pathname?.startsWith("/donate") ?? false;
+  const isOnDonate =
+    (pathname?.startsWith("/donate") ?? false) || (pathname?.startsWith("/be-a-donor") ?? false);
 
   // Manage focus across drawer transitions. SheetDrawer owns the focus-trap
   // while open but doesn't know which element opened or should land focus.

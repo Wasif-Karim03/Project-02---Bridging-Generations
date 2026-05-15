@@ -25,21 +25,21 @@ const SLIDES: Slide[] = [
     headline: "Make a Better World",
     image: "/home-hero.jpg",
     imageAlt: "Students in a Bangladesh classroom hold up their drawings beside their teacher",
-    cta: { href: "/students", label: "Donate Now" },
+    cta: { href: "/be-a-donor", label: "Be a Donor" },
   },
   {
     eyebrow: "Togetherness Empowers Us",
     headline: "Make the Children Smile",
     image: "/activity-visit.jpg",
     imageAlt: "A field visit at a Hill Tracts school — staff and students gathered outside",
-    cta: { href: "/students", label: "Donate Now" },
+    cta: { href: "/be-a-donor", label: "Be a Donor" },
   },
   {
     eyebrow: "The Child Education",
     headline: "Save the Children",
     image: "/home-mission.jpg",
     imageAlt: "A schoolboy in uniform reads a book in a library corner",
-    cta: { href: "/students", label: "Donate Now" },
+    cta: { href: "/be-a-donor", label: "Be a Donor" },
   },
 ];
 

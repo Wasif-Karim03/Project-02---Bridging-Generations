@@ -48,8 +48,8 @@ export const primaryNav: PrimaryNavItem[] = [
 ];
 
 export const donateCta = {
-  href: "/donate",
-  label: "Donate",
+  href: "/be-a-donor",
+  label: "Be a Donor",
   labelKey: "donate",
 };
 

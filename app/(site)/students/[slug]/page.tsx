@@ -115,10 +115,10 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
             </dl>
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
-                href={`/donate?student=${encodeURIComponent(student.id)}`}
+                href="/be-a-donor"
                 className="inline-flex min-h-[48px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
               >
-                Donate to {student.displayName}
+                Be a Donor
               </Link>
               <Link
                 href="/students"

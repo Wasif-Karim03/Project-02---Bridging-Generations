@@ -13,7 +13,13 @@ export const metadata: Metadata = {
 // and that this is the only one with self-service sign-up enabled —
 // anyone can register as a donor and donate.
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
+  const { welcome } = await searchParams;
+  const justSignedUp = welcome === "1";
   if (!isClerkConfigured()) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-ground px-4 py-16">
@@ -76,11 +82,15 @@ export default async function SignInPage() {
   const { SignIn } = await import("@clerk/nextjs");
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-ground px-4 py-16">
-      <div className="mb-8 flex flex-col items-center gap-2 text-center">
+      <div className="mb-8 flex max-w-[520px] flex-col items-center gap-2 text-center">
         <p className="text-eyebrow uppercase tracking-[0.12em] text-accent">Donor portal</p>
-        <h1 className="text-balance text-heading-2 text-ink">Welcome back.</h1>
+        <h1 className="text-balance text-heading-2 text-ink">
+          {justSignedUp ? "Account created. Sign in to continue." : "Welcome back."}
+        </h1>
         <p className="max-w-[44ch] text-body text-ink-2">
-          Sign in to see your donation history, manage receipts, and view the students you support.
+          {justSignedUp
+            ? "Your donor account is ready. Sign in with the credentials you just set to view your dashboard."
+            : "Sign in to see your donation history, manage receipts, and view the students you support."}
         </p>
       </div>
 

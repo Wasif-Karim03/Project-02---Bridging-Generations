@@ -102,7 +102,10 @@ type GridCardProps = CardProps & { as: "article" | "li" };
 
 function GridCard({ project, flags, as: Tag, ariaLabel }: GridCardProps) {
   const remaining = Math.max(project.fundingGoal - project.fundingRaised, 0);
-  const donateHref = `/donate?project=${encodeURIComponent(project.id)}`;
+  // The public-site Donate CTA now routes everyone through /be-a-donor so we
+  // can collect their account before they give. The project context lives in
+  // the donor's dashboard "Browse projects" surface, not in the public CTA.
+  const donateHref = "/be-a-donor";
   return (
     <Tag
       aria-label={ariaLabel}
@@ -147,7 +150,7 @@ function GridCard({ project, flags, as: Tag, ariaLabel }: GridCardProps) {
               href={donateHref}
               className="inline-flex min-h-[44px] items-center justify-center bg-accent-2-text px-4 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
             >
-              Donate Now
+              Be a Donor
             </Link>
           )}
         </div>
