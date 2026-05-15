@@ -16,27 +16,40 @@ export const metadata: Metadata = {
 
 export default async function AdminSignInPage() {
   if (!isClerkConfigured()) {
+    const isDev = process.env.NODE_ENV === "development";
     return (
       <main className="flex min-h-screen items-center justify-center bg-ink px-4 py-16">
         <div className="mx-auto max-w-[520px] border border-hairline bg-ground p-8 shadow-[var(--shadow-card)]">
-          <Eyebrow>Setup pending</Eyebrow>
+          <Eyebrow>{isDev ? "Preview mode · Staff" : "Setup pending"}</Eyebrow>
           <h1 className="mt-3 text-balance text-heading-3 text-ink">
-            Admin sign-in is being configured.
+            {isDev ? "Walk through the admin flow." : "Admin sign-in is being configured."}
           </h1>
           <p className="mt-3 text-body text-ink-2">
-            Once Clerk auth is wired, this page becomes the dedicated staff sign-in. Until then,
-            visit{" "}
-            <Link
-              href="/dashboard/admin"
-              className="text-accent underline underline-offset-[3px] hover:no-underline"
-            >
-              /dashboard/admin
-            </Link>{" "}
-            directly — preview mode bypasses the role check.
+            {isDev
+              ? "Clerk isn't wired locally — click below to enter the admin dashboard as a preview admin."
+              : "Once Clerk auth is wired, this page becomes the dedicated staff sign-in."}
           </p>
+
+          {isDev ? (
+            <div className="mt-6 flex flex-col gap-3">
+              <Link
+                href="/dashboard/admin"
+                className="inline-flex min-h-[48px] items-center justify-center bg-ink px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-ink/90"
+              >
+                Continue to admin dashboard →
+              </Link>
+              <Link
+                href="/"
+                className="inline-flex min-h-[44px] items-center justify-center border border-hairline px-5 text-nav-link uppercase text-ink hover:border-accent hover:text-accent"
+              >
+                ← Home
+              </Link>
+            </div>
+          ) : null}
+
           <p className="mt-6 border-t border-hairline pt-4 text-meta uppercase tracking-[0.06em] text-ink-2">
-            Owner: set CLERK_SECRET_KEY + NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in Netlify env to
-            enable.
+            Owner: set CLERK_SECRET_KEY + NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in Netlify env to enable
+            real admin sign-in.
           </p>
         </div>
       </main>

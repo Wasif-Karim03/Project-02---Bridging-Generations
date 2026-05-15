@@ -16,27 +16,51 @@ export const metadata: Metadata = {
 
 export default async function MentorSignInPage() {
   if (!isClerkConfigured()) {
+    const isDev = process.env.NODE_ENV === "development";
     return (
       <main className="flex min-h-screen items-center justify-center bg-ground px-4 py-16">
         <div className="mx-auto max-w-[520px] border-2 border-accent bg-ground-2 p-8 shadow-[var(--shadow-card)]">
-          <Eyebrow>Setup pending</Eyebrow>
+          <Eyebrow>{isDev ? "Preview mode · Mentor" : "Setup pending"}</Eyebrow>
           <h1 className="mt-3 text-balance text-heading-3 text-ink">
-            Mentor sign-in is being configured.
+            {isDev ? "Walk through the mentor flow." : "Mentor sign-in is being configured."}
           </h1>
           <p className="mt-3 text-body text-ink-2">
-            Once Clerk auth is wired, mentors will sign in here. In the meantime, if you're
-            interested in mentoring a student,{" "}
-            <Link
-              href="/apply/mentor"
-              className="text-accent underline underline-offset-[3px] hover:no-underline"
-            >
-              apply to mentor
-            </Link>
-            .
+            {isDev
+              ? "Clerk isn't wired locally — click below to land on the mentor dashboard as a preview user."
+              : "Once Clerk auth is wired, mentors will sign in here."}
           </p>
+
+          {isDev ? (
+            <div className="mt-6 flex flex-col gap-3">
+              <Link
+                href="/dashboard/mentor"
+                className="inline-flex min-h-[48px] items-center justify-center bg-accent px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent/90"
+              >
+                Continue to mentor dashboard →
+              </Link>
+              <Link
+                href="/be-a-donor"
+                className="inline-flex min-h-[44px] items-center justify-center border border-hairline px-5 text-nav-link uppercase text-ink hover:border-accent hover:text-accent"
+              >
+                ← Donor flow
+              </Link>
+            </div>
+          ) : (
+            <p className="mt-4 text-body-sm text-ink-2">
+              Interested in mentoring?{" "}
+              <Link
+                href="/mentor-signup"
+                className="text-accent underline underline-offset-[3px] hover:no-underline"
+              >
+                Create a mentor account
+              </Link>
+              .
+            </p>
+          )}
+
           <p className="mt-6 border-t border-hairline pt-4 text-meta uppercase tracking-[0.06em] text-ink-2">
             Owner: set CLERK_SECRET_KEY + NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in Netlify env (or
-            .env.local for local dev) to enable.
+            .env.local for local dev) to enable real mentor sign-in.
           </p>
         </div>
       </main>
