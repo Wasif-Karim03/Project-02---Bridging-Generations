@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
-import { setUserStudentSlug } from "@/lib/db/queries/users";
+import { getUserById, setUserStudentSlug } from "@/lib/db/queries/users";
+import { sendEmail } from "@/lib/forms/server";
 
 export async function adminLinkStudentSlugAction(
   userId: string,
@@ -13,9 +14,40 @@ export async function adminLinkStudentSlugAction(
     .trim()
     .slice(0, 80);
   try {
+    // Capture the previous state so we only fire the approval email when
+    // this is a fresh link (transition from unlinked → linked), not on
+    // every save of an already-linked student.
+    const prev = await getUserById(userId);
+    const wasLinked = Boolean(prev?.studentSlug);
     await setUserStudentSlug(userId, slug || null);
     revalidatePath("/dashboard/admin/students");
     revalidatePath(`/dashboard/student`);
+
+    if (slug && !wasLinked && prev?.email) {
+      // Send the approval email only on first-time link. Failures don't
+      // roll back the link itself.
+      await sendEmail({
+        to: prev.email,
+        subject: "You're approved — welcome to Bridging Generations",
+        text: [
+          `Hi ${prev.displayName ?? "there"},`,
+          "",
+          "Great news — the board has approved your scholarship application. Your account is",
+          "now linked to your public student profile, so when you sign in you'll see your",
+          "sponsors and the donations they've made toward your education.",
+          "",
+          "Sign in to your dashboard:",
+          "https://brigen.org/student-login",
+          "",
+          "Your public profile (visible to potential sponsors):",
+          `https://brigen.org/students/${slug}`,
+          "",
+          "Welcome — we're glad to have you with us.",
+          "",
+          "— Bridging Generations",
+        ].join("\n"),
+      });
+    }
     return { ok: true };
   } catch (err) {
     console.error("[admin/students/link] failed", err);

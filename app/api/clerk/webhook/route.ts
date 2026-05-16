@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { deleteUserByClerkId, upsertUserFromClerk } from "@/lib/db/queries/users";
+import { donorCodeForUuid } from "@/lib/donor/donorCode";
+import { sendEmail } from "@/lib/forms/server";
 
 // Clerk → users table sync. Configure the endpoint URL in the Clerk dashboard
 // (Webhooks → Add endpoint) pointing at:
@@ -68,13 +70,40 @@ export async function POST(req: Request) {
         break;
       }
       try {
-        await upsertUserFromClerk({
+        const synced = await upsertUserFromClerk({
           clerkUserId: user.id,
           email,
           displayName: displayName(user),
         });
+        // Send a one-time welcome email on user.created. Skip on user.updated
+        // (Clerk fires that for profile edits and we don't want to re-spam).
+        if (event.type === "user.created" && synced) {
+          const code = donorCodeForUuid(synced.id);
+          const name = synced.displayName ?? "there";
+          await sendEmail({
+            to: email,
+            subject: "Welcome to Bridging Generations",
+            text: [
+              `Hi ${name},`,
+              "",
+              "Your Bridging Generations account is live. Your unique donor ID is:",
+              "",
+              `    ${code}`,
+              "",
+              "Save it somewhere safe — you can reference it on receipts and when reaching out to",
+              "our team. Sign in any time to view your dashboard, pick a student to sponsor, and",
+              "track your giving history:",
+              "",
+              "https://brigen.org/sign-in",
+              "",
+              "Reply to this email if you have any questions.",
+              "",
+              "— Bridging Generations",
+            ].join("\n"),
+          });
+        }
       } catch (err) {
-        console.error("[clerk/webhook] upsert failed", err);
+        console.error("[clerk/webhook] upsert / welcome email failed", err);
       }
       break;
     }

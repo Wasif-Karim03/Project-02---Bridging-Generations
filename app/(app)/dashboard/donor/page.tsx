@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isDbConfigured } from "@/db/client";
-import { getCurrentDbUser, isClerkConfigured, requireUserId } from "@/lib/auth";
+import { dashboardForRole, getCurrentDbUser, isClerkConfigured, requireUserId } from "@/lib/auth";
 import {
   donationsForCurrentMonth,
   donationsForPreviousMonth,
@@ -42,6 +43,12 @@ export default async function DonorDashboard({
   const showMentorPending = welcome === "mentor";
   const usingMockData = !isDbConfigured();
   const dbUser = usingMockData ? null : await getCurrentDbUser();
+  // Route-correctness: students / mentors / admins who land on the donor
+  // dashboard bounce to their own home so they don't see an out-of-context
+  // empty state. Skip in preview mode (no DB → no role to check).
+  if (dbUser && dbUser.role !== "donor" && dbUser.role !== "anonymous") {
+    redirect(dashboardForRole(dbUser.role));
+  }
   const queryUserId = dbUser?.id ?? clerkUserId;
   // Donor codes are derived from the local users.id UUID. In preview mode
   // (no DB) we don't yet have a UUID, so show "pending sync" instead of

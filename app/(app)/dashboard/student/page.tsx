@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isDbConfigured } from "@/db/client";
-import { getCurrentDbUser, requireUserId } from "@/lib/auth";
+import { dashboardForRole, getCurrentDbUser, requireUserId } from "@/lib/auth";
 import { getAllSchools } from "@/lib/content/schools";
 import { getStudentBySlug } from "@/lib/content/students";
 import { getLatestStudentRegistrationForUser } from "@/lib/db/queries/applications";
@@ -40,6 +41,11 @@ export default async function StudentDashboard() {
   await requireUserId();
   const dbReady = isDbConfigured();
   const dbUser = dbReady ? await getCurrentDbUser() : null;
+  // Non-students bounce home. A donor with no application data would
+  // otherwise sit on "Complete your application" forever — confusing.
+  if (dbUser && dbUser.role !== "student") {
+    redirect(dashboardForRole(dbUser.role));
+  }
 
   // Preview mode (no DB) — show a friendly demo of the three states.
   if (!dbReady || !dbUser) {

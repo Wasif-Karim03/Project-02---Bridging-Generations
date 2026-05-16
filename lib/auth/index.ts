@@ -93,6 +93,10 @@ export async function getCurrentDbUser(): Promise<User | null> {
  * local DB (Drizzle) and enforces `users.role`. When DATABASE_URL is unset
  * (preview mode), allows any signed-in user through with a warning so the
  * dashboard remains demoable.
+ *
+ * When a signed-in user lacks the required role, they're redirected to
+ * THEIR role's dashboard — so a student bouncing off /dashboard/admin
+ * lands on /dashboard/student, a donor on /dashboard/donor, etc.
  */
 export async function requireRole(role: Role): Promise<AuthedUser> {
   const userId = await requireUserId();
@@ -110,11 +114,25 @@ export async function requireRole(role: Role): Promise<AuthedUser> {
   }
   const allowed = roleSatisfies(dbUser.role, role);
   if (!allowed) {
-    // The user is signed in but lacks the required role — send them home
-    // rather than 403 to keep the experience friendly.
-    redirect("/dashboard/donor");
+    redirect(dashboardForRole(dbUser.role));
   }
   return { userId, role: dbUser.role as Role };
+}
+
+// Map a role to its home dashboard. Used by requireRole's fallback redirect
+// and by the role-mismatch guards on each dashboard's own page.
+export function dashboardForRole(role: string): string {
+  switch (role) {
+    case "student":
+      return "/dashboard/student";
+    case "mentor":
+      return "/dashboard/mentor";
+    case "admin":
+    case "it":
+      return "/dashboard/admin";
+    default:
+      return "/dashboard/donor";
+  }
 }
 
 // Role hierarchy: admin/it ≥ mentor ≥ donor. Anything beneath the required

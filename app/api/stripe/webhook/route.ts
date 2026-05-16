@@ -2,7 +2,50 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { insertDonation } from "@/lib/db/queries/donations";
 import { getUserByClerkId, getUserByEmail } from "@/lib/db/queries/users";
+import { sendEmail } from "@/lib/forms/server";
 import { getStripe } from "@/lib/payments/stripe";
+
+// Donation thank-you / receipt email. Stripe receipts are great for tax
+// purposes but feel transactional; this is the friendlier nonprofit version
+// with a direct link to the donor dashboard. Best-effort — failures here
+// never roll back the donation insert.
+async function sendDonationThankYou(args: {
+  to: string;
+  amountCents: number;
+  recurring: boolean;
+  studentSlug: string | null;
+  projectSlug: string | null;
+  donationId: string;
+}) {
+  if (!args.to) return;
+  const amount = `$${(args.amountCents / 100).toFixed(2)} USD`;
+  const target = args.studentSlug
+    ? `student ${args.studentSlug}`
+    : args.projectSlug
+      ? `project ${args.projectSlug}`
+      : "our general fund";
+  const cadence = args.recurring ? "recurring monthly gift" : "one-time gift";
+  await sendEmail({
+    to: args.to,
+    subject: `Thank you for your ${amount} gift to Bridging Generations`,
+    text: [
+      "Hi friend,",
+      "",
+      `Your ${cadence} of ${amount} toward ${target} just came through. Thank you — this`,
+      "is the kind of support that keeps our students learning.",
+      "",
+      "View your donation history and download the tax receipt:",
+      "https://brigen.org/dashboard/donor",
+      "",
+      `Receipt ID: ${args.donationId}`,
+      "",
+      "Bridging Generations is a registered 501(c)(3) nonprofit. Your contribution is",
+      "tax-deductible to the extent allowed by law.",
+      "",
+      "— Bridging Generations",
+    ].join("\n"),
+  });
+}
 
 // Resolve a checkout / invoice event back to a local users.id. Prefer the
 // clerkUserId we stuffed into Stripe metadata at checkout-session time; fall
@@ -92,7 +135,7 @@ export async function POST(req: Request) {
             clerkUserId: meta.clerkUserId || null,
             email: donorEmail,
           });
-          await insertDonation({
+          const inserted = await insertDonation({
             amountCents,
             currency,
             recurring: false,
@@ -106,6 +149,16 @@ export async function POST(req: Request) {
             dedicationText,
             metadata: { sessionId: session.id, mode: session.mode },
           });
+          if (donorEmail) {
+            await sendDonationThankYou({
+              to: donorEmail,
+              amountCents,
+              recurring: false,
+              studentSlug: studentId,
+              projectSlug: projectId,
+              donationId: inserted?.id ?? session.id,
+            });
+          }
         }
       } catch (err) {
         console.error("[stripe/webhook] insertDonation failed", err);
@@ -143,7 +196,7 @@ export async function POST(req: Request) {
           clerkUserId: meta.clerkUserId || null,
           email: donorEmail,
         });
-        await insertDonation({
+        const inserted = await insertDonation({
           amountCents,
           currency,
           recurring: true,
@@ -157,6 +210,16 @@ export async function POST(req: Request) {
           dedicationText,
           metadata: { invoiceId: invoice.id, subscriptionId },
         });
+        if (donorEmail) {
+          await sendDonationThankYou({
+            to: donorEmail,
+            amountCents,
+            recurring: true,
+            studentSlug: studentId,
+            projectSlug: projectId,
+            donationId: inserted?.id ?? invoice.id ?? "—",
+          });
+        }
       } catch (err) {
         console.error("[stripe/webhook] insertDonation failed", err);
       }

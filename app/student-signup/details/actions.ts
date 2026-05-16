@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getDb, isDbConfigured } from "@/db/client";
 import { studentRegistrations, users } from "@/db/schema";
 import { getCurrentDbUser, requireUserId } from "@/lib/auth";
+import { sendEmail } from "@/lib/forms/server";
 
 export type StudentApplicationState = { ok: true } | { ok: false; error: string };
 
@@ -117,6 +118,46 @@ export async function submitStudentApplicationAction(
       error: "Could not save your application. Please try again.",
     };
   }
+
+  // Fire-and-forget confirmation emails — applicant + board notify. Failures
+  // here don't block the signup flow; sendEmail logs to stderr in that case.
+  const applicantEmail = email || dbUser.email;
+  const orgEmail = process.env.RESEND_FROM_EMAIL ?? "contact@bridginggenerations.org";
+  await Promise.allSettled([
+    sendEmail({
+      to: applicantEmail,
+      subject: "Your Bridging Generations application is in",
+      text: [
+        `Hi ${studentName},`,
+        "",
+        "Thank you for applying to Bridging Generations. We've received your application and",
+        "the board will review it within four weeks. You'll get another email here as soon as a",
+        "decision is made.",
+        "",
+        "In the meantime you can sign in at any time to see your application status:",
+        "https://brigen.org/student-login",
+        "",
+        "If you have questions, just reply to this email.",
+        "",
+        "— Bridging Generations",
+      ].join("\n"),
+    }),
+    sendEmail({
+      to: orgEmail,
+      subject: `New student application · ${studentName}`,
+      text: [
+        `${studentName} just submitted a scholarship application.`,
+        "",
+        `Grade: ${grade}`,
+        `School: ${school}`,
+        `Guardian: ${guardianName}`,
+        `Contact: ${applicantEmail}${phone ? " · " + phone : ""}`,
+        "",
+        "Review in the admin queue: https://brigen.org/dashboard/admin",
+      ].join("\n"),
+      replyTo: applicantEmail,
+    }),
+  ]);
 
   redirect("/student-login?welcome=1");
 }
