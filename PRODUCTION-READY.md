@@ -31,7 +31,7 @@ status as we go.
 - ✅ /contact form with audience triage
 - ✅ /donation-journey explainer
 - ✅ /terms
-- ❌ 🔥 **`/privacy` policy page** — no route exists; nonprofit accepting donations legally needs one
+- ✅ **`/privacy` policy page** — full nonprofit privacy policy covering Stripe/Clerk/Neon/Resend/Netlify processors, children's data, retention, GDPR/CCPA rights. Editable via Keystatic.
 - ❌ ⚠️ **Cookie consent banner** — needed if analytics is added; some jurisdictions require disclosure even without
 - ⏭ Bengali toggle on dashboard surfaces (currently public site only)
 
@@ -184,7 +184,7 @@ status as we go.
 ## E. Legal / compliance
 
 - ✅ /terms exists with MDX body
-- ❌ 🔥 **/privacy policy** route + content
+- ✅ **/privacy** route + content (mirrors /terms structure; editable via Keystatic singleton)
 - ❌ 🔥 **501(c)(3) disclosure** on every donate flow (mostly there; verify "tax-deductible to the extent allowed by law" appears on receipts + donate page)
 - ❌ ⚠️ **EIN displayed in footer** (currently a Keystatic field; verify a real value is set)
 - ❌ ⚠️ **Annual Form 990 link** when published

@@ -1,0 +1,132 @@
+---
+lastUpdated: 2026-05-16
+---
+
+Your privacy matters to us, and we built this site to collect only what we actually need to run our scholarship and mentorship programs. This page lays out, in plain language, what we collect, why, who we share it with, and how to reach us to change or delete your data. If anything below is unclear, write to us and we will explain it in more detail.
+
+## Who this policy applies to
+
+This policy covers anyone who visits **bridginggenerations.org**, creates a donor or student account, makes a donation, applies for a scholarship, signs up to mentor, or sends us a message through the contact form. It applies regardless of where you live, though some regional rules (GDPR, CCPA) give you additional rights — we honor those rights for everyone who asks, not only the people whose laws require it.
+
+## What we collect
+
+We collect the smallest amount of information needed to do the job in front of us. Specifically:
+
+**From everyone who visits the site:**
+- Page-view counts via lightweight, cookie-free analytics. No personal identifier is logged.
+- Your IP address may be visible in server logs for up to 24 hours (used to block abuse).
+
+**From donors:**
+- Name, email address, and (optional) phone — collected when you create an account.
+- Donation amount, date, payment method type, and which student or project you supported — recorded after each gift.
+- Public profile information you choose to share (display name, dedication, anonymity preference).
+- We **never** see your full card number, CVC, or bank details. Stripe handles all payment information.
+
+**From students and applicants:**
+- Full name, date of birth, school, grade, and contact information.
+- Guardian's name, relation, occupation, phone numbers, and approximate family income (used by our board to evaluate scholarship need).
+- Emergency contact name, relation, and phone.
+- National ID or birth-certificate number, if you choose to share it (optional, helps us verify identity).
+- Home address (needed to send a decision letter).
+- Your story — why you're applying, your goals, your hobbies.
+- Once approved: ongoing academic information (GPA, grade), mentor weekly-report content, and donation records attributed to you.
+
+**From mentors:**
+- Name, email, country, occupation, education status.
+- Subjects you can teach, weekly availability, and your application essay.
+- Weekly reports you file about students you mentor.
+
+**From contact-form senders:**
+- Name, email, message, and your selected audience category (donor, partner, journalist, parent).
+
+## Why we collect it
+
+We collect each piece of information for exactly one or two specific reasons:
+
+- **To run the program** — scholarship decisions, mentor matching, donation attribution, sending receipts and approval emails.
+- **To meet our legal obligations** — IRS reporting on charitable contributions, retention of donation records for tax purposes.
+- **To prevent fraud and abuse** — rate limiting, honeypot anti-spam, webhook signature verification.
+
+We do **not** use your information for marketing, retargeting, or profile-building. We do not sell your data, and we do not share it with advertising networks.
+
+## Who we share it with
+
+We use the following third-party processors to run the site. Each one sees only the information needed for its specific job:
+
+| Service | What they see | Why |
+|---|---|---|
+| **Stripe** (US) | Donor name, email, card details, donation amount | Process payments + issue tax-deductible receipts |
+| **Clerk** (US) | Account email, phone, password hash (not the password itself) | Sign-in and account management |
+| **Neon** (US) | Donor / student / mentor profile data | Primary database — encrypted at rest |
+| **Resend** (US) | Recipient email + message body | Transactional email delivery (welcome, application receipts, approvals, donation thanks) |
+| **Netlify** (US) | Page-view metadata + your IP for ~24h in access logs | Web hosting + DDoS protection |
+| **GitHub** (US) | Content edits made via Keystatic CMS by board members | Source code + content version control |
+
+We do not share your data with any service or person beyond those above. We do not sell your data to anyone, for any reason.
+
+## Children's privacy
+
+Many of our scholarship applicants and recipients are minors. We treat their data with extra care:
+
+- A guardian must sign a consent release before any student's portrait or story appears on the public site.
+- Student portraits and personally identifying details are gated behind explicit consent — the default is to show name and grade only.
+- Family income, guardian contact information, and national ID numbers are **never** displayed publicly. They are visible only to our board members during application review.
+- If a student or guardian asks us to remove information at any time, we do so within a few business days.
+
+If you are a parent, guardian, or student under 18 and you have a concern about how your information is being used, write to us at the address in [Get in touch](#get-in-touch) and we will resolve it.
+
+## How long we keep it
+
+- **Donation records:** 7 years (IRS retention requirement for tax-deductible contributions).
+- **Active donor accounts:** for as long as you keep the account, plus 90 days after you delete it (so we can finalize any pending receipts).
+- **Student application data:** for the duration of your relationship with the program, plus 3 years after your last enrollment (used for alumni outreach and reporting).
+- **Mentor records:** for as long as you mentor with us, plus 1 year after you stop.
+- **Server access logs:** rotated within 24 hours.
+- **Contact form submissions:** deleted within 90 days of resolution.
+
+## Your rights
+
+You can do any of the following at any time, no matter where you live:
+
+- **See your data** — sign in to your dashboard to view everything we have on you. Donors and students see their full record there.
+- **Update your data** — edit your profile through the dashboard, or email us if you want changes our UI doesn't expose.
+- **Withdraw consent** — if you previously consented to your photo or story appearing publicly, you can revoke that at any time; we remove it on the next deploy.
+- **Delete your account** — email us. We retain only what's legally required (donation records for tax purposes); everything else is deleted within 30 days.
+- **Get a portable copy** — email us and we'll send you everything we have on you in a machine-readable format (JSON or CSV).
+
+We respond to every request within 30 days. There is no fee.
+
+## Cookies and similar technologies
+
+We use the smallest possible set of cookies and never use tracking cookies:
+
+- **Clerk session cookie** — set after you sign in, so we know it's still you on each page. Removed when you sign out.
+- **Language preference cookie** (`NEXT_LOCALE`) — remembers whether you chose English or Bengali. Set only if you change the default.
+- **Stripe Checkout session** — set briefly during a donation flow on the Stripe-hosted page (their domain, not ours).
+
+We do not use cookies for advertising, behavioral profiling, or third-party tracking.
+
+## Data transfers
+
+Our hosting, database, and email services are based in the United States. Our students and many of our donors are in Bangladesh. By using this site, you understand that your information may be transferred to and stored in the U.S. The processors above (Stripe, Clerk, Neon, Resend, Netlify) all maintain industry-standard data-protection practices and comply with applicable cross-border rules (Standard Contractual Clauses, etc.).
+
+## Security
+
+We take security seriously but cannot guarantee perfect protection of any data transmitted over the internet. What we do:
+
+- All connections to the site are HTTPS-only (TLS 1.2+).
+- Passwords are never stored in our database; Clerk hashes them with bcrypt/scrypt.
+- Card details never touch our servers; Stripe handles them directly.
+- Webhook payloads (from Stripe, Clerk) are verified by signature before we trust them.
+- Database connections from our application to Neon use encrypted connection strings.
+- Admin role changes require an existing admin to approve.
+
+If you discover a security issue, please email us before disclosing it publicly. We will respond within 48 hours and credit you for the report if you'd like.
+
+## Changes to this policy
+
+We may update this policy occasionally. The "Last updated" date at the top of this page will reflect the most recent revision. Material changes will be announced on the home page for a week following the update, and active donors and students will receive an email notification.
+
+## Get in touch
+
+For privacy questions, deletion requests, data exports, or any concern about how we handle your information, write to us using the [contact form](/contact) or email us directly at the address on the [About page](/about). We reply within two business days, and we respond to formal data-rights requests within 30 days.
