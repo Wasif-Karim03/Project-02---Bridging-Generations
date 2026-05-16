@@ -6,6 +6,7 @@ import { getDb, isDbConfigured } from "@/db/client";
 import { studentRegistrations, users } from "@/db/schema";
 import { getCurrentDbUser, requireUserId } from "@/lib/auth";
 import { sendEmail } from "@/lib/forms/server";
+import { studentCodeForUuid } from "@/lib/student/studentCode";
 
 export type StudentApplicationState = { ok: true } | { ok: false; error: string };
 
@@ -45,6 +46,24 @@ export async function submitStudentApplicationAction(
   const guardianOccupation = String(formData.get("guardianOccupation") ?? "")
     .trim()
     .slice(0, 200);
+  const guardianPhone = String(formData.get("guardianPhone") ?? "")
+    .trim()
+    .slice(0, 40);
+  const alternateGuardianPhone = String(formData.get("alternateGuardianPhone") ?? "")
+    .trim()
+    .slice(0, 40);
+  const emergencyContactName = String(formData.get("emergencyContactName") ?? "")
+    .trim()
+    .slice(0, 120);
+  const emergencyContactRelation = String(formData.get("emergencyContactRelation") ?? "")
+    .trim()
+    .slice(0, 80);
+  const emergencyContactPhone = String(formData.get("emergencyContactPhone") ?? "")
+    .trim()
+    .slice(0, 40);
+  const nationalIdNumber = String(formData.get("nationalIdNumber") ?? "")
+    .trim()
+    .slice(0, 40);
   const familyIncome = String(formData.get("familyIncome") ?? "")
     .trim()
     .slice(0, 80);
@@ -71,6 +90,7 @@ export async function submitStudentApplicationAction(
   if (!grade) return { ok: false, error: "Grade is required." };
   if (!school) return { ok: false, error: "School name is required." };
   if (!guardianName) return { ok: false, error: "Guardian name is required." };
+  if (!guardianPhone) return { ok: false, error: "Guardian's phone number is required." };
   if (!address) return { ok: false, error: "Home address is required." };
   if (!message) return { ok: false, error: "Tell us a bit about why you're applying." };
 
@@ -98,6 +118,12 @@ export async function submitStudentApplicationAction(
       guardianName,
       guardianRelation: guardianRelation || null,
       guardianOccupation: guardianOccupation || null,
+      guardianPhone,
+      alternateGuardianPhone: alternateGuardianPhone || null,
+      emergencyContactName: emergencyContactName || null,
+      emergencyContactRelation: emergencyContactRelation || null,
+      emergencyContactPhone: emergencyContactPhone || null,
+      nationalIdNumber: nationalIdNumber || null,
       familyIncome: familyIncome || null,
       address,
       phone: phone || null,
@@ -122,6 +148,7 @@ export async function submitStudentApplicationAction(
   // Fire-and-forget confirmation emails — applicant + board notify. Failures
   // here don't block the signup flow; sendEmail logs to stderr in that case.
   const applicantEmail = email || dbUser.email;
+  const studentCode = studentCodeForUuid(dbUser.id);
   const orgEmail = process.env.RESEND_FROM_EMAIL ?? "contact@bridginggenerations.org";
   await Promise.allSettled([
     sendEmail({
@@ -134,7 +161,12 @@ export async function submitStudentApplicationAction(
         "the board will review it within four weeks. You'll get another email here as soon as a",
         "decision is made.",
         "",
-        "In the meantime you can sign in at any time to see your application status:",
+        `Your Student ID: ${studentCode}`,
+        "",
+        "Save this ID — once your account is fully active you can use it (or your email or",
+        "phone number) to sign in. You can always find it on your dashboard too.",
+        "",
+        "Sign in any time to check your application status:",
         "https://brigen.org/student-login",
         "",
         "If you have questions, just reply to this email.",
@@ -144,13 +176,14 @@ export async function submitStudentApplicationAction(
     }),
     sendEmail({
       to: orgEmail,
-      subject: `New student application · ${studentName}`,
+      subject: `New student application · ${studentName} (${studentCode})`,
       text: [
         `${studentName} just submitted a scholarship application.`,
         "",
+        `Student ID: ${studentCode}`,
         `Grade: ${grade}`,
         `School: ${school}`,
-        `Guardian: ${guardianName}`,
+        `Guardian: ${guardianName}${guardianPhone ? " · " + guardianPhone : ""}`,
         `Contact: ${applicantEmail}${phone ? " · " + phone : ""}`,
         "",
         "Review in the admin queue: https://brigen.org/dashboard/admin",

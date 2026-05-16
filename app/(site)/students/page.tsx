@@ -120,21 +120,32 @@ export default async function StudentsPage() {
           <div>
             <p className="text-eyebrow uppercase text-accent">Apply</p>
             <h2 className="mt-2 max-w-[36ch] text-balance text-heading-3 text-ink">
-              Mentor, online teacher, or want to apply for a scholarship?
+              Are you a student? Apply for a scholarship.
             </h2>
+            <p className="mt-2 max-w-[48ch] text-body-sm text-ink-2">
+              Create a free student account, share your details, and our board will review your
+              application. Once approved, you'll get a unique Student ID and can sign in to see who
+              is sponsoring you and how much they've given.
+            </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/contact?audience=mentor"
-              className="inline-flex min-h-[48px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
+              href="/student-signup"
+              className="inline-flex min-h-[48px] items-center bg-accent px-5 text-nav-link uppercase text-white transition-colors hover:bg-accent/90"
             >
-              Apply as mentor
+              Apply as a student →
             </Link>
             <Link
-              href="/contact?audience=sponsor"
-              className="inline-flex min-h-[48px] items-center bg-accent px-5 text-nav-link uppercase text-white transition-colors hover:bg-accent-2-hover"
+              href="/student-login"
+              className="inline-flex min-h-[48px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
             >
-              Apply for scholarship
+              Sign in
+            </Link>
+            <Link
+              href="/mentor-login"
+              className="inline-flex min-h-[48px] items-center border border-hairline px-5 text-nav-link uppercase text-ink hover:border-accent hover:text-accent"
+            >
+              Apply as mentor
             </Link>
           </div>
         </div>

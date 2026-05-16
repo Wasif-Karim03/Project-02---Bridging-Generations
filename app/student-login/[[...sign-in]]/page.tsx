@@ -78,6 +78,9 @@ export default async function StudentSignInPage({
             ? "Sign in to see your application status. Once an admin approves and links your account, you'll also see your sponsors and donations."
             : "Sign in to see your application status, your sponsors, and the donations they've made toward your education."}
         </p>
+        <p className="mt-2 max-w-[44ch] text-meta uppercase tracking-[0.06em] text-ink-2">
+          Sign in with your email, phone number, or Student ID (STU-XXXXXXXX) + your password.
+        </p>
       </div>
 
       <SignIn

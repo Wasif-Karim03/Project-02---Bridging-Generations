@@ -9,6 +9,7 @@ import { getAllSchools } from "@/lib/content/schools";
 import { getStudentBySlug } from "@/lib/content/students";
 import { getLatestStudentRegistrationForUser } from "@/lib/db/queries/applications";
 import { getDonorsForStudent } from "@/lib/db/queries/donations";
+import { studentCodeForUuid } from "@/lib/student/studentCode";
 
 export const metadata: Metadata = {
   title: "Student dashboard",
@@ -71,6 +72,11 @@ export default async function StudentDashboard() {
   // DB-ready: figure out which state this student is in.
   const registration = await getLatestStudentRegistrationForUser(dbUser.id);
   const studentSlug = dbUser.studentSlug;
+  // Public student ID — same one shown on the application confirmation email
+  // and the admin queue. Stable for the life of the account; donors can
+  // reference it when reaching out, and the student can use it as a sign-in
+  // identifier (once username/phone are enabled in Clerk).
+  const studentCode = studentCodeForUuid(dbUser.id);
 
   // State 1: no application yet
   if (!registration) {
@@ -83,6 +89,7 @@ export default async function StudentDashboard() {
             You haven't submitted your scholarship application yet. Fill it out so our team can
             review you.
           </p>
+          <StudentIdBadge code={studentCode} />
         </header>
         <Link
           href="/student-signup/details"
@@ -105,6 +112,7 @@ export default async function StudentDashboard() {
             Our board reviews every scholarship application carefully. You'll get an email once a
             decision is made — typically within a week.
           </p>
+          <StudentIdBadge code={studentCode} />
         </header>
         <PendingDetails registration={registration} />
       </div>
@@ -129,8 +137,9 @@ export default async function StudentDashboard() {
         <h1 className="text-balance text-heading-1 text-ink">
           {student?.displayName ?? registration.studentName}
         </h1>
+        <StudentIdBadge code={studentCode} />
         <p className="font-mono text-meta uppercase tracking-[0.08em] text-ink-2">
-          Linked to {studentSlug}
+          Public profile · {studentSlug}
         </p>
       </header>
 
@@ -244,6 +253,15 @@ export default async function StudentDashboard() {
         </p>
       </section>
     </div>
+  );
+}
+
+function StudentIdBadge({ code }: { code: string }) {
+  return (
+    <p className="mt-1 inline-flex w-fit items-center gap-2 border border-hairline bg-ground-2 px-3 py-1.5 font-mono text-meta uppercase tracking-[0.08em] text-ink">
+      <span className="text-ink-2">Student ID</span>
+      <span className="text-ink">{code}</span>
+    </p>
   );
 }
 

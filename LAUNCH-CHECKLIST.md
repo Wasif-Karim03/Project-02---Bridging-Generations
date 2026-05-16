@@ -95,7 +95,11 @@ Unlocks: real donor / mentor / admin dashboards, role-based access.
 ### C1. Clerk
 - [ ] Sign up at https://clerk.com
 - [ ] **Create application** → name: `Bridging Generations`
-- [ ] Enable sign-in methods you want (Email + password, Google, magic link recommended)
+- [ ] **Authentication → Email, Phone, Username**:
+  - [ ] Enable **Email address** (required, default on)
+  - [ ] Enable **Phone number** — students often sign up via phone, and the donor sign-in copy mentions phone as an option
+  - [ ] Enable **Password** as a verification factor
+  - [ ] (Optional) Enable **Username** — lets students sign in using their `STU-XXXXXXXX` ID, donors with `BG-XXXXXXXX`. Wiring this requires the Clerk backend SDK to set username on first signup; deferred to a follow-up.
 - [ ] **API Keys** → copy `pk_test_…` + `sk_test_…`
 - [ ] In Netlify env:
   - [ ] `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` = pk_…

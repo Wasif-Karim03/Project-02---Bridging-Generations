@@ -66,6 +66,22 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
             placeholder="e.g. Day laborer, Farmer"
           />
         </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field
+            label="Guardian's phone"
+            name="guardianPhone"
+            type="tel"
+            required
+            maxLength={40}
+            placeholder="e.g. +880 1XXX-XXXXXX"
+          />
+          <Field
+            label="Alternate guardian phone (optional)"
+            name="alternateGuardianPhone"
+            type="tel"
+            maxLength={40}
+          />
+        </div>
         <SelectField
           label="Approximate family income"
           name="familyIncome"
@@ -76,7 +92,7 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
       <Section title="Where you live + contact">
         <Field label="Home address" name="address" required multiline maxLength={2000} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Phone" name="phone" type="tel" maxLength={40} />
+          <Field label="Your phone (if any)" name="phone" type="tel" maxLength={40} />
           <Field
             label="Email (we'll use your signup email if blank)"
             name="email"
@@ -85,6 +101,29 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
             maxLength={255}
           />
         </div>
+        <Field
+          label="National ID / birth certificate number (optional)"
+          name="nationalIdNumber"
+          maxLength={40}
+          placeholder="Helps us verify identity for the scholarship records"
+        />
+      </Section>
+
+      <Section title="Emergency contact">
+        <p className="text-body-sm text-ink-2">
+          Someone other than your guardian we can reach if we need to — a teacher, an older sibling,
+          a community elder.
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Full name" name="emergencyContactName" maxLength={120} />
+          <Field
+            label="Relation to you"
+            name="emergencyContactRelation"
+            maxLength={80}
+            placeholder="e.g. Teacher, Cousin"
+          />
+        </div>
+        <Field label="Phone" name="emergencyContactPhone" type="tel" maxLength={40} />
       </Section>
 
       <Section title="About you">
