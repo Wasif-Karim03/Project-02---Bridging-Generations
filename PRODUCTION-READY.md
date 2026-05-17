@@ -272,7 +272,7 @@ status as we go.
 - ✅ README.md with stack + dev setup
 - ✅ LAUNCH-CHECKLIST.md with click-by-click production setup
 - ✅ AGENTS.md with collaborator + AI-agent workflow
-- ❌ 🔥 **Owner manual** — how to log in, approve students, view donations, edit content via Keystatic
+- ✅ **Owner manual** — see [OWNER-MANUAL.md](./OWNER-MANUAL.md). 10 task-oriented sections (sign-in, approve student, promote mentor, assign students, view donations, exports, Keystatic CMS, refunds, admin management, troubleshooting).
 - ❌ ⚠️ **Video walkthrough** (5-10 min screen recording) of the admin panel + Keystatic CMS
 - ❌ ⚠️ **Runbook** — what to do when:
   - Site is down (check Netlify, Neon, Clerk statuses in order)
