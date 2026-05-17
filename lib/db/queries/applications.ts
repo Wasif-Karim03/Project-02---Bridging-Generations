@@ -25,6 +25,40 @@ export async function getLatestStudentRegistrationForUser(
 }
 
 /**
+ * Set the latest student registration's review state for a given applicant.
+ * Used by the admin reject / approve actions to capture who decided, when,
+ * and (for rejections) why. Returns true on update, false in preview mode
+ * or when no registration exists.
+ */
+export async function setLatestStudentRegistrationStatus(args: {
+  applicantUserId: string;
+  status: ApplicationStatus;
+  reviewedBy: string;
+  notes?: string | null;
+}): Promise<boolean> {
+  if (!isDbConfigured()) return false;
+  const db = getDb();
+  const latest = await db
+    .select({ id: studentRegistrations.id })
+    .from(studentRegistrations)
+    .where(eq(studentRegistrations.applicantUserId, args.applicantUserId))
+    .orderBy(desc(studentRegistrations.submittedAt))
+    .limit(1);
+  const row = latest[0];
+  if (!row) return false;
+  await db
+    .update(studentRegistrations)
+    .set({
+      status: args.status,
+      reviewedBy: args.reviewedBy,
+      reviewedAt: new Date(),
+      reviewerNotes: args.notes ?? null,
+    })
+    .where(eq(studentRegistrations.id, row.id));
+  return true;
+}
+
+/**
  * Merged feed of every application kind, newest first. Drives the admin
  * dashboard queue. Falls back to mock data when the DB isn't configured.
  */
