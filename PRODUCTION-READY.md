@@ -31,7 +31,7 @@ status as we go.
 - ✅ /contact form with audience triage
 - ✅ /donation-journey explainer
 - ✅ /terms
-- ❌ 🔥 **`/privacy` policy page** — no route exists; nonprofit accepting donations legally needs one
+- ✅ **`/privacy` policy page** — full nonprofit privacy policy covering Stripe/Clerk/Neon/Resend/Netlify processors, children's data, retention, GDPR/CCPA rights. Editable via Keystatic.
 - ❌ ⚠️ **Cookie consent banner** — needed if analytics is added; some jurisdictions require disclosure even without
 - ⏭ Bengali toggle on dashboard surfaces (currently public site only)
 
@@ -61,7 +61,7 @@ status as we go.
 - ✅ /mentor-signup → /mentor-login
 - ✅ Mentor dashboard with assigned students
 - ✅ Weekly report submission (env-gated)
-- 🟡 ⚠️ **Mentor approval email** — currently signup just lands on donor dashboard with "pending" banner; admin promotes role manually without an email going out
+- ✅ **Mentor approval email** — sent on non-mentor → mentor role transition from either /dashboard/admin/users or /dashboard/admin/donors/[id]. Shared template in lib/notifications/mentorApproval.ts.
 - ❌ · Mentor profile editor (bio, availability, subjects)
 
 ### Admin flow
@@ -172,7 +172,7 @@ status as we go.
 - ✅ Admin layout enforces requireRole("admin") for the whole subtree
 - ✅ Receipt route ownership check (donor or admin only)
 - ✅ Donor anonymity respected on /donors public wall + student dashboards
-- 🟡 ⚠️ **Rate limiting is in-memory only** — won't survive serverless cold starts or sync across instances. Switch to Upstash Redis (free tier) for production.
+- ✅ **Rate limiting backed by Postgres** when DATABASE_URL is set — shared across function instances via an upsert + atomic CASE. Falls back to in-memory in preview mode or if the DB write fails. No new service to wire up; uses the existing Neon DB.
 - ❌ ⚠️ **Real production secrets management** — currently env vars only. Consider 1Password or similar for the owner.
 - ❌ · 2FA enforcement on admin accounts (Clerk supports, needs flag)
 - ❌ · Account lockout after N failed login attempts (Clerk handles, verify config)
@@ -184,7 +184,7 @@ status as we go.
 ## E. Legal / compliance
 
 - ✅ /terms exists with MDX body
-- ❌ 🔥 **/privacy policy** route + content
+- ✅ **/privacy** route + content (mirrors /terms structure; editable via Keystatic singleton)
 - ❌ 🔥 **501(c)(3) disclosure** on every donate flow (mostly there; verify "tax-deductible to the extent allowed by law" appears on receipts + donate page)
 - ❌ ⚠️ **EIN displayed in footer** (currently a Keystatic field; verify a real value is set)
 - ❌ ⚠️ **Annual Form 990 link** when published
@@ -233,7 +233,7 @@ status as we go.
 - ✅ OpenGraph images on key routes
 - ✅ Meta titles + descriptions on every page
 - ✅ JSON-LD breadcrumbs on most routes
-- ❌ ⚠️ **NonprofitOrganization schema.org** markup on /about
+- ✅ **NonprofitOrganization schema.org** markup on /about + homepage; WebSite schema also on homepage.
 - ❌ · Canonical URLs verified everywhere
 - ❌ · Submit sitemap to Google Search Console after launch
 - ❌ · Add `<link rel="alternate" hreflang="bn"`> for Bengali pages
@@ -272,7 +272,7 @@ status as we go.
 - ✅ README.md with stack + dev setup
 - ✅ LAUNCH-CHECKLIST.md with click-by-click production setup
 - ✅ AGENTS.md with collaborator + AI-agent workflow
-- ❌ 🔥 **Owner manual** — how to log in, approve students, view donations, edit content via Keystatic
+- ✅ **Owner manual** — see [OWNER-MANUAL.md](./OWNER-MANUAL.md). 10 task-oriented sections (sign-in, approve student, promote mentor, assign students, view donations, exports, Keystatic CMS, refunds, admin management, troubleshooting).
 - ❌ ⚠️ **Video walkthrough** (5-10 min screen recording) of the admin panel + Keystatic CMS
 - ❌ ⚠️ **Runbook** — what to do when:
   - Site is down (check Netlify, Neon, Clerk statuses in order)

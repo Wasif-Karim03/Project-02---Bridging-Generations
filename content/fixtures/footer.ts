@@ -26,6 +26,7 @@ export const footerContent = {
   // "Others" column — legal / supporting.
   others: [
     { label: "Terms and Conditions", labelKey: "termsAndConditions", href: "/terms" },
+    { label: "Privacy Policy", labelKey: "privacyPolicy", href: "/privacy" },
     { label: "Donors", labelKey: "donors", href: "/donors" },
     { label: "Testimonial", labelKey: "testimonial", href: "/testimonials" },
     { label: "Blog", labelKey: "blog", href: "/blog" },

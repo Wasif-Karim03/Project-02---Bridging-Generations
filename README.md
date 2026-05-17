@@ -109,7 +109,10 @@ Copy `.env.example` to `.env.local` and fill in what you need. **Every var is op
 | `RESEND_FROM_EMAIL` | Production | From-address for emails |
 | `BLOB_READ_WRITE_TOKEN` | Phase 6+ | Donor photos, mentor report attachments |
 
-Full setup walkthrough: see [LAUNCH-CHECKLIST.md](./LAUNCH-CHECKLIST.md) and [PHASE0_OWNER_ACTIONS.md](./PHASE0_OWNER_ACTIONS.md).
+For the full owner-side guide:
+- **[LAUNCH-CHECKLIST.md](./LAUNCH-CHECKLIST.md)** — one-time production setup (Netlify, Neon, Clerk, Stripe, Resend; DNS records; first admin promotion).
+- **[OWNER-MANUAL.md](./OWNER-MANUAL.md)** — day-to-day operations: approving students, promoting mentors, viewing donations, editing content, troubleshooting.
+- **[PRODUCTION-READY.md](./PRODUCTION-READY.md)** — exhaustive checklist of what's done vs what's left before launch.
 
 ## Content editing (board members)
 

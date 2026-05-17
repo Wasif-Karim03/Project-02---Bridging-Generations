@@ -1,10 +1,14 @@
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getRecentActivities } from "@/lib/content/activities";
 import { getAllGalleryImages } from "@/lib/content/galleryImages";
+import { isPlaceholder } from "@/lib/content/isPlaceholder";
 import { getFeaturedProjects } from "@/lib/content/projects";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getSpotlightStudents } from "@/lib/content/students";
 import { getFeaturedSuccessStories } from "@/lib/content/successStories";
 import { getFeaturedTestimonial } from "@/lib/content/testimonials";
+import { nonprofitOrganization, webSite } from "@/lib/seo/jsonLd";
+import { SITE_URL } from "@/lib/seo/siteUrl";
 import { HomeActivities } from "./_components/HomeActivities";
 import { HomeCTAFooter } from "./_components/HomeCTAFooter";
 import { HomeGallery } from "./_components/HomeGallery";
@@ -48,6 +52,32 @@ export default async function Home() {
     href: "/activities",
   }));
 
+  // Homepage JSON-LD — gives search engines an authoritative summary of who
+  // the org is the first time they crawl. NonprofitOrganization mirrors what
+  // /about already publishes; WebSite enables sitelinks + the search box
+  // affordance Google sometimes renders.
+  const einIsReal = !isPlaceholder(settings.ein) && settings.ein !== "00-0000000";
+  const mailingAddressIsReal = !isPlaceholder(settings.mailingAddress);
+  const social = settings.socialLinks;
+  const sameAs = [social.instagram, social.facebook, social.linkedin, social.youtube].filter(
+    (s): s is string => Boolean(s),
+  );
+  const ldOrg = nonprofitOrganization({
+    siteUrl: SITE_URL,
+    url: "/",
+    orgName: settings.orgName,
+    foundingDate: settings.foundingYear,
+    taxID: einIsReal ? settings.ein : undefined,
+    address: mailingAddressIsReal ? settings.mailingAddress : undefined,
+    email: settings.contactEmail,
+    sameAs,
+  });
+  const ldSite = webSite({
+    siteUrl: SITE_URL,
+    name: settings.orgName,
+    description: settings.missionShort,
+  });
+
   return (
     <>
       {/* 1. Scrolling news ticker */}
@@ -69,6 +99,8 @@ export default async function Home() {
       {/* 9. Testimonial — spec heading + send-feedback CTA */}
       {testimonial ? <HomeTestimonialPanel testimonial={testimonial} /> : null}
       <HomeCTAFooter />
+      <JsonLd id="ld-home-org" data={ldOrg} />
+      <JsonLd id="ld-home-site" data={ldSite} />
     </>
   );
 }

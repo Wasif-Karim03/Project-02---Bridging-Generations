@@ -1,27 +1,13 @@
 "use server";
 
-import { headers } from "next/headers";
 import { Resend } from "resend";
 import { getContactPage } from "@/lib/content/contactPage";
+import { clientIp, takeRateSlot } from "@/lib/forms/server";
 import type { GiveActionState } from "./actions.types";
 
+const RATE_LIMIT_KEY = "giveForm";
 const RATE_LIMIT_MAX = 3;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
-
-type Bucket = { count: number; resetAt: number };
-const rateBucket = new Map<string, Bucket>();
-
-function takeRateSlot(ip: string): boolean {
-  const now = Date.now();
-  const existing = rateBucket.get(ip);
-  if (!existing || existing.resetAt <= now) {
-    rateBucket.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-  if (existing.count >= RATE_LIMIT_MAX) return false;
-  existing.count += 1;
-  return true;
-}
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -61,13 +47,14 @@ export async function submitGiveForm(
     return { status: "error", message: "Please fix the errors below and try again.", fieldErrors };
   }
 
-  const headerList = await headers();
-  const ip =
-    headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headerList.get("x-real-ip") ||
-    "unknown";
-
-  if (!takeRateSlot(ip)) {
+  const ip = await clientIp();
+  if (
+    !(await takeRateSlot(ip, {
+      key: RATE_LIMIT_KEY,
+      max: RATE_LIMIT_MAX,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    }))
+  ) {
     return {
       status: "error",
       message: "Too many submissions in a short window. Please wait a few minutes and try again.",

@@ -16,6 +16,25 @@ export function breadcrumbList(siteUrl: string, items: BreadcrumbItem[]) {
   };
 }
 
+type WebSiteArgs = {
+  siteUrl: string;
+  name: string;
+  description?: string;
+};
+
+// Homepage-level WebSite schema. Lets Google render the org's name + a
+// sitelinks search box if it wants. Cheap to include — pure metadata, no
+// runtime cost.
+export function webSite({ siteUrl, name, description }: WebSiteArgs) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name,
+    url: siteUrl,
+    ...(description ? { description } : {}),
+  };
+}
+
 type CollectionPageArgs = {
   siteUrl: string;
   url: string;
