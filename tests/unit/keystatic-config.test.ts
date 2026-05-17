@@ -23,6 +23,7 @@ const EXPECTED_SINGLETONS = [
   "donationJourney",
   "contactPage",
   "termsPage",
+  "privacyPage",
   "studentsPage",
   "projectsPage",
   "scholarshipsPage",

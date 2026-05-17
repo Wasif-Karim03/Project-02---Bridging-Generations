@@ -2,6 +2,7 @@ export { contactPageSingleton } from "./contactPage";
 export { donatePageSingleton } from "./donatePage";
 export { donationJourneySingleton } from "./donationJourney";
 export { donorsPageSingleton } from "./donorsPage";
+export { privacyPageSingleton } from "./privacyPage";
 export { projectsPageSingleton } from "./projectsPage";
 export { scholarshipsPageSingleton } from "./scholarshipsPage";
 export { siteSettingsSingleton } from "./siteSettings";
