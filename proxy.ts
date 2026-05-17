@@ -1,22 +1,48 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { type NextFetchEvent, type NextRequest, NextResponse } from "next/server";
 
-// Next.js 16 proxy (formerly "middleware"). We wrap Clerk's middleware
-// because Clerk's auth() / currentUser() helpers throw inside server
-// components if clerkMiddleware() isn't running. The callback is the
-// existing /design noindex header logic, preserved verbatim.
+// Next.js 16 proxy (formerly "middleware"). Two responsibilities:
 //
-// clerkMiddleware passes through by default — no auto-protection. Each
-// page handles its own gating with requireRole() / requireUserId() from
-// lib/auth, so adding pages never requires touching this file.
+//   1. Set noindex headers on /design preview routes — always on.
+//   2. When Clerk is configured, run clerkMiddleware() so the auth() and
+//      currentUser() helpers work inside server components.
+//
+// We gate Clerk on NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY. Without that env var
+// @clerk/nextjs/server throws on its first call, which would 500 the entire
+// marketing site during the staging window between "deploy" and "wire up
+// Clerk keys." Falling back to a plain pass-through keeps the public pages
+// reachable while auth-gated routes either render their "Setup pending"
+// fallback (sign-in pages) or redirect to it (dashboards).
 
-export const proxy = clerkMiddleware((_auth, request) => {
+const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+
+function designNoIndex(request: NextRequest): NextResponse | undefined {
   if (request.nextUrl.pathname.startsWith("/design")) {
     const response = NextResponse.next();
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
     return response;
   }
-});
+  return undefined;
+}
+
+// Cached per-worker so we don't import Clerk on every request.
+type Delegate = (req: NextRequest, ev: NextFetchEvent) => Promise<NextResponse> | NextResponse;
+let delegate: Delegate | null = null;
+
+async function getDelegate(): Promise<Delegate> {
+  if (delegate) return delegate;
+  if (clerkConfigured) {
+    const { clerkMiddleware } = await import("@clerk/nextjs/server");
+    delegate = clerkMiddleware((_auth, req) => designNoIndex(req)) as Delegate;
+  } else {
+    delegate = (req) => designNoIndex(req) ?? NextResponse.next();
+  }
+  return delegate;
+}
+
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
+  const handler = await getDelegate();
+  return handler(request, event);
+}
 
 export const config = {
   matcher: [
