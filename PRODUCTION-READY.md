@@ -172,7 +172,7 @@ status as we go.
 - ✅ Admin layout enforces requireRole("admin") for the whole subtree
 - ✅ Receipt route ownership check (donor or admin only)
 - ✅ Donor anonymity respected on /donors public wall + student dashboards
-- 🟡 ⚠️ **Rate limiting is in-memory only** — won't survive serverless cold starts or sync across instances. Switch to Upstash Redis (free tier) for production.
+- ✅ **Rate limiting backed by Postgres** when DATABASE_URL is set — shared across function instances via an upsert + atomic CASE. Falls back to in-memory in preview mode or if the DB write fails. No new service to wire up; uses the existing Neon DB.
 - ❌ ⚠️ **Real production secrets management** — currently env vars only. Consider 1Password or similar for the owner.
 - ❌ · 2FA enforcement on admin accounts (Clerk supports, needs flag)
 - ❌ · Account lockout after N failed login attempts (Clerk handles, verify config)

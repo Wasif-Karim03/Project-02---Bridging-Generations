@@ -45,7 +45,7 @@ export async function submitMentorApplication(
   }
 
   const ip = await clientIp();
-  if (!takeRateSlot(ip, { key: RATE_KEY, max: 3, windowMs: 10 * 60 * 1000 })) {
+  if (!(await takeRateSlot(ip, { key: RATE_KEY, max: 3, windowMs: 10 * 60 * 1000 }))) {
     return {
       status: "error",
       message: "Too many submissions in a short window. Please wait a few minutes and try again.",

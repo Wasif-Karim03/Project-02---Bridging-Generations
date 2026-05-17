@@ -1,42 +1,87 @@
 import "server-only";
+import { sql } from "drizzle-orm";
 import { headers } from "next/headers";
+import { getDb, isDbConfigured } from "@/db/client";
+import { rateLimits } from "@/db/schema";
 
-// Per-IP rate limiter shared by every application form.
-// In-memory only — fine for v1 (a single server instance). Phase 4 moves to
-// the DB so multiple Vercel regions stay in sync.
+// Cross-instance rate limit shared by every public form. Backed by Postgres
+// when DATABASE_URL is set so multiple Netlify function instances see the
+// same counters; falls back to per-process in-memory buckets in preview mode
+// or when the DB write fails (degraded protection rather than no protection).
+//
+// Algorithm: one row per (key, ip) bucket. Each call upserts and increments
+// the counter atomically. If the previous expires_at has passed we reset
+// count to 1 and push expires_at forward. We return false (deny) when the
+// new count exceeds the per-bucket max.
+//
+// Side effect: old expired rows accumulate. For a low-volume nonprofit site
+// this is harmless; we can add a periodic DELETE if needed.
+
 type Bucket = { count: number; resetAt: number };
-const bucketsByKey = new Map<string, Map<string, Bucket>>();
-
-function getKeyBucket(key: string): Map<string, Bucket> {
-  let bucket = bucketsByKey.get(key);
-  if (!bucket) {
-    bucket = new Map();
-    bucketsByKey.set(key, bucket);
-  }
-  return bucket;
-}
+const inMemoryBuckets = new Map<string, Bucket>();
 
 type RateLimitOptions = {
   /** Logical bucket key — e.g. "scholarshipApplication". */
   key: string;
-  /** Max submissions per window. */
+  /** Max submissions per window. Default 5. */
   max?: number;
-  /** Window length in ms. */
+  /** Window length in ms. Default 10 minutes. */
   windowMs?: number;
 };
 
-export function takeRateSlot(
+export async function takeRateSlot(
   ip: string,
   { key, max = 5, windowMs = 10 * 60 * 1000 }: RateLimitOptions,
-): boolean {
+): Promise<boolean> {
+  if (isDbConfigured()) {
+    const ok = await takeRateSlotPostgres(ip, { key, max, windowMs });
+    if (ok !== null) return ok;
+    // Fall through to in-memory if the DB call fails — degraded but safer
+    // than letting every form through.
+  }
+  return takeRateSlotInMemory(ip, { key, max, windowMs });
+}
+
+async function takeRateSlotPostgres(
+  ip: string,
+  opts: Required<RateLimitOptions>,
+): Promise<boolean | null> {
+  const bucketKey = `${opts.key}:${ip}`;
+  const now = new Date();
+  const newExpires = new Date(now.getTime() + opts.windowMs);
+  try {
+    const db = getDb();
+    // Upsert + atomic CASE: if the existing bucket has expired, reset to 1
+    // with a fresh expires_at; otherwise increment count and keep expires_at.
+    const result = await db
+      .insert(rateLimits)
+      .values({ bucketKey, count: 1, expiresAt: newExpires, updatedAt: now })
+      .onConflictDoUpdate({
+        target: rateLimits.bucketKey,
+        set: {
+          count: sql`CASE WHEN ${rateLimits.expiresAt} < NOW() THEN 1 ELSE ${rateLimits.count} + 1 END`,
+          expiresAt: sql`CASE WHEN ${rateLimits.expiresAt} < NOW() THEN ${newExpires} ELSE ${rateLimits.expiresAt} END`,
+          updatedAt: now,
+        },
+      })
+      .returning({ count: rateLimits.count });
+    const count = result[0]?.count ?? 1;
+    return count <= opts.max;
+  } catch (err) {
+    console.error("[forms/rate-limit] postgres failed, falling back to memory", err);
+    return null;
+  }
+}
+
+function takeRateSlotInMemory(ip: string, opts: Required<RateLimitOptions>): boolean {
+  const bucketKey = `${opts.key}:${ip}`;
   const now = Date.now();
-  const bucket = getKeyBucket(key);
-  const existing = bucket.get(ip);
+  const existing = inMemoryBuckets.get(bucketKey);
   if (!existing || existing.resetAt <= now) {
-    bucket.set(ip, { count: 1, resetAt: now + windowMs });
+    inMemoryBuckets.set(bucketKey, { count: 1, resetAt: now + opts.windowMs });
     return true;
   }
-  if (existing.count >= max) return false;
+  if (existing.count >= opts.max) return false;
   existing.count += 1;
   return true;
 }

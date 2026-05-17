@@ -254,6 +254,25 @@ export const weeklyReports = pgTable(
   }),
 );
 
+// ---------- Rate limiting ----------
+// Per-bucket sliding-window rate limit shared across all serverless function
+// instances (the in-memory fallback in lib/forms/server.ts only survives a
+// single warm Lambda). bucketKey concatenates the form id + client IP so we
+// can scope limits per (form, ip) without a composite primary key.
+
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    bucketKey: varchar("bucket_key", { length: 200 }).primaryKey(),
+    count: integer("count").notNull().default(0),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byExpiresAt: index("rate_limits_expires_at_idx").on(t.expiresAt),
+  }),
+);
+
 // ---------- Type exports ----------
 
 export type User = typeof users.$inferSelect;

@@ -1,8 +1,8 @@
 "use server";
 
-import { headers } from "next/headers";
 import { Resend } from "resend";
 import { getContactPage } from "@/lib/content/contactPage";
+import { clientIp, takeRateSlot } from "@/lib/forms/server";
 import {
   AUDIENCE_VALUES,
   type AudienceValue,
@@ -10,26 +10,12 @@ import {
   SUBJECT_PREFIX,
 } from "./actions.types";
 
+const RATE_LIMIT_KEY = "contactForm";
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
 function parseAudience(raw: string): AudienceValue | undefined {
   return (AUDIENCE_VALUES as readonly string[]).includes(raw) ? (raw as AudienceValue) : undefined;
-}
-
-type Bucket = { count: number; resetAt: number };
-const rateBucket = new Map<string, Bucket>();
-
-function takeRateSlot(ip: string): boolean {
-  const now = Date.now();
-  const existing = rateBucket.get(ip);
-  if (!existing || existing.resetAt <= now) {
-    rateBucket.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-  if (existing.count >= RATE_LIMIT_MAX) return false;
-  existing.count += 1;
-  return true;
 }
 
 function isValidEmail(value: string): boolean {
@@ -84,13 +70,14 @@ export async function submitContactForm(
     };
   }
 
-  const headerList = await headers();
-  const ip =
-    headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    headerList.get("x-real-ip") ||
-    "unknown";
-
-  if (!takeRateSlot(ip)) {
+  const ip = await clientIp();
+  if (
+    !(await takeRateSlot(ip, {
+      key: RATE_LIMIT_KEY,
+      max: RATE_LIMIT_MAX,
+      windowMs: RATE_LIMIT_WINDOW_MS,
+    }))
+  ) {
     return {
       status: "error",
       message: "Too many messages in a short window. Please wait a few minutes and try again.",
