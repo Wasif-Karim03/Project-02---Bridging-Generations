@@ -46,6 +46,16 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   transpilePackages: ["motion"],
+  // Keystatic reads YAML/MDX from content/ at runtime via Node's fs. The
+  // standalone build tracer (`@vercel/nft`) doesn't see those files as
+  // imports, so without an explicit include they're missing from the
+  // Netlify Lambda bundle and the reader hangs forever on the first
+  // fs.open. Including them for every route is the safest pattern — the
+  // total payload is small (YAML + MDX, not images) and we want every
+  // server route to be able to read any Keystatic singleton.
+  outputFileTracingIncludes: {
+    "/**/*": ["./content/**/*"],
+  },
   async redirects() {
     return [
       {
