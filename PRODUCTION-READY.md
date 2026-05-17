@@ -93,7 +93,7 @@ status as we go.
 - ✅ Student approval email
 - ✅ Donation thank-you (one-time + recurring)
 - ✅ **Student rejection email** — admin reject button on /dashboard/admin/students with optional reason. Status badge shows Approved/Rejected/Pending. Rejected students see a soft "wasn't approved this cycle" state with the board's note.
-- ❌ · Mentor approval email
+- ✅ Mentor approval email
 - ❌ · Password-reset email (Clerk handles automatically, just verify branding)
 - ❌ · Newsletter / mass-email tooling (defer — owner can use Resend directly for now)
 
