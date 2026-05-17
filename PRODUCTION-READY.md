@@ -61,7 +61,7 @@ status as we go.
 - ✅ /mentor-signup → /mentor-login
 - ✅ Mentor dashboard with assigned students
 - ✅ Weekly report submission (env-gated)
-- 🟡 ⚠️ **Mentor approval email** — currently signup just lands on donor dashboard with "pending" banner; admin promotes role manually without an email going out
+- ✅ **Mentor approval email** — sent on non-mentor → mentor role transition from either /dashboard/admin/users or /dashboard/admin/donors/[id]. Shared template in lib/notifications/mentorApproval.ts.
 - ❌ · Mentor profile editor (bio, availability, subjects)
 
 ### Admin flow
@@ -93,7 +93,7 @@ status as we go.
 - ✅ Student approval email
 - ✅ Donation thank-you (one-time + recurring)
 - 🟡 **Student rejection email** — admin can unlink, but there's no explicit "reject with reason" flow
-- ❌ · Mentor approval email
+- ✅ Mentor approval email
 - ❌ · Password-reset email (Clerk handles automatically, just verify branding)
 - ❌ · Newsletter / mass-email tooling (defer — owner can use Resend directly for now)
 
