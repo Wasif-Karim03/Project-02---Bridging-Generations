@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { upsertDonorProfile } from "@/lib/db/queries/donorProfiles";
-import { setUserRole } from "@/lib/db/queries/users";
+import { getUserById, setUserRole } from "@/lib/db/queries/users";
+import { sendMentorApprovalEmail } from "@/lib/notifications/mentorApproval";
 
 // Admin can edit any donor's public profile fields. This is a privileged
 // action — requireRole("admin") enforces it. The donor themselves edits
@@ -51,6 +52,9 @@ export async function adminSetDonorRoleAction(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   await requireRole("admin");
   if (!donorUserId) return { ok: false, error: "Invalid donor id." };
+  const prev = await getUserById(donorUserId);
+  const wasMentor = prev?.role === "mentor";
+
   if (role === "anonymous") {
     // setUserRole expects one of the active roles; "anonymous" deactivates.
     // For now treat it the same — schema enum includes anonymous so the cast
@@ -70,8 +74,17 @@ export async function adminSetDonorRoleAction(
       return { ok: false, error: "Could not update role." };
     }
   }
+
+  // Same approval email as /dashboard/admin/users — fires on the first
+  // non-mentor → mentor transition only. Identical wording so the donor's
+  // experience doesn't depend on which admin screen made the change.
+  if (role === "mentor" && !wasMentor && prev?.email) {
+    await sendMentorApprovalEmail({ email: prev.email, displayName: prev.displayName });
+  }
+
   revalidatePath(`/dashboard/admin/donors/${donorUserId}`);
   revalidatePath("/dashboard/admin");
   revalidatePath("/dashboard/admin/users");
+  revalidatePath("/dashboard/admin/mentors");
   return { ok: true };
 }
