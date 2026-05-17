@@ -101,7 +101,65 @@ export default async function StudentDashboard() {
     );
   }
 
-  // State 2: pending review (application submitted, admin hasn't linked slug yet)
+  // State 2a: rejected application — admin decided not to move forward.
+  // Soft language; lets the student see what (if anything) was noted, and
+  // points them at the donor side of the site since their account is still
+  // active for that.
+  if (registration.status === "rejected") {
+    return (
+      <div className="flex flex-col gap-8">
+        <header className="flex flex-col gap-2">
+          <Eyebrow>Student dashboard</Eyebrow>
+          <h1 className="text-balance text-heading-1 text-ink">
+            Your application wasn't approved this cycle.
+          </h1>
+          <p className="max-w-[60ch] text-body text-ink-2">
+            Thank you for applying. The board reviewed your application carefully and decided not to
+            move forward at this time. You're welcome to apply again in the future.
+          </p>
+          <StudentIdBadge code={studentCode} />
+        </header>
+        {registration.reviewerNotes ? (
+          <section className="flex flex-col gap-3 border-2 border-accent-2-text bg-accent-2-text/5 px-5 py-5">
+            <p className="text-eyebrow uppercase tracking-[0.1em] text-accent-2-text">
+              Note from the board
+            </p>
+            <p className="max-w-[60ch] whitespace-pre-line text-body text-ink">
+              {registration.reviewerNotes}
+            </p>
+          </section>
+        ) : null}
+        <section className="flex flex-col gap-3 border border-hairline bg-ground-2 p-5">
+          <p className="text-eyebrow uppercase tracking-[0.1em] text-accent">What you can do</p>
+          <ul className="flex flex-col gap-2 text-body text-ink-2">
+            <li>
+              ·{" "}
+              <Link
+                href="/contact"
+                className="text-accent underline underline-offset-[3px] hover:no-underline"
+              >
+                Write to us
+              </Link>{" "}
+              if you'd like guidance on strengthening a future application.
+            </li>
+            <li>
+              · Your account is still active. You can{" "}
+              <Link
+                href="/students"
+                className="text-accent underline underline-offset-[3px] hover:no-underline"
+              >
+                support other students
+              </Link>{" "}
+              in the program if you'd like.
+            </li>
+            <li>· Apply again next cycle — the application form is always open.</li>
+          </ul>
+        </section>
+      </div>
+    );
+  }
+
+  // State 2b: pending review (application submitted, admin hasn't decided yet)
   if (!studentSlug) {
     return (
       <div className="flex flex-col gap-8">

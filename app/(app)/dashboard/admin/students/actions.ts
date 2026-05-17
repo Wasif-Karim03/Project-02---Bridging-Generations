@@ -1,9 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/lib/auth";
+import { getCurrentDbUser, requireRole } from "@/lib/auth";
+import {
+  getLatestStudentRegistrationForUser,
+  setLatestStudentRegistrationStatus,
+} from "@/lib/db/queries/applications";
 import { getUserById, setUserStudentSlug } from "@/lib/db/queries/users";
 import { sendEmail } from "@/lib/forms/server";
+import { sendStudentRejectionEmail } from "@/lib/notifications/studentRejection";
 import { studentCodeForUuid } from "@/lib/student/studentCode";
 
 export async function adminLinkStudentSlugAction(
@@ -60,5 +65,64 @@ export async function adminLinkStudentSlugAction(
   } catch (err) {
     console.error("[admin/students/link] failed", err);
     return { ok: false, error: "Could not update the link." };
+  }
+}
+
+// Reject a pending student application. Sets the registration status to
+// "rejected", records who/when/why on the registration row, and sends a
+// soft-language rejection email. Does NOT change the user's role — they
+// keep their account and can use the site as a donor.
+export async function adminRejectStudentAction(
+  userId: string,
+  formData: FormData,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requireRole("admin");
+  if (!userId) return { ok: false, error: "Invalid student id." };
+  const reason = String(formData.get("reason") ?? "")
+    .trim()
+    .slice(0, 1000);
+  try {
+    const [target, reviewer, registration] = await Promise.all([
+      getUserById(userId),
+      getCurrentDbUser(),
+      getLatestStudentRegistrationForUser(userId),
+    ]);
+    if (!target?.email) return { ok: false, error: "Student has no email on file." };
+    if (!reviewer) return { ok: false, error: "Reviewer lookup failed." };
+    if (!registration) {
+      return { ok: false, error: "This student hasn't submitted an application yet." };
+    }
+    if (registration.status === "rejected") {
+      return { ok: false, error: "This application is already marked rejected." };
+    }
+    // Make sure they're not currently linked — if they are, the admin should
+    // unlink first via the slug dropdown. Rejecting a linked student would
+    // leave the dashboard in an inconsistent state.
+    if (target.studentSlug) {
+      return {
+        ok: false,
+        error: "Unlink the student from their Keystatic record before rejecting.",
+      };
+    }
+
+    await setLatestStudentRegistrationStatus({
+      applicantUserId: userId,
+      status: "rejected",
+      reviewedBy: reviewer.id,
+      notes: reason || null,
+    });
+    await sendStudentRejectionEmail({
+      email: target.email,
+      studentName: registration.studentName,
+      reason: reason || null,
+    });
+
+    revalidatePath("/dashboard/admin/students");
+    revalidatePath("/dashboard/admin");
+    revalidatePath("/dashboard/student");
+    return { ok: true };
+  } catch (err) {
+    console.error("[admin/students/reject] failed", err);
+    return { ok: false, error: "Could not save the decision. Please try again." };
   }
 }
