@@ -198,6 +198,12 @@ export const studentRegistrations = pgTable("student_registrations", {
   hobby: varchar("hobby", { length: 200 }),
   lifeTarget: text("life_target"),
   status: applicationStatusEnum("status").notNull().default("submitted"),
+  // Review trail — populated when an admin approves or rejects the
+  // application. reviewerNotes holds the rejection reason (or any approval
+  // commentary). Mirrors the same fields on scholarshipApplications.
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  reviewerNotes: text("reviewer_notes"),
 });
 
 // ---------- Mentor records (approved mentors) + assignments + reports ----------
