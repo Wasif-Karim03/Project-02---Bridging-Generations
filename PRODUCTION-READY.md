@@ -233,7 +233,7 @@ status as we go.
 - ✅ OpenGraph images on key routes
 - ✅ Meta titles + descriptions on every page
 - ✅ JSON-LD breadcrumbs on most routes
-- ❌ ⚠️ **NonprofitOrganization schema.org** markup on /about
+- ✅ **NonprofitOrganization schema.org** markup on /about + homepage; WebSite schema also on homepage.
 - ❌ · Canonical URLs verified everywhere
 - ❌ · Submit sitemap to Google Search Console after launch
 - ❌ · Add `<link rel="alternate" hreflang="bn"`> for Bengali pages
