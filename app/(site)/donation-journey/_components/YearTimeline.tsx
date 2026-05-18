@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { Link } from "next-view-transitions";
 import { TimelineRail } from "@/components/ui/editorial/TimelineRail";
 import { TagPill } from "@/components/ui/TagPill";
 import type { YearlyEntry } from "@/lib/content/donationJourney";
@@ -76,6 +77,14 @@ export function YearTimeline({ entries }: YearTimelineProps) {
                           <dd className="tabular-nums text-ink">{entry.donorCount ?? 0}</dd>
                         </div>
                       </dl>
+                      {entry.year ? (
+                        <Link
+                          href={`/donors/year/${entry.year}`}
+                          className="mt-1 text-meta uppercase tracking-[0.08em] text-accent transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-accent"
+                        >
+                          View all donors →
+                        </Link>
+                      ) : null}
                     </div>
 
                     {/* Right: milestone + optional quote */}

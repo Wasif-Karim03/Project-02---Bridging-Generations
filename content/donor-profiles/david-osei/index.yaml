@@ -1,0 +1,18 @@
+displayName: David Osei
+email: david.osei@example.com
+isAnonymous: false
+photoUrl: 'https://i.pravatar.cc/300?u=david-osei'
+country: Ghana
+joinedDate: '2024-04-18'
+message: 'Proud to be part of something bigger than myself.'
+donationHistory:
+  - date: '2024-04-18'
+    amount: 175
+    designation: books
+    linkedStudentId: rima
+    note: ''
+  - date: '2024-10-30'
+    amount: 125
+    designation: materials
+    linkedStudentId: mithun
+    note: ''

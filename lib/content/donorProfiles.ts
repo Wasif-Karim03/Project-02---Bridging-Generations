@@ -44,6 +44,21 @@ export function getStudentsSupported(history: readonly DonationEntry[]): number 
   return ids.size;
 }
 
+export async function getDonorsByYear(year: number): Promise<DonorProfile[]> {
+  const all = await getAllPublicDonorProfiles();
+  return all.filter((p) =>
+    (p.donationHistory ?? []).some(
+      (e) => e.date && new Date(e.date).getFullYear() === year,
+    ),
+  );
+}
+
+export function getYearTotalDonated(history: readonly DonationEntry[], year: number): number {
+  return history
+    .filter((e) => e.date && new Date(e.date).getFullYear() === year)
+    .reduce((sum, e) => sum + (e.amount ?? 0), 0);
+}
+
 /** Group donation history by year → month (1-indexed) for the calendar heat map. */
 export function groupHistoryByYearMonth(
   history: readonly DonationEntry[],

@@ -1,0 +1,18 @@
+displayName: Michael Chen
+email: michael.chen@example.com
+isAnonymous: false
+photoUrl: 'https://i.pravatar.cc/300?img=12'
+country: Australia
+joinedDate: '2024-01-08'
+message: 'Happy to contribute to the future of these brilliant kids.'
+donationHistory:
+  - date: '2024-01-08'
+    amount: 500
+    designation: tuition
+    linkedStudentId: anika
+    note: ''
+  - date: '2024-09-01'
+    amount: 250
+    designation: meals
+    linkedStudentId: mithun
+    note: ''

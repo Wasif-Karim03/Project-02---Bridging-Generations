@@ -1,0 +1,23 @@
+displayName: Fatima Malik
+email: fatima.malik@example.com
+isAnonymous: false
+photoUrl: 'https://i.pravatar.cc/300?u=fatima-malik'
+country: Bangladesh
+joinedDate: '2023-05-20'
+message: 'These children remind me of my own journey. Education changed my life.'
+donationHistory:
+  - date: '2023-05-20'
+    amount: 100
+    designation: meals
+    linkedStudentId: mithun
+    note: ''
+  - date: '2023-12-10'
+    amount: 150
+    designation: general
+    linkedStudentId: anika
+    note: ''
+  - date: '2024-05-05'
+    amount: 200
+    designation: tuition
+    linkedStudentId: bishal
+    note: ''

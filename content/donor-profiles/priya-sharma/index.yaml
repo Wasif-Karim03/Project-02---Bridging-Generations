@@ -1,0 +1,18 @@
+displayName: Priya Sharma
+email: priya.sharma@example.com
+isAnonymous: false
+photoUrl: 'https://i.pravatar.cc/300?u=priya-sharma'
+country: United Kingdom
+joinedDate: '2023-11-01'
+message: 'Bridging generations, one student at a time.'
+donationHistory:
+  - date: '2023-11-01'
+    amount: 120
+    designation: books
+    linkedStudentId: rima
+    note: ''
+  - date: '2024-03-15'
+    amount: 180
+    designation: tuition
+    linkedStudentId: bishal
+    note: ''

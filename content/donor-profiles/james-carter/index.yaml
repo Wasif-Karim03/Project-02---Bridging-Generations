@@ -1,0 +1,23 @@
+displayName: James Carter
+email: james.carter@example.com
+isAnonymous: false
+photoUrl: 'https://i.pravatar.cc/300?u=james-carter'
+country: Canada
+joinedDate: '2022-08-05'
+message: 'Every child deserves a chance to learn and grow.'
+donationHistory:
+  - date: '2022-08-05'
+    amount: 300
+    designation: tuition
+    linkedStudentId: bishal
+    note: ''
+  - date: '2023-08-12'
+    amount: 250
+    designation: general
+    linkedStudentId: mithun
+    note: ''
+  - date: '2024-02-28'
+    amount: 200
+    designation: materials
+    linkedStudentId: anika
+    note: ''

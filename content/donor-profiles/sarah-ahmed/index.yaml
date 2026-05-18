@@ -1,0 +1,23 @@
+displayName: Sarah Ahmed
+email: sarah.ahmed@example.com
+isAnonymous: false
+photoUrl: 'https://i.pravatar.cc/300?u=sarah-ahmed'
+country: United States
+joinedDate: '2023-03-10'
+message: 'Education is the most powerful gift we can give. I am proud to support these students.'
+donationHistory:
+  - date: '2023-03-10'
+    amount: 200
+    designation: tuition
+    linkedStudentId: anika
+    note: ''
+  - date: '2024-01-15'
+    amount: 150
+    designation: meals
+    linkedStudentId: mithun
+    note: ''
+  - date: '2024-06-20'
+    amount: 100
+    designation: books
+    linkedStudentId: rima
+    note: ''

@@ -43,6 +43,10 @@ export const donorProfileCollection = collection({
       description:
         "Link to a hosted photo (e.g. LinkedIn profile picture URL). Leave empty to show initials avatar.",
     }),
+    country: fields.text({
+      label: "Country (optional)",
+      description: "Donor's country, shown publicly on year donor pages (e.g. United States).",
+    }),
     joinedDate: fields.date({
       label: "Joined on",
       description: "Date the donor first gave. Shown on the public profile.",
