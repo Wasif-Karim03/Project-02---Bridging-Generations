@@ -352,3 +352,48 @@ Each unchecked item is a discrete task. We'll work top-down by priority:
 
 Update this file as items are completed — bump ❌ → 🟡 → ✅ and commit. Keep
 the list as the single source of truth for what's left.
+
+---
+
+## P. Post-launch backlog — features from Khokon's branch
+
+The owner specifically wants these features after launch. Khokon pushed a
+branch (`feat/donors-by-year` on `origin`) implementing them, but the branch
+was based on a pre-rebase init with no common ancestor against `develop`
+(it deletes ~50 of our shipped files and uses a YAML-driven data model
+that doesn't talk to the Stripe-driven `donations` table). So we treat
+his branch as a design reference, not a merge target — we rebuild these
+features ourselves once the auth + payments + email stack is live.
+
+Reference branch (do NOT delete — kept for design reference):
+**`origin/feat/donors-by-year`** (3 commits by Khokon Barua, oldest May 7)
+
+What to rebuild:
+
+- ❌ ⚠️ **`/donors/year/[year]` public page** — year-scoped donor listing
+  with breadcrumb "← Back to donors" and count. Reads from our
+  `donations` table grouped by year (not from YAML).
+- ❌ ⚠️ **Per-year donor cards** — name, country, photo, total given for
+  that year. Khokon's `DonorYearCard.tsx` + `DonorYearGrid.tsx` are
+  decent starting templates for the UI.
+- ❌ · **Search/filter on the year page** — Khokon's branch adds a
+  client-side search across the displayed donors.
+- ❌ · **`getDonorsByYear(year)` query helper** — needs to be Postgres-
+  driven for our model (JOIN donations + users + donor_profiles, sum
+  amount_cents per donor where occurred_at year matches).
+- ❌ · **`getYearTotalDonated(donor, year)` helper** — sum a single
+  donor's gifts in a given year. Same Postgres approach.
+- ❌ · **`groupHistoryByYearMonth(history)` helper** — useful for the
+  donor's own dashboard if we want a per-month breakdown view.
+- ❌ · **6 demo donor-profile YAML files** (`david-osei`, `fatima-malik`,
+  `james-carter`, `michael-chen`, `priya-sharma`, `sarah-ahmed`) — only
+  if the org wants seed demo donors before real donations arrive. Our
+  current /donors page already shows anonymized real DB rows once
+  donations land.
+
+Out of scope from his branch (do not rebuild):
+- His tweaks to ~94 existing files — those were just his version of
+  files we already built differently in the auth / admin / docs work.
+- The data-model shift from DB-backed to YAML-backed donations — we
+  stay DB-backed.
+
