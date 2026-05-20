@@ -110,9 +110,29 @@ proxy.ts           Next 16 middleware (Clerk + /design noindex)
 - **No `console.log` left in committed code.** `console.warn` / `console.error`
   for genuine ops signals is fine.
 
+## Service account ownership
+
+The project uses a **3-email model** to separate ops, public correspondence,
+and transactional sending. When you're about to create or reconfigure a
+third-party account, use these mappings — do NOT sign up with your personal
+email.
+
+| Email | Role | Used by which services |
+|---|---|---|
+| `bridginggenerationdevelopment@gmail.com` | **Developer ops** — owns every third-party account. Used so the dev team can manage services without pulling the owner into every billing alert / security email. | Netlify, Neon, Clerk, Stripe, Resend — every service login |
+| `bridginggeneration20@gmail.com` | **Org public Gmail** — the org's own contact address. Shown on the site as the contact email; receives contact-form messages. | Keystatic `siteSettings.contactEmail`, contact-form destination, board-facing correspondence |
+| `noreply@brigen.org` *(once domain verified)* | **Transactional from-address** — the "From:" header on emails the app sends (welcome, donation thank-yous, application receipts, approval/rejection notices). | `RESEND_FROM_EMAIL` env var. Domain must be DKIM/SPF/DMARC verified in Resend. |
+
+**Rules:**
+- New third-party service signups go through `bridginggenerationdevelopment@gmail.com`. Owner shouldn't get account-creation emails for ops services.
+- Don't tie production accounts to a personal Gmail or a university email. Personal/uni emails eventually deactivate; the project would lose access.
+- Each service should have 2FA enabled with recovery codes saved in a shared 1Password (or similar) vault that the owner has access to. Vault entries should include: service URL, login email, password, 2FA recovery codes, current API key fingerprints.
+- Outgoing transactional emails always send FROM `noreply@brigen.org` (once Resend's domain verification is complete). The reply-to header can point at `bridginggeneration20@gmail.com` so replies land somewhere a human reads.
+
 ## When in doubt
 
 Read `README.md` for the stack overview, `LAUNCH-CHECKLIST.md` for production
-setup, and recent `git log` for the commit-message style used here. If
-anything in this file conflicts with what the developer tells you in
-conversation, the developer's instruction wins — but flag the conflict.
+setup, `OWNER-MANUAL.md` for day-to-day operations, and recent `git log` for
+the commit-message style used here. If anything in this file conflicts with
+what the developer tells you in conversation, the developer's instruction
+wins — but flag the conflict.
