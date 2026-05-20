@@ -9,12 +9,23 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 // needed), so we only need form-action + connect-src for the Stripe.js
 // confirmation network call. Resend is server-side only and needs no entry.
 //
+// Clerk loads its SDK from *.clerk.accounts.dev (dev instance) and renders
+// a Cloudflare Turnstile widget for bot detection — both must be allowed
+// in script-src + connect-src + frame-src or the SignIn/SignUp components
+// silently fail to hydrate. The wildcard also covers the production Clerk
+// subdomain once we configure clerk.brigen.org later.
+//
 // 'unsafe-eval' is dev-only — Next.js HMR relies on dynamic code generation
 // for module replacement. Prod builds don't, so prod CSP omits it.
 const isDev = process.env.NODE_ENV !== "production";
+
+const clerkScriptSrc = "https://*.clerk.accounts.dev https://challenges.cloudflare.com";
+const clerkConnectSrc = "https://*.clerk.accounts.dev wss://*.clerk.accounts.dev https://clerk-telemetry.com";
+const clerkFrameSrc = "https://challenges.cloudflare.com";
+
 const scriptSrc = isDev
-  ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com"
-  : "script-src 'self' 'unsafe-inline' https://js.stripe.com";
+  ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com ${clerkScriptSrc}`
+  : `script-src 'self' 'unsafe-inline' https://js.stripe.com ${clerkScriptSrc}`;
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -22,8 +33,9 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://api.stripe.com https://m.stripe.com https://m.stripe.network",
-  "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+  `connect-src 'self' https://api.stripe.com https://m.stripe.com https://m.stripe.network ${clerkConnectSrc}`,
+  `frame-src 'self' https://js.stripe.com https://hooks.stripe.com ${clerkFrameSrc}`,
+  "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self' https://checkout.stripe.com",

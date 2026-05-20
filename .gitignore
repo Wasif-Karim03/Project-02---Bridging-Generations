@@ -68,3 +68,6 @@ _archive/
 # Per-dev personal notes for their own AI assistant.
 # AGENTS.md (the shared collaborator spec) is intentionally NOT ignored.
 CLAUDE.md
+
+# Local Netlify folder
+.netlify
