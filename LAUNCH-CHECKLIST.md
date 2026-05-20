@@ -4,6 +4,8 @@ Owner-facing checklist for taking the site from preview to production. Items are
 
 **Hosting target:** Netlify free tier — commercial use allowed, $0/month forever for this org's scale. The only annual cost is domain renewal (~$12/yr for `brigen.org`).
 
+**Email used to sign up to every service below:** `bridginggenerationdevelopment@gmail.com` (the dev-ops Gmail). This is intentional — see `AGENTS.md` § Service account ownership. Do not use your personal email for production service signups; the project would lose access if you change roles. Public-facing correspondence still goes to / from `bridginggeneration20@gmail.com` and `noreply@brigen.org`.
+
 ---
 
 ## Phase A — minimum viable launch (~30 minutes)
@@ -11,7 +13,7 @@ Owner-facing checklist for taking the site from preview to production. Items are
 Just the public marketing site, contact form, application forms (email-only), and Stripe donation flow. **Hosted on Netlify's free tier** (commercial use allowed, ~$0/month forever for this org's scale).
 
 ### A1. Connect repo to Netlify
-- [ ] Sign in at https://app.netlify.com (free, sign up with GitHub for one-click repo access)
+- [ ] Sign up at https://app.netlify.com **using `bridginggenerationdevelopment@gmail.com`** (free, sign up with Google for one-click repo access)
 - [ ] **Add new site → Import from Git → GitHub** → pick `Wasif-Karim03/Project-02---Bridging-Generations`
 - [ ] Netlify auto-detects Next.js and reads `netlify.toml`. Leave defaults — build command `npm run build`, publish dir `.next`
 - [ ] **Deploy site** — the first build will succeed even with zero env vars; the site renders in preview mode
@@ -24,7 +26,7 @@ Just the public marketing site, contact form, application forms (email-only), an
 - [ ] In Netlify **Site settings → Environment variables**, set `NEXT_PUBLIC_SITE_URL=https://brigen.org`
 
 ### A3. Resend for transactional email
-- [ ] Sign up at https://resend.com (free tier: 3,000 emails/month)
+- [ ] Sign up at https://resend.com **using `bridginggenerationdevelopment@gmail.com`** (free tier: 3,000 emails/month)
 - [ ] **Domains → Add Domain** → enter `brigen.org`
 - [ ] Add the SPF / DKIM / DMARC DNS records Resend shows you
 - [ ] Wait for "Verified" status (~1 hour)
@@ -35,7 +37,7 @@ Just the public marketing site, contact form, application forms (email-only), an
 - [ ] Redeploy. Now contact + application forms send real emails.
 
 ### A4. Stripe Checkout
-- [ ] Sign in to https://dashboard.stripe.com
+- [ ] Sign up at https://dashboard.stripe.com **using `bridginggenerationdevelopment@gmail.com`** (or sign in if the dev-ops account already exists)
 - [ ] **Developers → API keys** → copy `pk_test_…` + `sk_test_…` (use test keys to start; flip to LIVE keys at launch)
 - [ ] **Developers → Webhooks → Add endpoint**:
   - URL: `https://<your-domain>/api/stripe/webhook`
@@ -70,7 +72,7 @@ Just the public marketing site, contact form, application forms (email-only), an
 Unlocks: forms persist as queryable rows, admin queue shows real submissions, donor dashboard shows real donation history.
 
 ### B1. Provision Neon Postgres
-- [ ] Sign up at https://console.neon.tech (free tier: 0.5 GB storage, always free, no credit card)
+- [ ] Sign up at https://console.neon.tech **using `bridginggenerationdevelopment@gmail.com`** (free tier: 0.5 GB storage, always free, no credit card)
 - [ ] **New Project** → name `bridging-generations`, region nearest your users (e.g. AWS us-east-2)
 - [ ] **Connection Details** → copy the connection string (starts with `postgresql://`)
 - [ ] In Netlify env (Site settings → Environment variables), set `DATABASE_URL` to that string
@@ -93,7 +95,7 @@ This reads `db/schema.ts` and creates the 10 tables + indexes in your Neon datab
 Unlocks: real donor / mentor / admin dashboards, role-based access.
 
 ### C1. Clerk
-- [ ] Sign up at https://clerk.com
+- [ ] Sign up at https://clerk.com **using `bridginggenerationdevelopment@gmail.com`**
 - [ ] **Create application** → name: `Bridging Generations`
 - [ ] **Authentication → Email, Phone, Username**:
   - [ ] Enable **Email address** (required, default on)
@@ -142,7 +144,7 @@ Unlocks: real donor / mentor / admin dashboards, role-based access.
 - [ ] Redeploy
 
 ### D2. File uploads (donor photos + mentor report attachments)
-- [ ] Sign up at https://uploadthing.com or https://cloudinary.com (both free tiers fit this scale)
+- [ ] Sign up at https://uploadthing.com or https://cloudinary.com **using `bridginggenerationdevelopment@gmail.com`** (both free tiers fit this scale)
 - [ ] Generate API keys
 - [ ] In Netlify env, set the relevant tokens for your chosen provider
 - [ ] Update `lib/storage/` to point at the chosen provider (this is the only host-coupled piece — Vercel Blob was the original; we're not married to it)
