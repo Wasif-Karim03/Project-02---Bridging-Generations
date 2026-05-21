@@ -38,8 +38,8 @@ export default async function DonationJourneyPage() {
       <CTAFooterPanel
         headline="Join the journey."
         body="Every gift keeps one more student in school. Start a recurring sponsorship or make a one-time contribution."
-        ctaLabel="Create your donor profile"
-        ctaHref="/give"
+        ctaLabel="Become a donor"
+        ctaHref="/be-a-donor"
         tone="teal"
         titleId="journey-cta-title"
       />
