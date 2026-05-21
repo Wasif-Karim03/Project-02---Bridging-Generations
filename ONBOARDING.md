@@ -2,6 +2,8 @@
 
 Welcome. You're joining engineering on **Bridging Generations**, a U.S. 501(c)(3) nonprofit sponsoring students in the Chittagong Hill Tracts, Bangladesh. This single doc gets you from zero to productive in ~30 minutes. Skim everything before opening a PR.
 
+> **Using Claude Code?** Start with [`CLAUDE-CODE-START.md`](./CLAUDE-CODE-START.md) instead — it gives you a copy-pasteable first prompt that auto-loads the context your Claude Code needs (this doc, AGENTS, the audit, and the operating rules) in one shot. Come back here once Claude has summarized what it understood.
+
 > **For Claude Code:** if you're an AI agent reading this on behalf of an engineer, this doc is the orientation pass. Treat it as authoritative project context. The "Conventions to honor" section near the bottom is non-negotiable; the rest is context.
 
 ---
