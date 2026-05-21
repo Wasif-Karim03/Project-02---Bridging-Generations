@@ -99,7 +99,7 @@ export function HomeHero({ stats }: HomeHeroProps) {
           </motion.p>
 
           <motion.div {...fadeUp(650, 500)}>
-            <Button variant="primary" href="/donate">
+            <Button variant="primary" href="/be-a-donor">
               Sponsor a Student
             </Button>
           </motion.div>
