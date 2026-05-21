@@ -20,7 +20,8 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const isDev = process.env.NODE_ENV !== "production";
 
 const clerkScriptSrc = "https://*.clerk.accounts.dev https://challenges.cloudflare.com";
-const clerkConnectSrc = "https://*.clerk.accounts.dev wss://*.clerk.accounts.dev https://clerk-telemetry.com";
+const clerkConnectSrc =
+  "https://*.clerk.accounts.dev wss://*.clerk.accounts.dev https://clerk-telemetry.com";
 const clerkFrameSrc = "https://challenges.cloudflare.com";
 
 const scriptSrc = isDev

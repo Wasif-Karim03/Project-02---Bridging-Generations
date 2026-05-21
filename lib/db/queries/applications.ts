@@ -1,10 +1,55 @@
 import "server-only";
 import { desc, eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
-import type { StudentRegistration } from "@/db/schema";
+import type { MentorApplication, ScholarshipApplication, StudentRegistration } from "@/db/schema";
 import { mentorApplications, scholarshipApplications, studentRegistrations } from "@/db/schema";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { MOCK_APPLICATIONS } from "@/lib/content/applicationsMock";
+
+/** Discriminated union of one full application row, fetched for the admin
+ * detail page. Each variant carries the raw row so the page can render every
+ * field on the table — none of the summarisation that `getAllApplications`
+ * does for the list view. */
+export type ApplicationDetail =
+  | { kind: "scholarship"; data: ScholarshipApplication }
+  | { kind: "mentor"; data: MentorApplication }
+  | { kind: "student-sponsorship"; data: StudentRegistration };
+
+/** Fetch one application by (kind, id) for the admin review page. Returns
+ * null when the kind is unknown, the row doesn't exist, or the DB isn't
+ * configured (preview mode). */
+export async function getApplicationById(
+  kind: ApplicationRow["kind"],
+  id: string,
+): Promise<ApplicationDetail | null> {
+  if (!isDbConfigured()) return null;
+  const db = getDb();
+  if (kind === "scholarship") {
+    const rows = await db
+      .select()
+      .from(scholarshipApplications)
+      .where(eq(scholarshipApplications.id, id))
+      .limit(1);
+    return rows[0] ? { kind, data: rows[0] } : null;
+  }
+  if (kind === "mentor") {
+    const rows = await db
+      .select()
+      .from(mentorApplications)
+      .where(eq(mentorApplications.id, id))
+      .limit(1);
+    return rows[0] ? { kind, data: rows[0] } : null;
+  }
+  if (kind === "student-sponsorship") {
+    const rows = await db
+      .select()
+      .from(studentRegistrations)
+      .where(eq(studentRegistrations.id, id))
+      .limit(1);
+    return rows[0] ? { kind, data: rows[0] } : null;
+  }
+  return null;
+}
 
 /**
  * Most recent student registration submitted by a given user. Drives the
