@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/lib/auth";
+import { getCurrentDbUser, requireRole } from "@/lib/auth";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { setApplicationStatus } from "@/lib/db/queries/applications";
 
@@ -20,9 +20,20 @@ export async function setApplicationStatusAction(
   reviewerNotes?: string,
 ): Promise<ApprovalResult> {
   await requireRole("admin");
+  const dbUser = await getCurrentDbUser();
+  if (!dbUser) {
+    return {
+      status: "error",
+      message: "Could not identify the reviewer. Sign out and back in, then retry.",
+    };
+  }
   try {
-    await setApplicationStatus(kind, id, status, reviewerNotes);
+    await setApplicationStatus(kind, id, status, {
+      reviewedBy: dbUser.id,
+      reviewerNotes,
+    });
     revalidatePath("/dashboard/admin");
+    revalidatePath("/dashboard/admin/applications");
     return {
       status: "success",
       message: `Application marked ${status.replace(/_/g, " ")}.`,

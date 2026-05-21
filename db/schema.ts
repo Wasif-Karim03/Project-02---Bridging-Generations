@@ -165,6 +165,13 @@ export const mentorApplications = pgTable("mentor_applications", {
   status: applicationStatusEnum("status").notNull().default("submitted"),
   approvedUserId: uuid("approved_user_id").references(() => users.id, { onDelete: "set null" }),
   approvedAt: timestamp("approved_at", { withTimezone: true }),
+  // Review trail — populated by the admin detail page on any status change.
+  // approvedUserId / approvedAt above stay as the "moment of becoming a
+  // mentor" markers; these capture every review touch (including rejections
+  // and re-reviews) so admins can leave context for each other.
+  reviewedBy: uuid("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  reviewerNotes: text("reviewer_notes"),
 });
 
 export const studentRegistrations = pgTable("student_registrations", {
