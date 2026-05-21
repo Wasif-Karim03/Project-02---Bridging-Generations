@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireRole } from "@/lib/auth";
+import { getCurrentDbUser, requireRole } from "@/lib/auth";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { setApplicationStatus } from "@/lib/db/queries/applications";
 
@@ -33,6 +33,13 @@ export async function submitApplicationReview(
   formData: FormData,
 ): Promise<ReviewActionState> {
   await requireRole("admin");
+  const dbUser = await getCurrentDbUser();
+  if (!dbUser) {
+    return {
+      status: "error",
+      message: "Could not identify the reviewer. Sign out and back in, then retry.",
+    };
+  }
 
   const kind = String(formData.get("kind") ?? "");
   const id = String(formData.get("id") ?? "");
@@ -54,9 +61,13 @@ export async function submitApplicationReview(
       kind as ApplicationRow["kind"],
       id,
       nextStatus as ApplicationStatus,
-      notes ? notes : undefined,
+      {
+        reviewedBy: dbUser.id,
+        reviewerNotes: notes,
+      },
     );
     revalidatePath("/dashboard/admin");
+    revalidatePath("/dashboard/admin/applications");
     revalidatePath(`/dashboard/admin/applications/${kind}/${id}`);
     return {
       status: "success",

@@ -18,12 +18,9 @@ type Props = {
   id: string;
   currentStatus: ApplicationStatus;
   initialNotes: string;
-  /** Mentor applications don't have a reviewer_notes column yet, so we hide
-   * the textarea for that kind. The server action ignores notes either way. */
-  supportsNotes: boolean;
 };
 
-export function ReviewControls({ kind, id, currentStatus, initialNotes, supportsNotes }: Props) {
+export function ReviewControls({ kind, id, currentStatus, initialNotes }: Props) {
   const [state, formAction, isPending] = useActionState(
     submitApplicationReview,
     INITIAL_REVIEW_STATE,
@@ -52,22 +49,19 @@ export function ReviewControls({ kind, id, currentStatus, initialNotes, supports
         </select>
       </label>
 
-      {supportsNotes ? (
-        <label className="flex flex-col gap-1">
-          <span className="text-meta uppercase tracking-[0.06em] text-ink-2">Reviewer notes</span>
-          <textarea
-            name="notes"
-            defaultValue={initialNotes}
-            rows={5}
-            placeholder="Context, rationale, follow-up actions… visible to other admins only."
-            className="border border-hairline bg-ground px-3 py-2 text-body text-ink focus:border-accent focus:outline-none"
-          />
-          <span className="text-meta text-ink-2">
-            Notes are stored against the application row and shown to every admin reviewing it
-            later.
-          </span>
-        </label>
-      ) : null}
+      <label className="flex flex-col gap-1">
+        <span className="text-meta uppercase tracking-[0.06em] text-ink-2">Reviewer notes</span>
+        <textarea
+          name="notes"
+          defaultValue={initialNotes}
+          rows={5}
+          placeholder="Context, rationale, follow-up actions… visible to other admins only."
+          className="border border-hairline bg-ground px-3 py-2 text-body text-ink focus:border-accent focus:outline-none"
+        />
+        <span className="text-meta text-ink-2">
+          Notes are stored against the application row and shown to every admin reviewing it later.
+        </span>
+      </label>
 
       <button
         type="submit"

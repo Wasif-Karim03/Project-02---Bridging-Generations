@@ -43,10 +43,8 @@ export default async function AdminApplicationDetailPage({
   if (!detail) notFound();
 
   const { applicantLabel, applicantEmail, submittedAt, status, fields } = extractDisplay(detail);
-  const supportsNotes = detail.kind !== "mentor";
-  const existingNotes = supportsNotes
-    ? ((detail.data as { reviewerNotes: string | null }).reviewerNotes ?? "")
-    : "";
+  // Every kind now has a reviewer_notes column; pull it off directly.
+  const existingNotes = (detail.data as { reviewerNotes: string | null }).reviewerNotes ?? "";
 
   return (
     <div className="flex flex-col gap-10">
@@ -90,19 +88,7 @@ export default async function AdminApplicationDetailPage({
           <h2 id="review-title" className="text-heading-3 text-ink">
             Review
           </h2>
-          <ReviewControls
-            kind={kind}
-            id={id}
-            currentStatus={status}
-            initialNotes={existingNotes}
-            supportsNotes={supportsNotes}
-          />
-          {!supportsNotes ? (
-            <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
-              Mentor applications don't store reviewer notes yet — only status changes are
-              persisted.
-            </p>
-          ) : null}
+          <ReviewControls kind={kind} id={id} currentStatus={status} initialNotes={existingNotes} />
         </section>
       </div>
     </div>
