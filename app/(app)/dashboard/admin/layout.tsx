@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Link } from "next-view-transitions";
 import { isDbConfigured } from "@/db/client";
 import { getCurrentDbUser, isClerkConfigured, requireRole } from "@/lib/auth";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
+import { AdminNav } from "./_components/AdminNav";
 import { AdminSignOutButton } from "./_components/AdminSignOutButton";
 
 export const metadata: Metadata = {
@@ -46,38 +46,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </div>
       </header>
 
-      <nav
-        aria-label="Admin sections"
-        className="flex flex-wrap gap-x-5 gap-y-2 border-b border-hairline pb-3 text-meta uppercase tracking-[0.08em]"
-      >
-        <Link href="/dashboard/admin" className="text-ink hover:text-accent">
-          Overview
-        </Link>
-        <Link href="/dashboard/admin/applications" className="text-ink-2 hover:text-accent">
-          Applications
-        </Link>
-        <Link href="/dashboard/admin/donations" className="text-ink-2 hover:text-accent">
-          Donations
-        </Link>
-        <Link href="/dashboard/admin#donors-title" className="text-ink-2 hover:text-accent">
-          Donors
-        </Link>
-        <Link href="/dashboard/admin/students" className="text-ink-2 hover:text-accent">
-          Students
-        </Link>
-        <Link href="/dashboard/admin/mentors" className="text-ink-2 hover:text-accent">
-          Mentors
-        </Link>
-        <Link href="/dashboard/admin/users" className="text-ink-2 hover:text-accent">
-          Users & roles
-        </Link>
-        <Link href="/dashboard/admin/audit" className="text-ink-2 hover:text-accent">
-          Audit log
-        </Link>
-        <Link href="/dashboard/admin#exports-title" className="text-ink-2 hover:text-accent">
-          Exports
-        </Link>
-      </nav>
+      <AdminNav />
 
       <div>{children}</div>
     </div>
