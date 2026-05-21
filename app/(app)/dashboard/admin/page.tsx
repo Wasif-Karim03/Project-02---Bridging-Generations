@@ -86,7 +86,12 @@ export default async function AdminDashboard() {
                     {APPLICATION_KIND_LABEL[a.kind]}
                   </td>
                   <td className="py-3 pr-4 align-top text-ink">
-                    <div className="font-semibold">{a.applicantName}</div>
+                    <Link
+                      href={`/dashboard/admin/applications/${a.kind}/${a.id}`}
+                      className="font-semibold text-accent underline underline-offset-[3px] hover:no-underline"
+                    >
+                      {a.applicantName}
+                    </Link>
                     <div className="text-meta text-ink-2">{a.email}</div>
                   </td>
                   <td className="py-3 pr-4 align-top text-ink-2">{a.summary}</td>
@@ -224,6 +229,23 @@ export default async function AdminDashboard() {
               </span>
               <span className="text-body-sm text-ink-2">
                 See every mentor, pair them with students, and review their weekly reports.
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/keystatic"
+              className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
+            >
+              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">
+                Site content
+              </span>
+              <span className="text-heading-5 text-ink group-hover:text-accent">
+                Edit pages, students, projects
+              </span>
+              <span className="text-body-sm text-ink-2">
+                Opens the Keystatic CMS where board members edit site copy, student records,
+                projects, testimonials, and home-page numbers. Sign in with GitHub.
               </span>
             </Link>
           </li>
