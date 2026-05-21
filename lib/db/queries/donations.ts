@@ -86,6 +86,143 @@ export async function thisMonthTotalCents(userId?: string): Promise<number> {
   return Number(result[0]?.total ?? 0);
 }
 
+/** Sum of cents donated across the whole org's history. Drives the
+ * lifetime tile on the admin donations dashboard. */
+export async function lifetimeTotalCents(): Promise<number> {
+  if (!isDbConfigured()) return 0;
+  const db = getDb();
+  const result = await db.select({ total: sum(donations.amountCents) }).from(donations);
+  return Number(result[0]?.total ?? 0);
+}
+
+/** Sum of cents donated in the current calendar year (UTC). */
+export async function thisYearTotalCents(): Promise<number> {
+  if (!isDbConfigured()) return 0;
+  const db = getDb();
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+  const end = new Date(Date.UTC(now.getUTCFullYear() + 1, 0, 1));
+  const result = await db
+    .select({ total: sum(donations.amountCents) })
+    .from(donations)
+    .where(and(gte(donations.occurredAt, start), lt(donations.occurredAt, end)));
+  return Number(result[0]?.total ?? 0);
+}
+
+/** Sum of cents donated in the last 7 days. Rolling window, not calendar
+ * week, so the tile stays accurate regardless of which day the admin opens
+ * the dashboard. */
+export async function lastSevenDaysTotalCents(): Promise<number> {
+  if (!isDbConfigured()) return 0;
+  const db = getDb();
+  const start = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const result = await db
+    .select({ total: sum(donations.amountCents) })
+    .from(donations)
+    .where(gte(donations.occurredAt, start));
+  return Number(result[0]?.total ?? 0);
+}
+
+/** Most recent donations (any user / project), newest first. Drives the
+ * "Recent donations" table on the admin donations dashboard. Joins users
+ * for the donor display name. */
+export type RecentDonationRow = {
+  id: string;
+  occurredAt: Date;
+  amountCents: number;
+  currency: string;
+  recurring: boolean;
+  donorEmail: string | null;
+  donorDisplayName: string | null;
+  studentSlug: string | null;
+  projectSlug: string | null;
+};
+export async function getRecentDonations(limit = 25): Promise<RecentDonationRow[]> {
+  if (!isDbConfigured()) return [];
+  const db = getDb();
+  const rows = await db
+    .select({
+      id: donations.id,
+      occurredAt: donations.occurredAt,
+      amountCents: donations.amountCents,
+      currency: donations.currency,
+      recurring: donations.recurring,
+      donorEmail: donations.donorEmail,
+      donorDisplayName: users.displayName,
+      studentSlug: donations.studentSlug,
+      projectSlug: donations.projectSlug,
+    })
+    .from(donations)
+    .leftJoin(users, eq(donations.donorUserId, users.id))
+    .orderBy(desc(donations.occurredAt))
+    .limit(limit);
+  return rows;
+}
+
+/** Top student slugs by total raised. studentSlug=null donations (general
+ * fund / project-only) are excluded. */
+export type TopRecipientStudent = {
+  studentSlug: string;
+  totalCents: number;
+  giftCount: number;
+};
+export async function getTopRecipientStudents(limit = 5): Promise<TopRecipientStudent[]> {
+  if (!isDbConfigured()) return [];
+  const db = getDb();
+  const rows = await db
+    .select({
+      studentSlug: donations.studentSlug,
+      totalCents: sum(donations.amountCents),
+      giftCount: sql<number>`count(${donations.id})::int`,
+    })
+    .from(donations)
+    .where(isNotNull(donations.studentSlug))
+    .groupBy(donations.studentSlug)
+    .orderBy(desc(sum(donations.amountCents)))
+    .limit(limit);
+  return rows
+    .filter((r): r is { studentSlug: string; totalCents: string | null; giftCount: number } =>
+      Boolean(r.studentSlug),
+    )
+    .map((r) => ({
+      studentSlug: r.studentSlug,
+      totalCents: Number(r.totalCents ?? 0),
+      giftCount: Number(r.giftCount ?? 0),
+    }));
+}
+
+/** Breakdown of recurring vs one-time across all donations. Returns the
+ * count and dollar total for each kind so the donations dashboard can show
+ * the ratio. */
+export type RecurringBreakdown = {
+  recurringCount: number;
+  recurringCents: number;
+  oneTimeCount: number;
+  oneTimeCents: number;
+};
+export async function getRecurringBreakdown(): Promise<RecurringBreakdown> {
+  if (!isDbConfigured()) {
+    return { recurringCount: 0, recurringCents: 0, oneTimeCount: 0, oneTimeCents: 0 };
+  }
+  const db = getDb();
+  const rows = await db
+    .select({
+      recurring: donations.recurring,
+      total: sum(donations.amountCents),
+      count: sql<number>`count(${donations.id})::int`,
+    })
+    .from(donations)
+    .groupBy(donations.recurring);
+  const recurring = rows.find((r) => r.recurring === true);
+  const oneTime = rows.find((r) => r.recurring === false);
+  return {
+    recurringCount: Number(recurring?.count ?? 0),
+    recurringCents: Number(recurring?.total ?? 0),
+    oneTimeCount: Number(oneTime?.count ?? 0),
+    oneTimeCents: Number(oneTime?.total ?? 0),
+  };
+}
+
 export async function lastMonthTotalCents(userId?: string): Promise<number> {
   if (!isDbConfigured()) return 0;
   const db = getDb();
