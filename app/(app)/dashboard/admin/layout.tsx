@@ -56,6 +56,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/dashboard/admin/applications" className="text-ink-2 hover:text-accent">
           Applications
         </Link>
+        <Link href="/dashboard/admin/donations" className="text-ink-2 hover:text-accent">
+          Donations
+        </Link>
         <Link href="/dashboard/admin#donors-title" className="text-ink-2 hover:text-accent">
           Donors
         </Link>
@@ -67,6 +70,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </Link>
         <Link href="/dashboard/admin/users" className="text-ink-2 hover:text-accent">
           Users & roles
+        </Link>
+        <Link href="/dashboard/admin/audit" className="text-ink-2 hover:text-accent">
+          Audit log
         </Link>
         <Link href="/dashboard/admin#exports-title" className="text-ink-2 hover:text-accent">
           Exports
