@@ -2,7 +2,13 @@ import "server-only";
 import { desc, eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
 import type { MentorApplication, ScholarshipApplication, StudentRegistration } from "@/db/schema";
-import { mentorApplications, scholarshipApplications, studentRegistrations } from "@/db/schema";
+import {
+  mentorApplications,
+  mentors,
+  scholarshipApplications,
+  studentRegistrations,
+  users,
+} from "@/db/schema";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { MOCK_APPLICATIONS } from "@/lib/content/applicationsMock";
 
@@ -196,6 +202,12 @@ export async function setApplicationStatus(
         approvedAt: status === "approved" ? reviewedAt : null,
       })
       .where(eq(mentorApplications.id, id));
+    // On approve, try to auto-link the application to a user account and
+    // promote them to the mentor role. No-op if the applicant hasn't signed
+    // up yet — admin can promote them by hand once they do.
+    if (status === "approved") {
+      await autoPromoteMentorIfPossible(id);
+    }
   } else if (kind === "student-sponsorship") {
     await db
       .update(studentRegistrations)
@@ -321,4 +333,54 @@ export async function insertStudentRegistration(
     })
     .returning({ id: studentRegistrations.id });
   return inserted[0]?.id ?? null;
+}
+
+/** When an admin approves a mentor application, try to flip the matching
+ * user account's role to "mentor" and create the canonical `mentors` row.
+ * No-op when:
+ *   - the applicant hasn't signed up yet (no user with that email)
+ *   - the user is already mentor / admin / it / student (don't downgrade or
+ *     re-overwrite roles we shouldn't touch)
+ *
+ * Admin can always promote manually from /dashboard/admin/users if this
+ * helper bails out. */
+async function autoPromoteMentorIfPossible(applicationId: string): Promise<void> {
+  if (!isDbConfigured()) return;
+  const db = getDb();
+
+  const appRows = await db
+    .select({ email: mentorApplications.email })
+    .from(mentorApplications)
+    .where(eq(mentorApplications.id, applicationId))
+    .limit(1);
+  const applicantEmail = appRows[0]?.email;
+  if (!applicantEmail) return;
+
+  const userRows = await db.select().from(users).where(eq(users.email, applicantEmail)).limit(1);
+  const user = userRows[0];
+  if (!user) return;
+
+  // Only promote from donor/anonymous. Admin/it/student stay where they are;
+  // an existing mentor doesn't need re-promotion. The mentor application
+  // record still gets approvedUserId linked below for everyone.
+  const promotable = user.role === "donor" || user.role === "anonymous";
+  if (promotable) {
+    await db
+      .update(users)
+      .set({ role: "mentor", updatedAt: new Date() })
+      .where(eq(users.id, user.id));
+  }
+
+  // Link the application to the user (one-time idempotent set).
+  await db
+    .update(mentorApplications)
+    .set({ approvedUserId: user.id })
+    .where(eq(mentorApplications.id, applicationId));
+
+  // Canonical mentors row. The (userId) column is unique, so re-approving an
+  // existing mentor is a no-op via onConflictDoNothing.
+  await db
+    .insert(mentors)
+    .values({ userId: user.id, applicationId, bio: null })
+    .onConflictDoNothing({ target: mentors.userId });
 }
