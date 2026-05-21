@@ -158,32 +158,54 @@ export async function getAllApplications(): Promise<ApplicationRow[]> {
   return merged.sort((a, b) => b.submittedAt.getTime() - a.submittedAt.getTime());
 }
 
-// Update status on any application kind. We accept the kind explicitly to
-// avoid a 3-way lookup; the admin UI passes it from the row.
+// Update status + review trail on any application kind. We accept the kind
+// explicitly to avoid a 3-way lookup; the admin UI passes it from the row.
+// reviewedBy is the DB user.id of the admin making the change — required when
+// the DB is configured so the audit trail isn't anonymous. Notes are
+// optional; pass undefined or "" to clear them.
 export async function setApplicationStatus(
   kind: ApplicationRow["kind"],
   id: string,
   status: ApplicationStatus,
-  reviewerNotes?: string,
+  args: { reviewedBy: string; reviewerNotes?: string },
 ): Promise<void> {
   if (!isDbConfigured()) return;
   const db = getDb();
   const reviewedAt = new Date();
+  const notes = args.reviewerNotes?.trim() || null;
   if (kind === "scholarship") {
     await db
       .update(scholarshipApplications)
-      .set({ status, reviewerNotes: reviewerNotes ?? null, reviewedAt })
+      .set({
+        status,
+        reviewerNotes: notes,
+        reviewedAt,
+        reviewedBy: args.reviewedBy,
+      })
       .where(eq(scholarshipApplications.id, id));
   } else if (kind === "mentor") {
     await db
       .update(mentorApplications)
       .set({
         status,
+        reviewerNotes: notes,
+        reviewedAt,
+        reviewedBy: args.reviewedBy,
+        // approvedAt is the "became a mentor" timestamp; only set it when we
+        // flip to approved, clear it otherwise (re-rejection scenario).
         approvedAt: status === "approved" ? reviewedAt : null,
       })
       .where(eq(mentorApplications.id, id));
   } else if (kind === "student-sponsorship") {
-    await db.update(studentRegistrations).set({ status }).where(eq(studentRegistrations.id, id));
+    await db
+      .update(studentRegistrations)
+      .set({
+        status,
+        reviewerNotes: notes,
+        reviewedAt,
+        reviewedBy: args.reviewedBy,
+      })
+      .where(eq(studentRegistrations.id, id));
   }
 }
 

@@ -53,7 +53,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/dashboard/admin" className="text-ink hover:text-accent">
           Overview
         </Link>
-        <Link href="/dashboard/admin#applications-title" className="text-ink-2 hover:text-accent">
+        <Link href="/dashboard/admin/applications" className="text-ink-2 hover:text-accent">
           Applications
         </Link>
         <Link href="/dashboard/admin#donors-title" className="text-ink-2 hover:text-accent">
