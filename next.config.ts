@@ -76,6 +76,14 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        // Legacy non-Clerk donor profile route. Every donor signup now flows
+        // through /be-a-donor → Clerk; this redirect keeps any stale links
+        // or bookmarks from landing on a deleted page.
+        source: "/give",
+        destination: "/be-a-donor",
+        permanent: true,
+      },
+      {
         source: "/donate-us",
         destination: "/donate",
         permanent: true,

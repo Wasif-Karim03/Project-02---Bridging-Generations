@@ -173,8 +173,8 @@ export default async function DonorProfilePage({ params }: { params: Promise<Par
       <CTAFooterPanel
         headline="Support a student."
         body="Your gift funds tuition, daily meals, books, and materials for children across the Chittagong Hill Tracts."
-        ctaLabel="Create your donor profile"
-        ctaHref="/give"
+        ctaLabel="Become a donor"
+        ctaHref="/be-a-donor"
         tone="teal"
         titleId="donor-profile-cta-title"
       />
