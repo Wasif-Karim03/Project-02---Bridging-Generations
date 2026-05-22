@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "next-view-transitions";
 import { useEffect, useRef, useState } from "react";
 import { LanguageToggle } from "@/components/layout/LanguageToggle";
+import { ScrollProgressRule } from "@/components/layout/ScrollProgressRule";
 import { SheetDrawer } from "@/components/ui/SheetDrawer";
 import {
   donateCta,
@@ -62,8 +63,10 @@ export function Nav({ contactEmail, phoneNumber, whatsappNumber }: NavProps = {}
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOnDonate =
     (pathname?.startsWith("/donate") ?? false) || (pathname?.startsWith("/be-a-donor") ?? false);
 
@@ -108,164 +111,175 @@ export function Nav({ contactEmail, phoneNumber, whatsappNumber }: NavProps = {}
     };
   }, [openDropdown]);
 
+  // Hide the header while scrolling; reveal 200 ms after the last scroll tick.
+  // Skip hiding when the drawer or a dropdown is open, and when the page is
+  // within 80 px of the top so a tiny bump doesn't yank the nav away.
+  useEffect(() => {
+    function handleScroll() {
+      if (open || openDropdown || window.scrollY < 80) {
+        setIsScrolling(false);
+        return;
+      }
+      setIsScrolling(true);
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => setIsScrolling(false), 200);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    };
+  }, [open, openDropdown]);
+
   const closeDrawer = () => setOpen(false);
 
   return (
     <>
-      {/* Contact strip — phone + email + language toggle at the top per spec.
-          Hidden on mobile to keep the chrome compact; mobile drawer surfaces them. */}
-      <div className="hidden border-b border-white/15 bg-accent text-white lg:block">
-        <div className="mx-auto flex h-9 max-w-[1280px] items-center justify-end gap-6 px-4 sm:px-6 lg:px-[6%]">
-          {phoneNumber ? (
-            <a
-              href={`tel:${phoneNumber.replace(/\s+/g, "")}`}
-              className="inline-flex items-center gap-1.5 text-meta uppercase tracking-[0.04em] transition-colors hover:text-accent-3"
-            >
-              <Phone className="size-3.5" aria-hidden="true" />
-              <span>{phoneNumber}</span>
-            </a>
-          ) : null}
-          {contactEmail ? (
-            <a
-              href={`mailto:${contactEmail}`}
-              className="inline-flex items-center gap-1.5 text-meta normal-case transition-colors hover:text-accent-3"
-            >
-              <Mail className="size-3.5" aria-hidden="true" />
-              <span>{contactEmail}</span>
-            </a>
-          ) : null}
-          <LanguageToggle variant="compact" />
-        </div>
-      </div>
+      {/* White over the dark nav; accent blue over light page content when nav is hidden. */}
+      <ScrollProgressRule barClassName={isScrolling ? "bg-accent" : "bg-white"} />
 
-      <nav aria-label="Primary" className="fixed inset-x-0 top-0 z-50 bg-accent lg:top-9">
-        <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-[6%]">
-          <Link
-            href="/"
-            className="inline-flex min-h-[44px] items-center whitespace-nowrap text-body font-bold tracking-[-0.005em] text-white transition-colors hover:text-accent-3 active:text-accent-3 sm:text-heading-6"
-          >
-            Bridging Generations
-          </Link>
-          <ul className="hidden items-center gap-7 lg:flex">
-            {primaryNav.map((item) => {
-              const active = isActive(pathname, item.href);
-              const label = resolveLabel(t, item);
-              if (hasDropdown(item)) {
-                const isOpen = openDropdown === item.href;
+      {/* Single fixed wrapper — contact strip + nav bar slide as one unit so
+          there is no gap between them when the header hides/shows. */}
+      <div
+        className={
+          isScrolling
+            ? "fixed inset-x-0 top-0 z-50 -translate-y-full transition-transform duration-300 ease-out"
+            : "fixed inset-x-0 top-0 z-50 translate-y-0 transition-transform duration-300 ease-out"
+        }
+      >
+        <nav aria-label="Primary" className="bg-accent">
+          <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-[6%]">
+            <Link
+              href="/"
+              className="inline-flex min-h-[44px] items-center whitespace-nowrap text-body font-bold tracking-[-0.005em] text-white transition-colors hover:text-accent-3 active:text-accent-3 sm:text-heading-6"
+            >
+              Bridging Generations
+            </Link>
+            <ul className="hidden items-center gap-7 lg:flex">
+              {primaryNav.map((item) => {
+                const active = isActive(pathname, item.href);
+                const label = resolveLabel(t, item);
+                if (hasDropdown(item)) {
+                  const isOpen = openDropdown === item.href;
+                  return (
+                    <li key={item.href} data-nav-dropdown className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setOpenDropdown(isOpen ? null : item.href)}
+                        aria-haspopup="menu"
+                        aria-expanded={isOpen}
+                        className={
+                          active
+                            ? "relative inline-flex items-center gap-1 text-nav-link font-bold uppercase text-white transition-colors"
+                            : "inline-flex items-center gap-1 text-nav-link uppercase text-white transition-colors hover:text-accent-3 active:text-accent-3"
+                        }
+                      >
+                        {label}
+                        <ChevronDown
+                          className={
+                            isOpen
+                              ? "size-3 transition-transform rotate-180"
+                              : "size-3 transition-transform"
+                          }
+                          aria-hidden="true"
+                        />
+                        {active ? <ActiveMotif /> : null}
+                      </button>
+                      {isOpen ? (
+                        <div
+                          role="menu"
+                          className="absolute left-1/2 top-full z-50 mt-3 w-72 -translate-x-1/2 shape-bevel border border-hairline bg-ground-2 p-3 shadow-[var(--shadow-card-hover)]"
+                        >
+                          <ul className="flex flex-col gap-1">
+                            {item.dropdown.map((d) => {
+                              const dLabel = resolveLabel(t, d);
+                              const dDesc = d.descriptionKey ? t(d.descriptionKey) : d.description;
+                              return (
+                                <li key={d.href}>
+                                  <Link
+                                    href={d.href}
+                                    role="menuitem"
+                                    onClick={() => setOpenDropdown(null)}
+                                    className="block px-3 py-2 transition-colors hover:bg-ground-3 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
+                                  >
+                                    <span className="block text-body-sm font-semibold text-ink">
+                                      {dLabel}
+                                    </span>
+                                    {dDesc ? (
+                                      <span className="mt-0.5 block text-meta text-ink-2 normal-case">
+                                        {dDesc}
+                                      </span>
+                                    ) : null}
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </li>
+                  );
+                }
                 return (
-                  <li key={item.href} data-nav-dropdown className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setOpenDropdown(isOpen ? null : item.href)}
-                      aria-haspopup="menu"
-                      aria-expanded={isOpen}
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
                       className={
                         active
-                          ? "relative inline-flex items-center gap-1 text-nav-link font-bold uppercase text-white transition-colors"
-                          : "inline-flex items-center gap-1 text-nav-link uppercase text-white transition-colors hover:text-accent-3 active:text-accent-3"
+                          ? "relative text-nav-link font-bold uppercase text-white transition-colors"
+                          : "text-nav-link uppercase text-white transition-colors hover:text-accent-3 active:text-accent-3"
                       }
                     >
                       {label}
-                      <ChevronDown
-                        className={
-                          isOpen
-                            ? "size-3 transition-transform rotate-180"
-                            : "size-3 transition-transform"
-                        }
-                        aria-hidden="true"
-                      />
                       {active ? <ActiveMotif /> : null}
-                    </button>
-                    {isOpen ? (
-                      <div
-                        role="menu"
-                        className="absolute left-1/2 top-full z-50 mt-3 w-72 -translate-x-1/2 shape-bevel border border-hairline bg-ground-2 p-3 shadow-[var(--shadow-card-hover)]"
-                      >
-                        <ul className="flex flex-col gap-1">
-                          {item.dropdown.map((d) => {
-                            const dLabel = resolveLabel(t, d);
-                            const dDesc = d.descriptionKey ? t(d.descriptionKey) : d.description;
-                            return (
-                              <li key={d.href}>
-                                <Link
-                                  href={d.href}
-                                  role="menuitem"
-                                  onClick={() => setOpenDropdown(null)}
-                                  className="block px-3 py-2 transition-colors hover:bg-ground-3 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
-                                >
-                                  <span className="block text-body-sm font-semibold text-ink">
-                                    {dLabel}
-                                  </span>
-                                  {dDesc ? (
-                                    <span className="mt-0.5 block text-meta text-ink-2 normal-case">
-                                      {dDesc}
-                                    </span>
-                                  ) : null}
-                                </Link>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    ) : null}
+                    </Link>
                   </li>
                 );
-              }
-              return (
-                <li key={item.href}>
+              })}
+              {!isOnDonate && (
+                <li>
                   <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={
-                      active
-                        ? "relative text-nav-link font-bold uppercase text-white transition-colors"
-                        : "text-nav-link uppercase text-white transition-colors hover:text-accent-3 active:text-accent-3"
-                    }
+                    href={donateCta.href}
+                    className="inline-flex h-9 items-center bg-accent-2-text px-4 text-nav-link font-bold uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
                   >
-                    {label}
-                    {active ? <ActiveMotif /> : null}
+                    {t("donate")}
                   </Link>
                 </li>
-              );
-            })}
-            {!isOnDonate && (
+              )}
               <li>
+                <LanguageToggle variant="compact" />
+              </li>
+            </ul>
+            <div className="flex items-center gap-3 lg:hidden">
+              {!isOnDonate && (
                 <Link
                   href={donateCta.href}
-                  className="inline-flex h-9 items-center bg-accent-2-text px-4 text-nav-link font-bold uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
+                  className="inline-flex min-h-[48px] items-center bg-accent-2 px-4 text-[19px] font-bold uppercase leading-none text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
                 >
                   {t("donate")}
                 </Link>
-              </li>
-            )}
-          </ul>
-          <div className="flex items-center gap-3 lg:hidden">
-            {!isOnDonate && (
-              <Link
-                href={donateCta.href}
-                className="inline-flex min-h-[48px] items-center bg-accent-2 px-4 text-[19px] font-bold uppercase leading-none text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
-              >
-                {t("donate")}
-              </Link>
-            )}
-            <button
-              ref={hamburgerRef}
-              type="button"
-              aria-expanded={open}
-              aria-controls={open ? "mobile-menu" : undefined}
-              aria-label={open ? t("closeMenu") : t("openMenu")}
-              onClick={() => setOpen((v) => !v)}
-              className="flex size-12 items-center justify-center text-white transition-colors hover:text-accent-3 active:text-accent-3"
-            >
-              {open ? (
-                <X className="size-5" aria-hidden="true" />
-              ) : (
-                <Menu className="size-5" aria-hidden="true" />
               )}
-            </button>
+              <button
+                ref={hamburgerRef}
+                type="button"
+                aria-expanded={open}
+                aria-controls={open ? "mobile-menu" : undefined}
+                aria-label={open ? t("closeMenu") : t("openMenu")}
+                onClick={() => setOpen((v) => !v)}
+                className="flex size-12 items-center justify-center text-white transition-colors hover:text-accent-3 active:text-accent-3"
+              >
+                {open ? (
+                  <X className="size-5" aria-hidden="true" />
+                ) : (
+                  <Menu className="size-5" aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
+      {/* end fixed header wrapper */}
 
       {/* WhatsApp floating button — bottom-right on all viewports.
           Only renders when a whatsappNumber is configured in siteSettings. */}

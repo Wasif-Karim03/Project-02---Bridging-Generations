@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-export function ScrollProgressRule() {
+export function ScrollProgressRule({ barClassName }: { barClassName?: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export function ScrollProgressRule() {
     <div
       ref={ref}
       aria-hidden="true"
-      className="scroll-progress-rule pointer-events-none fixed left-0 top-14 z-40 h-[2px] w-full origin-left bg-[var(--color-accent)]"
+      className={`scroll-progress-rule pointer-events-none fixed left-0 top-0 z-[60] h-[2px] w-full origin-left transition-colors duration-300 ${barClassName ?? "bg-white"}`}
       style={{ transform: "scaleX(0)" }}
     />
   );
