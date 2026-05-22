@@ -13,6 +13,7 @@ import {
   getRelatedSuccessStories,
   getSuccessStoryBySlug,
 } from "@/lib/content/successStories";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { articleLd, breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { BackToStories } from "./_components/BackToStories";
@@ -47,6 +48,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       type: "article",
       images: story.ogImageOverride?.src ? [story.ogImageOverride.src] : [story.portrait.src],
     },
+    alternates: pageAlternates(`/success-stories/${slug}`),
   };
 }
 

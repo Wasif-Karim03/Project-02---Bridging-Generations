@@ -11,6 +11,7 @@ import { getAllProjects } from "@/lib/content/projects";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getAllTestimonials } from "@/lib/content/testimonials";
 import { isStripeConfigured } from "@/lib/payments/stripe";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { DonateAfterNote } from "./_components/DonateAfterNote";
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
   title: "Donate",
   description:
     "Sponsor a student in the Chittagong Hill Tracts. $30 a month covers tuition, books, daily meals, and materials for one child for the full school year.",
+  alternates: pageAlternates("/donate"),
 };
 
 // Parse "15, 30, 60, 120, 250" → [15, 30, 60, 120, 250]. Filters non-numeric

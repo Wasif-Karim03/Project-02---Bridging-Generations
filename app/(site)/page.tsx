@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getRecentActivities } from "@/lib/content/activities";
 import { getAllGalleryImages } from "@/lib/content/galleryImages";
@@ -7,6 +8,7 @@ import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getSpotlightStudents } from "@/lib/content/students";
 import { getFeaturedSuccessStories } from "@/lib/content/successStories";
 import { getFeaturedTestimonial } from "@/lib/content/testimonials";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { nonprofitOrganization, webSite } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { HomeActivities } from "./_components/HomeActivities";
@@ -19,6 +21,10 @@ import { HomeProgramsGrid } from "./_components/HomeProgramsGrid";
 import { HomeSpotlightScroller } from "./_components/HomeSpotlightScroller";
 import { HomeSuccessPanel } from "./_components/HomeSuccessPanel";
 import { HomeTestimonialPanel } from "./_components/HomeTestimonialPanel";
+
+export const metadata: Metadata = {
+  alternates: pageAlternates("/"),
+};
 
 export default async function Home() {
   // Spec calls for: 7+ recent activities, 6 projects, 3 success stories, 3

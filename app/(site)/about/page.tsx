@@ -6,6 +6,7 @@ import { getAllBoardMembers, getAllTeamMembersGrouped } from "@/lib/content/boar
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getAllTestimonials } from "@/lib/content/testimonials";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, nonprofitOrganization } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { AboutHero } from "./_components/AboutHero";
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   title: "About",
   description:
     "Bridging Generations is a 501(c)(3) nonprofit sponsoring students across the Chittagong Hill Tracts. Meet the board and see where your donation goes.",
+  alternates: pageAlternates("/about"),
 };
 
 export default async function AboutPage() {

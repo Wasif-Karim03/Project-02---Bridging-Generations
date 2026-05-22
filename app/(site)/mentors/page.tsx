@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { getTeamMembersByGroup } from "@/lib/content/boardMembers";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   title: "Mentors",
   description:
     "Meet the volunteer mentors and online teachers guiding Bridging Generations students through their studies.",
+  alternates: pageAlternates("/mentors"),
 };
 
 export default async function MentorsPage() {

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllTestimonials } from "@/lib/content/testimonials";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { TestimonialsGrid } from "./_components/TestimonialsGrid";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
   title: "Testimonials",
   description:
     "Quotes from parents, teachers, students, alumni, partners, and donors about Bridging Generations' work in the Chittagong Hill Tracts.",
+  alternates: pageAlternates("/testimonials"),
 };
 
 const ROLE_VALUES = [
