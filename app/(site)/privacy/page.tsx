@@ -7,6 +7,7 @@ import { SectionAct } from "@/components/ui/SectionAct";
 import { extractHeadings } from "@/lib/content/extractHeadings";
 import { getPrivacyPage } from "@/lib/content/privacyPage";
 import { getSiteSettings } from "@/lib/content/siteSettings";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { PrivacyBody } from "./_components/PrivacyBody";
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
   title: "Privacy policy",
   description:
     "How Bridging Generations collects, uses, and protects donor + student data — written in plain language. Covers payment processing, account management, email, and your rights to access or delete your information.",
+  alternates: pageAlternates("/privacy"),
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {

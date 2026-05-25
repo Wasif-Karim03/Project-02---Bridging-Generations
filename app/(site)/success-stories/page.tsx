@@ -8,6 +8,7 @@ import { canShowSuccessStory } from "@/lib/content/canShowPortrait";
 import type { Student } from "@/lib/content/students";
 import { getAllStudents } from "@/lib/content/students";
 import { getAllSuccessStoriesPublished, type SuccessStory } from "@/lib/content/successStories";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { SuccessStoriesHero } from "./_components/SuccessStoriesHero";
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
   title: "Success Stories",
   description:
     "In-depth stories from current students, alumni, and families sponsored by Bridging Generations across the Chittagong Hill Tracts.",
+  alternates: pageAlternates("/success-stories"),
 };
 
 type StoryWithConsent = {

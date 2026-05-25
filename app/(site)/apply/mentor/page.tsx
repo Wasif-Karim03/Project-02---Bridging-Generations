@@ -3,6 +3,7 @@ import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { MentorApplicationForm } from "./_components/MentorApplicationForm";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   title: "Apply as a mentor",
   description:
     "Apply to mentor or teach online for Bridging Generations students. We pair every active student with a volunteer mentor.",
+  alternates: pageAlternates("/apply/mentor"),
 };
 
 export default function ApplyMentorPage() {

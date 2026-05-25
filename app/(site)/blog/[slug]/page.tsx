@@ -8,6 +8,7 @@ import { SectionAct } from "@/components/ui/SectionAct";
 import { getAllBlogPostsRaw, getBlogPostBySlug, getRecentBlogPosts } from "@/lib/content/blogPosts";
 import { getAllBoardMembers, getBoardMemberById } from "@/lib/content/boardMembers";
 import { readingTime } from "@/lib/content/readingTime";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { articleLd, breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { AuthorByline } from "./_components/AuthorByline";
@@ -40,6 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
       type: "article",
       images: post.ogImageOverride?.src ? [post.ogImageOverride.src] : [post.coverImage.src],
     },
+    alternates: pageAlternates(`/blog/${slug}`),
   };
 }
 

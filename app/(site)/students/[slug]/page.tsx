@@ -7,8 +7,10 @@ import { StudentPlaceholder } from "@/components/ui/StudentPlaceholder";
 import { canShowPortrait, canShowStory } from "@/lib/content/canShowPortrait";
 import { getSchoolById } from "@/lib/content/schools";
 import { getAllStudents, getStudentBySlug } from "@/lib/content/students";
+import { getStudentGrowthData } from "@/lib/db/queries/studentGrowth";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
+import { StudentGrowthButton } from "./_components/StudentGrowthButton";
 
 type Params = { slug: string };
 
@@ -35,7 +37,10 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
     notFound();
   }
 
-  const school = student.schoolId ? await getSchoolById(student.schoolId) : null;
+  const [school, growthData] = await Promise.all([
+    student.schoolId ? getSchoolById(student.schoolId) : Promise.resolve(null),
+    getStudentGrowthData(slug),
+  ]);
   const portraitSrc = student.portrait?.src ?? null;
   const allowPortrait = canShowPortrait(student.consent) && Boolean(portraitSrc);
   const allowBio = canShowStory(student.consent) && Boolean(student.bio?.trim());
@@ -126,6 +131,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
               >
                 Browse all students
               </Link>
+              <StudentGrowthButton data={growthData} studentName={student.displayName} />
             </div>
           </div>
         </header>

@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Link } from "next-view-transitions";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -16,43 +17,44 @@ type Slide = {
   cta: { href: string; label: string };
 };
 
-// Spec slides — three full-bleed hero stages with the exact headlines from the
-// owner doc. Each shows an eyebrow ("Help the Future"), a display headline
-// ("Make a Better World"), and a single CTA → /students.
-const SLIDES: Slide[] = [
-  {
-    eyebrow: "Help the Future",
-    headline: "Make a Better World",
-    image: "/home-hero.jpg",
-    imageAlt: "Students in a Bangladesh classroom hold up their drawings beside their teacher",
-    cta: { href: "/be-a-donor", label: "Be a Donor" },
-  },
-  {
-    eyebrow: "Togetherness Empowers Us",
-    headline: "Make the Children Smile",
-    image: "/activity-visit.jpg",
-    imageAlt: "A field visit at a Hill Tracts school — staff and students gathered outside",
-    cta: { href: "/be-a-donor", label: "Be a Donor" },
-  },
-  {
-    eyebrow: "The Child Education",
-    headline: "Save the Children",
-    image: "/home-mission.jpg",
-    imageAlt: "A schoolboy in uniform reads a book in a library corner",
-    cta: { href: "/be-a-donor", label: "Be a Donor" },
-  },
-];
-
 export function HomeHeroCarousel() {
+  const t = useTranslations("home");
   const shouldReduceMotion = useReducedMotion();
+
+  const SLIDES: Slide[] = [
+    {
+      eyebrow: t("slide1Eyebrow"),
+      headline: t("slide1Headline"),
+      image: "/home-hero.jpg",
+      imageAlt: "Students in a Bangladesh classroom hold up their drawings beside their teacher",
+      cta: { href: "/be-a-donor", label: t("slide1Cta") },
+    },
+    {
+      eyebrow: t("slide2Eyebrow"),
+      headline: t("slide2Headline"),
+      image: "/activity-visit.jpg",
+      imageAlt: "A field visit at a Hill Tracts school — staff and students gathered outside",
+      cta: { href: "/be-a-donor", label: t("slide2Cta") },
+    },
+    {
+      eyebrow: t("slide3Eyebrow"),
+      headline: t("slide3Headline"),
+      image: "/home-mission.jpg",
+      imageAlt: "A schoolboy in uniform reads a book in a library corner",
+      cta: { href: "/be-a-donor", label: t("slide3Cta") },
+    },
+  ];
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const goTo = useCallback((next: number) => {
-    setIndex((next + SLIDES.length) % SLIDES.length);
-  }, []);
+  const goTo = useCallback(
+    (next: number) => {
+      setIndex((next + SLIDES.length) % SLIDES.length);
+    },
+    [SLIDES.length],
+  );
   const goNext = useCallback(() => goTo(index + 1), [goTo, index]);
   const goPrev = useCallback(() => goTo(index - 1), [goTo, index]);
 
@@ -63,7 +65,7 @@ export function HomeHeroCarousel() {
       setIndex((i) => (i + 1) % SLIDES.length);
     }, AUTOPLAY_MS);
     return () => window.clearInterval(id);
-  }, [shouldReduceMotion, paused]);
+  }, [shouldReduceMotion, paused, SLIDES.length]);
 
   // Keyboard nav: ArrowLeft / ArrowRight when focus is inside the carousel.
   useEffect(() => {

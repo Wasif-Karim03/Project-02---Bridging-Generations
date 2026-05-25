@@ -90,11 +90,11 @@ describe("HomeHero", () => {
     expect(screen.getByText(stats.homeHeroSubhead)).toBeInTheDocument();
   });
 
-  it("renders a single primary CTA linking to /donate", () => {
+  it("renders a single primary CTA linking to /be-a-donor", () => {
     render(<HomeHero stats={stats} />);
     expect(screen.getByRole("link", { name: "Sponsor a Student" })).toHaveAttribute(
       "href",
-      "/donate",
+      "/be-a-donor",
     );
     expect(screen.queryByRole("link", { name: /Our Programs/i })).toBeNull();
   });

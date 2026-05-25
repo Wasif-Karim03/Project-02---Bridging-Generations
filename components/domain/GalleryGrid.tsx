@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useState } from "react";
 import { GalleryLightbox } from "@/components/domain/GalleryLightbox";
 import { ScaleGrid } from "@/components/ui/editorial";
@@ -62,6 +63,10 @@ type GalleryGridProps = {
 };
 
 export function GalleryGrid({ images }: GalleryGridProps) {
+  const t = useTranslations("gallery");
+  const locale = useLocale();
+  const fmt = useMemo(() => new Intl.NumberFormat(locale, { useGrouping: false }), [locale]);
+
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const orderedImages = useMemo(() => {
     const groups = buildGroups(images);
@@ -76,7 +81,7 @@ export function GalleryGrid({ images }: GalleryGridProps) {
   const handleNavigate = useCallback((index: number) => setLightboxIndex(index), []);
 
   if (images.length === 0) {
-    return <p className="text-body text-ink-2">No photographs yet.</p>;
+    return <p className="text-body text-ink-2">{t("noPhotographs")}</p>;
   }
 
   return (
@@ -93,10 +98,11 @@ export function GalleryGrid({ images }: GalleryGridProps) {
                 id={`gallery-group-${group.key}`}
                 className="text-meta uppercase tracking-[0.16em] text-ink"
               >
-                {group.label}
+                {group.key === "undated" ? t("groupUndated") : fmt.format(Number(group.key))}
               </h2>
               <span className="text-meta uppercase tracking-[0.08em] text-ink-2">
-                {group.items.length} {group.items.length === 1 ? "photograph" : "photographs"}
+                {fmt.format(group.items.length)}{" "}
+                {group.items.length === 1 ? t("groupPhotograph") : t("groupPhotographs")}
               </span>
             </header>
             <ScaleGrid>

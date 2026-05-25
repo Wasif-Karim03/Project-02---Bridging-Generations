@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getDonationJourney } from "@/lib/content/donationJourney";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { JourneyHero } from "./_components/JourneyHero";
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
   title: "Our Donation Journey",
   description:
     "Five years of impact — see how Bridging Generations donors have funded tuition, meals, and materials for students in the Chittagong Hill Tracts.",
+  alternates: pageAlternates("/donation-journey"),
 };
 
 export default async function DonationJourneyPage() {

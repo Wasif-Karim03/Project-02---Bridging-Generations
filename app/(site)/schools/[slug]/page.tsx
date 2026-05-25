@@ -11,6 +11,7 @@ import { canShowPortrait } from "@/lib/content/canShowPortrait";
 import { getAllSchools, getSchoolById } from "@/lib/content/schools";
 import { getAllStudents } from "@/lib/content/students";
 import { getAllTeachers } from "@/lib/content/teachers";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 
@@ -30,6 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     description:
       school.description ||
       `${school.name} is a Bridging Generations partner school in ${school.location}.`,
+    alternates: pageAlternates(`/schools/${slug}`),
   };
 }
 

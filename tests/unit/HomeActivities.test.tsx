@@ -41,22 +41,22 @@ const activities: Activity[] = [
 ];
 
 describe("HomeActivities", () => {
-  it("renders section landmark wired via aria-labelledby", () => {
-    const { container } = render(<HomeActivities activities={activities} />);
+  it("renders section landmark wired via aria-labelledby", async () => {
+    const { container } = render(await HomeActivities({ activities }));
     const section = container.querySelector("section");
     expect(section).toHaveAttribute("aria-labelledby", "home-activities-title");
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Recent activities");
   });
 
-  it("renders one card per activity", () => {
-    render(<HomeActivities activities={activities} />);
+  it("renders one card per activity", async () => {
+    render(await HomeActivities({ activities }));
     for (const a of activities) {
       expect(screen.getByText(a.title)).toBeInTheDocument();
     }
   });
 
-  it("renders the 'See all activities' tertiary link", () => {
-    render(<HomeActivities activities={activities} />);
+  it("renders the 'See all activities' tertiary link", async () => {
+    render(await HomeActivities({ activities }));
     const link = screen.getByRole("link", { name: /see all activities/i });
     expect(link).toHaveAttribute("href", "/activities");
   });

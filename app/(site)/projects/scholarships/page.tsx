@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { getScholarshipsPage } from "@/lib/content/scholarshipsPage";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   title: "Scholarships",
   description:
     "Bridging Generations' scholarship sub-program — overview, eligibility, what we cover, and how to apply.",
+  alternates: pageAlternates("/projects/scholarships"),
 };
 
 export default async function ScholarshipsSubPage() {
