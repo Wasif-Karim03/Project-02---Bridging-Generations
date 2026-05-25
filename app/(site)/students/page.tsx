@@ -9,6 +9,7 @@ import { getAllSchools, toSchoolSummary } from "@/lib/content/schools";
 import { getAllStudents, getStudentsGroupedBySchool } from "@/lib/content/students";
 import { getStudentsPage } from "@/lib/content/studentsPage";
 import { getAllTestimonials } from "@/lib/content/testimonials";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { ConsentStatement } from "./_components/ConsentStatement";
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
   title: "Students",
   description:
     "Browse the sponsored students at Bridging Generations partner schools across the Chittagong Hill Tracts. First names only; portraits appear only with a written family release on file.",
+  alternates: pageAlternates("/students"),
 };
 
 // HSC = Higher Secondary Certificate (grades 11–12)

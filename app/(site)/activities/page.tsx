@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllActivitiesPublished } from "@/lib/content/activities";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { ActivitiesHero } from "./_components/ActivitiesHero";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   title: "Activities",
   description:
     "Recent field updates from Bridging Generations — distributions, milestones, visits, fundraisers, and announcements from our partner schools.",
+  alternates: pageAlternates("/activities"),
 };
 
 export default async function ActivitiesPage() {

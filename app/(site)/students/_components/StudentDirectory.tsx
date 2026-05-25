@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "next-view-transitions";
 import { useMemo, useState } from "react";
 import { StudentCard } from "@/components/domain/StudentCard";
@@ -12,21 +13,6 @@ type StudentDirectoryProps = {
   students: Student[];
   schools: SchoolSummary[];
 };
-
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 type FilterState = {
   name: string;
@@ -69,6 +55,16 @@ function enrolledMonth(student: Student): number | null {
 }
 
 export function StudentDirectory({ students, schools }: StudentDirectoryProps) {
+  const t = useTranslations("students");
+  const locale = useLocale();
+  const fmt = useMemo(() => new Intl.NumberFormat(locale, { useGrouping: false }), [locale]);
+  const MONTHS = useMemo(() => {
+    const monthFmt = new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-US", {
+      month: "long",
+    });
+    return Array.from({ length: 12 }, (_, i) => monthFmt.format(new Date(2000, i)));
+  }, [locale]);
+
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
 
   function updateFilter<K extends keyof FilterState>(key: K, value: FilterState[K]) {
@@ -162,7 +158,7 @@ export function StudentDirectory({ students, schools }: StudentDirectoryProps) {
                 id="students-filter-title"
                 className="text-eyebrow uppercase tracking-[0.1em] text-ink"
               >
-                Search & Filter
+                {t("searchFilter")}
               </h2>
               {activeCount > 0 ? (
                 <button
@@ -170,53 +166,53 @@ export function StudentDirectory({ students, schools }: StudentDirectoryProps) {
                   onClick={() => setFilters(EMPTY_FILTERS)}
                   className="text-meta text-accent underline underline-offset-[3px] hover:no-underline"
                 >
-                  Clear all
+                  {t("clearAll")}
                 </button>
               ) : null}
             </div>
 
             <FilterText
-              label="Name"
+              label={t("labelName")}
               value={filters.name}
               onChange={(v) => updateFilter("name", v)}
-              placeholder="First name"
+              placeholder={t("placeholderFirstName")}
             />
             <FilterText
-              label="Village"
+              label={t("labelVillage")}
               value={filters.village}
               onChange={(v) => updateFilter("village", v)}
-              placeholder="Village name"
+              placeholder={t("placeholderVillageName")}
             />
             <FilterSelect
-              label="Class"
+              label={t("labelClass")}
               value={filters.grade}
               onChange={(v) => updateFilter("grade", v)}
             >
-              <option value="">All classes</option>
+              <option value="">{t("optionAllClasses")}</option>
               {grades.map((g) => (
                 <option key={g} value={String(g)}>
-                  Grade {g}
+                  {t("gradeOption", { grade: fmt.format(g) })}
                 </option>
               ))}
             </FilterSelect>
             <FilterText
-              label="Region"
+              label={t("labelRegion")}
               value={filters.region}
               onChange={(v) => updateFilter("region", v)}
-              placeholder="e.g. Rangamati"
+              placeholder={t("placeholderRegion")}
             />
             <FilterText
-              label="Area"
+              label={t("labelArea")}
               value={filters.area}
               onChange={(v) => updateFilter("area", v)}
-              placeholder="Narrower area"
+              placeholder={t("placeholderArea")}
             />
             <FilterSelect
-              label="School"
+              label={t("labelSchool")}
               value={filters.schoolId}
               onChange={(v) => updateFilter("schoolId", v)}
             >
-              <option value="">All schools</option>
+              <option value="">{t("optionAllSchools")}</option>
               {schools.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -224,32 +220,32 @@ export function StudentDirectory({ students, schools }: StudentDirectoryProps) {
               ))}
             </FilterSelect>
             <FilterSelect
-              label="Sponsorship"
+              label={t("labelSponsorship")}
               value={filters.status}
               onChange={(v) => updateFilter("status", v)}
             >
-              <option value="">All status</option>
-              <option value="sponsored">Sponsored</option>
-              <option value="waiting">Awaiting sponsor</option>
+              <option value="">{t("optionAllStatus")}</option>
+              <option value="sponsored">{t("optionSponsored")}</option>
+              <option value="waiting">{t("optionAwaitingSponsor")}</option>
             </FilterSelect>
             <FilterSelect
-              label="Year (enrolled)"
+              label={t("labelYear")}
               value={filters.year}
               onChange={(v) => updateFilter("year", v)}
             >
-              <option value="">Any year</option>
+              <option value="">{t("optionAnyYear")}</option>
               {years.map((y) => (
                 <option key={y} value={String(y)}>
-                  {y}
+                  {fmt.format(y)}
                 </option>
               ))}
             </FilterSelect>
             <FilterSelect
-              label="Month (enrolled)"
+              label={t("labelMonth")}
               value={filters.month}
               onChange={(v) => updateFilter("month", v)}
             >
-              <option value="">Any month</option>
+              <option value="">{t("optionAnyMonth")}</option>
               {MONTHS.map((label, i) => (
                 <option key={label} value={String(i + 1)}>
                   {label}
@@ -258,7 +254,10 @@ export function StudentDirectory({ students, schools }: StudentDirectoryProps) {
             </FilterSelect>
 
             <p className="border-t border-hairline pt-4 text-meta uppercase tracking-[0.06em] text-ink-2">
-              {filtered.length} of {students.length} students
+              {t("studentCount", {
+                filtered: fmt.format(filtered.length),
+                total: fmt.format(students.length),
+              })}
             </p>
           </div>
         </aside>

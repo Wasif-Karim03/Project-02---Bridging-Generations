@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { HorizonLine } from "@/components/motif/HorizonLine";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
@@ -6,7 +7,8 @@ type HomeMissionBandProps = {
   missionFull: string;
 };
 
-export function HomeMissionBand({ missionFull }: HomeMissionBandProps) {
+export async function HomeMissionBand({ missionFull: _missionFull }: HomeMissionBandProps) {
+  const t = await getTranslations("home");
   return (
     <section
       id="mission"
@@ -20,11 +22,11 @@ export function HomeMissionBand({ missionFull }: HomeMissionBandProps) {
       <div className="relative z-10 mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-[6%]">
         <Reveal stagger="up">
           <div className="flex max-w-[55ch] flex-col gap-5">
-            <Eyebrow>Our mission</Eyebrow>
+            <Eyebrow>{t("missionEyebrow")}</Eyebrow>
             <h2 id="home-mission-title" className="text-balance text-heading-2 text-ink">
-              [CONFIRM: short mission headline]
+              {t("missionHeadline")}
             </h2>
-            <p className="text-body-lg text-ink-2">{missionFull}</p>
+            <p className="text-body-lg text-ink-2">{t("missionBody")}</p>
           </div>
         </Reveal>
       </div>

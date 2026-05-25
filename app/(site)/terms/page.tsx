@@ -7,6 +7,7 @@ import { SectionAct } from "@/components/ui/SectionAct";
 import { extractHeadings } from "@/lib/content/extractHeadings";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getTermsPage } from "@/lib/content/termsPage";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { TermsBody } from "./_components/TermsBody";
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
   title: "Terms & Conditions",
   description:
     "Legal baseline for Bridging Generations: terms of use, privacy note, copyright, and nonprofit disclosures.",
+  alternates: pageAlternates("/terms"),
 };
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {

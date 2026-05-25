@@ -35,45 +35,45 @@ const stories = [
 ];
 
 describe("HomeSuccessPanel", () => {
-  it("renders three story cards", () => {
-    render(<HomeSuccessPanel stories={stories} />);
+  it("renders three story cards", async () => {
+    render(await HomeSuccessPanel({ stories }));
     for (const s of stories) {
       expect(screen.getByText(s.subjectName)).toBeInTheDocument();
       expect(screen.getByText(s.subjectRole)).toBeInTheDocument();
     }
   });
 
-  it("includes each story's pull quote", () => {
-    render(<HomeSuccessPanel stories={stories} />);
+  it("includes each story's pull quote", async () => {
+    render(await HomeSuccessPanel({ stories }));
     for (const s of stories) {
       expect(screen.getByText((content) => content.includes(s.pullQuote))).toBeInTheDocument();
     }
   });
 
-  it("wires the section landmark via aria-labelledby", () => {
-    const { container } = render(<HomeSuccessPanel stories={stories} />);
+  it("wires the section landmark via aria-labelledby", async () => {
+    const { container } = render(await HomeSuccessPanel({ stories }));
     const section = container.querySelector("section");
     expect(section).toHaveAttribute("aria-labelledby", "home-success-title");
     expect(container.querySelector("#home-success-title")).not.toBeNull();
   });
 
-  it("links each card to its detail URL", () => {
-    render(<HomeSuccessPanel stories={stories} />);
+  it("links each card to its detail URL", async () => {
+    render(await HomeSuccessPanel({ stories }));
     for (const s of stories) {
       const link = screen.getByRole("link", { name: new RegExp(s.subjectName, "i") });
       expect(link).toHaveAttribute("href", `/success-stories/${s.slug}`);
     }
   });
 
-  it("renders all three portraits with descriptive alt", () => {
-    render(<HomeSuccessPanel stories={stories} />);
+  it("renders all three portraits with descriptive alt", async () => {
+    render(await HomeSuccessPanel({ stories }));
     for (const s of stories) {
       expect(screen.getByAltText(s.portrait.alt)).toBeInTheDocument();
     }
   });
 
-  it("renders nothing when no stories are provided", () => {
-    const { container } = render(<HomeSuccessPanel stories={[]} />);
+  it("renders nothing when no stories are provided", async () => {
+    const { container } = render(await HomeSuccessPanel({ stories: [] }));
     expect(container.querySelector("section")).toBeNull();
   });
 });

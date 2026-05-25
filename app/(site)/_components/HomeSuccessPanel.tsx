@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
@@ -10,8 +11,9 @@ type HomeSuccessPanelProps = {
 
 // Spec: 3 cards side by side, each with thumbnail, title, author, "Read More".
 // Empty state renders nothing (parent already guards on truthy length).
-export function HomeSuccessPanel({ stories }: HomeSuccessPanelProps) {
+export async function HomeSuccessPanel({ stories }: HomeSuccessPanelProps) {
   if (stories.length === 0) return null;
+  const t = await getTranslations("home");
 
   return (
     <section
@@ -23,19 +25,19 @@ export function HomeSuccessPanel({ stories }: HomeSuccessPanelProps) {
         <Reveal stagger="up">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex flex-col gap-3">
-              <Eyebrow>Success stories</Eyebrow>
+              <Eyebrow>{t("successEyebrow")}</Eyebrow>
               <h2
                 id="home-success-title"
                 className="max-w-[28ch] text-balance text-heading-1 text-ink"
               >
-                Students who finished — and what they did next.
+                {t("successHeadline")}
               </h2>
             </div>
             <Link
               href="/success-stories"
               className="group inline-flex items-center gap-1 text-nav-link uppercase text-accent transition hover:text-accent-2"
             >
-              All stories
+              {t("successAllStories")}
               <span
                 aria-hidden="true"
                 className="transition-transform motion-safe:group-hover:translate-x-1"
@@ -74,7 +76,7 @@ export function HomeSuccessPanel({ stories }: HomeSuccessPanelProps) {
                       &ldquo;{story.pullQuote}&rdquo;
                     </p>
                     <span className="mt-2 inline-flex items-center gap-1 text-nav-link uppercase text-accent">
-                      Read More
+                      {t("successReadMore")}
                       <span
                         aria-hidden="true"
                         className="transition-transform motion-safe:group-hover:translate-x-1"
