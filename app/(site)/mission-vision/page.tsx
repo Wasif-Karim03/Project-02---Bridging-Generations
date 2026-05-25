@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Dropcap } from "@/components/content/Dropcap";
 import { SceneBreak } from "@/components/content/SceneBreak";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
-import { getSiteSettings } from "@/lib/content/siteSettings";
 import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MissionVisionPage() {
-  const siteSettings = await getSiteSettings();
+  const t = await getTranslations("missionVision");
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -37,17 +37,14 @@ export default async function MissionVisionPage() {
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)] lg:gap-16">
           <Reveal stagger="up">
             <div className="flex flex-col gap-6">
-              <Eyebrow>Our Mission and Our Vision</Eyebrow>
+              <Eyebrow>{t("eyebrow")}</Eyebrow>
               <h1
                 id="mission-vision-title"
                 className="max-w-[22ch] text-balance text-display-2 text-ink"
               >
-                Education without the barrier of poverty.
+                {t("headline")}
               </h1>
-              <p className="max-w-[44ch] text-body-lg text-ink-2">
-                Two statements that anchor everything we do — what we promise our students today,
-                and the generation we are working toward tomorrow.
-              </p>
+              <p className="max-w-[44ch] text-body-lg text-ink-2">{t("intro")}</p>
             </div>
           </Reveal>
           <Reveal stagger="right" delay={150}>
@@ -72,12 +69,12 @@ export default async function MissionVisionPage() {
       >
         <div className="mx-auto max-w-[840px] flex flex-col gap-6">
           <SceneBreak />
-          <Eyebrow>Mission</Eyebrow>
+          <Eyebrow>{t("missionEyebrow")}</Eyebrow>
           <h2 id="mission-title" className="text-balance text-heading-1 text-ink">
-            Our Mission
+            {t("missionHeading")}
           </h2>
           <Dropcap>
-            <p className="text-body-lg text-ink-2">{siteSettings.missionFull}</p>
+            <p className="text-body-lg text-ink-2">{t("missionBody")}</p>
           </Dropcap>
         </div>
       </section>
@@ -89,20 +86,20 @@ export default async function MissionVisionPage() {
       >
         <div className="mx-auto max-w-[840px] flex flex-col gap-6">
           <SceneBreak />
-          <Eyebrow>Vision</Eyebrow>
+          <Eyebrow>{t("visionEyebrow")}</Eyebrow>
           <h2 id="vision-title" className="text-balance text-heading-1 text-ink">
-            Our Vision
+            {t("visionHeading")}
           </h2>
           <Dropcap>
-            <p className="text-body-lg text-ink-2">{siteSettings.visionFull}</p>
+            <p className="text-body-lg text-ink-2">{t("visionBody")}</p>
           </Dropcap>
         </div>
       </section>
 
       <CTAFooterPanel
-        headline="Stand with the next generation."
-        body="Every sponsorship keeps one more student in the classroom. Help us carry this work forward."
-        ctaLabel="Donate"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/donate-us"
         tone="cream"
         titleId="mission-vision-cta-title"
