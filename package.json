@@ -27,6 +27,7 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "grant-admin": "node scripts/grant-admin.mjs",
     "reset-test-data": "node scripts/reset-test-data.mjs"
   },
   "dependencies": {

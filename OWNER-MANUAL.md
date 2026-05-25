@@ -214,16 +214,31 @@ We don't do refunds inside our admin (yet). For now:
 
 ### First admin (one-time bootstrap)
 
-Right after launch, there are zero admins. To create the first one:
+Right after launch, there are zero admins. Two ways to create the first one:
+
+**Option A — Script (recommended):**
 
 1. Sign up normally at `https://brigen.org/sign-up`.
+2. From a terminal in the repo, get the live DATABASE_URL and run the
+   helper:
+   ```bash
+   DATABASE_URL="$(netlify env:get DATABASE_URL)" npm run grant-admin your@email.com
+   ```
+3. Sign out, sign back in. Visit `/dashboard/admin` — you're in.
+
+The script is idempotent (no-ops if the email is already admin) and refuses
+to run without DATABASE_URL.
+
+**Option B — SQL fallback** (if you can't run the script):
+
+1. Sign up at `/sign-up`.
 2. Open the Neon console: `https://console.neon.tech` → your project →
    **SQL Editor**.
 3. Run:
    ```sql
    UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
    ```
-4. Sign out, sign back in. Visit `/dashboard/admin` — you're in.
+4. Sign out, sign back in. Visit `/dashboard/admin`.
 
 ### Every admin after that
 
