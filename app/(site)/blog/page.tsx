@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Feature, Row } from "@/components/ui/editorial";
@@ -12,17 +13,19 @@ import { BlogCategoryFilter } from "./_components/BlogCategoryFilter";
 import { BlogHero } from "./_components/BlogHero";
 import { BlogPagination } from "./_components/BlogPagination";
 
-const dateFmt = new Intl.DateTimeFormat("en-US", {
-  month: "long",
-  day: "numeric",
-  year: "numeric",
-});
+function makeDateFmt(locale: string) {
+  return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
-function formatDate(iso: string | null | undefined): string {
+function formatDate(iso: string | null | undefined, fmt: Intl.DateTimeFormat): string {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return dateFmt.format(d);
+  return fmt.format(d);
 }
 
 const POSTS_PER_PAGE = 12;
@@ -43,6 +46,8 @@ type SearchParams = {
 
 export default async function BlogPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
+  const locale = await getLocale();
+  const dateFmt = makeDateFmt(locale);
   const validCategoryValues = BLOG_CATEGORY_OPTIONS.map((c) => c.value);
   const rawCategory = sp.category ?? "";
   const activeCategory: BlogCategory | "" = validCategoryValues.includes(
@@ -78,7 +83,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
   const pageCount = Math.max(1, Math.ceil(rest.length / POSTS_PER_PAGE));
   const pageOne = rest.slice(0, POSTS_PER_PAGE);
 
-  const mostRecent = posts[0]?.publishedAt ? formatDate(posts[0].publishedAt) : null;
+  const mostRecent = posts[0]?.publishedAt ? formatDate(posts[0].publishedAt, dateFmt) : null;
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -129,7 +134,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
               <Feature.Body>
                 {featured.publishedAt ? (
                   <Feature.Eyebrow>
-                    {formatDate(featured.publishedAt)} ·{" "}
+                    {formatDate(featured.publishedAt, dateFmt)} ·{" "}
                     {CATEGORY_LABEL[featured.category] ?? "Update"}
                   </Feature.Eyebrow>
                 ) : null}
@@ -156,7 +161,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
                 </Reveal>
                 <Row.Body>
                   <Row.Eyebrow>
-                    {post.publishedAt ? formatDate(post.publishedAt) : ""}
+                    {post.publishedAt ? formatDate(post.publishedAt, dateFmt) : ""}
                     {post.publishedAt ? <span aria-hidden="true"> · </span> : null}
                     <span>{CATEGORY_LABEL[post.category] ?? "Update"}</span>
                     <span aria-hidden="true"> · </span>

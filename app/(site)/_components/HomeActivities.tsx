@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { ActivityCard } from "@/components/domain/ActivityCard";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -8,7 +9,8 @@ type HomeActivitiesProps = {
   activities: Activity[];
 };
 
-export function HomeActivities({ activities }: HomeActivitiesProps) {
+export async function HomeActivities({ activities }: HomeActivitiesProps) {
+  const t = await getTranslations("home");
   return (
     <section
       id="activities"
@@ -18,16 +20,16 @@ export function HomeActivities({ activities }: HomeActivitiesProps) {
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-[6%]">
         <header className="mb-12 flex flex-col gap-4 lg:mb-16 lg:flex-row lg:items-end lg:justify-between">
           <div className="flex flex-col gap-3">
-            <Eyebrow>From the field</Eyebrow>
+            <Eyebrow>{t("activitiesEyebrow")}</Eyebrow>
             <h2 id="home-activities-title" className="text-balance text-heading-2 text-ink">
-              Recent activities
+              {t("activitiesHeadline")}
             </h2>
           </div>
           <Link
             href="/activities"
             className="group inline-flex min-h-[44px] items-center gap-1 py-2 text-nav-link uppercase text-accent transition hover:text-accent-2-text active:text-accent-2-text"
           >
-            See all activities
+            {t("activitiesSeeAll")}
             <span
               aria-hidden="true"
               className="transition-transform motion-safe:group-hover:translate-x-1 motion-safe:group-active:translate-x-1"
