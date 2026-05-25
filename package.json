@@ -26,7 +26,8 @@
     "test:e2e:a11y": "playwright test tests/e2e/*-a11y.spec.ts --project=chromium",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "reset-test-data": "node scripts/reset-test-data.mjs"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.3.3",
