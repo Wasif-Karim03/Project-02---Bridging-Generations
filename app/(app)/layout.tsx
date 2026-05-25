@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
+import { SignOutOnTabClose } from "@/components/layout/SignOutOnTabClose";
 import { SiteChrome } from "@/components/layout/SiteChrome";
+import { isClerkConfigured } from "@/lib/auth";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -12,6 +14,7 @@ export const metadata: Metadata = {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SiteChrome>
+      {isClerkConfigured() ? <SignOutOnTabClose /> : null}
       <DashboardChrome>{children}</DashboardChrome>
     </SiteChrome>
   );
