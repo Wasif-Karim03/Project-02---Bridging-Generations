@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllGalleryImages } from "@/lib/content/galleryImages";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { FilterableGallery } from "./_components/FilterableGallery";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   title: "Gallery",
   description:
     "Photographs from partner schools, program visits, and the students sponsored by Bridging Generations across the Chittagong Hill Tracts.",
+  alternates: pageAlternates("/gallery"),
 };
 
 export default async function GalleryPage() {

@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { getSiteSettings } from "@/lib/content/siteSettings";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   title: "Our Mission and Our Vision",
   description:
     "The mission and vision of Bridging Generations — establishing an enlightened generation and providing scholarships to underprivileged but talented students.",
+  alternates: pageAlternates("/mission-vision"),
 };
 
 export default async function MissionVisionPage() {

@@ -54,7 +54,7 @@ These would break production or embarrass the org. **Fix first.**
 | Status | Sev | Title | Where | Effort |
 |---|---|---|---|---|
 | ❌ | ⚠️ | Cookie consent banner (only if analytics is added; some jurisdictions require disclosure regardless) | new component, layout-level | M |
-| ❌ | ⚠️ | `<link rel="alternate" hreflang="bn">` for Bengali pages | `app/layout.tsx`, per-page metadata | S |
+| ✅ | ⚠️ | `<link rel="alternate" hreflang="bn">` for Bengali pages | `lib/seo/alternates.ts` + all `(site)` pages | S | (@khokonbarua) |
 | ❌ | · | Canonical URLs verified everywhere | per-page metadata | S |
 | ❌ | · | Per-route `loading.tsx` for dashboard sections (skeletons instead of blank flashes) | `app/(app)/dashboard/*/loading.tsx` | M |
 | ❌ | · | Toast notifications for success/error actions (currently inline `role="alert"`) | new `<Toast>` component, wire into existing actions | M |

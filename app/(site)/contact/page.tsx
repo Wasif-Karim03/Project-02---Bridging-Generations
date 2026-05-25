@@ -4,6 +4,7 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { getContactPage } from "@/lib/content/contactPage";
 import { getSiteSettings } from "@/lib/content/siteSettings";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { ContactForm } from "./_components/ContactForm";
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   title: "Contact",
   description:
     "Reach the Bridging Generations board. We reply within two business days and use your email only to respond.",
+  alternates: pageAlternates("/contact"),
 };
 
 export default async function ContactPage() {

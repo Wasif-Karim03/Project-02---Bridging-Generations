@@ -6,6 +6,7 @@ import { Reveal } from "@/components/ui/Reveal";
 import { BLOG_CATEGORY_OPTIONS, type BlogCategory } from "@/keystatic/collections/blogPost";
 import { getAllBlogPosts, getFeaturedBlogPost } from "@/lib/content/blogPosts";
 import { getAllBoardMembers } from "@/lib/content/boardMembers";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { BlogCategoryFilter } from "./_components/BlogCategoryFilter";
@@ -35,6 +36,7 @@ export const metadata: Metadata = {
   title: "Blog",
   description:
     "Field updates and transparency notes from Bridging Generations — written by the board and partner-school staff.",
+  alternates: pageAlternates("/blog"),
 };
 
 type SearchParams = {

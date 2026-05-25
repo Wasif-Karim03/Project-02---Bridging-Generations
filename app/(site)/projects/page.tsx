@@ -11,6 +11,7 @@ import { getProjectsPage } from "@/lib/content/projectsPage";
 import { getAllSchools } from "@/lib/content/schools";
 import { getAllTeachers } from "@/lib/content/teachers";
 import { pickFeatureIndices } from "@/lib/projects/pickFeatureIndices";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { FundedRecap } from "./_components/FundedRecap";
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
   title: "Projects",
   description:
     "The projects that fund everything a classroom needs at our partner schools — meals, books, scholarships, labs, and libraries.",
+  alternates: pageAlternates("/projects"),
 };
 
 export default async function ProjectsPage() {

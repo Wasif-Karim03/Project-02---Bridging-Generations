@@ -4,6 +4,7 @@ import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
+import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   title: "Apply for a scholarship",
   description:
     "Bridging Generations scholarship application — for current students at our partner schools in the Chittagong Hill Tracts. Submissions reviewed within 4 weeks.",
+  alternates: pageAlternates("/apply/scholarship"),
 };
 
 export default function ApplyScholarshipPage() {
