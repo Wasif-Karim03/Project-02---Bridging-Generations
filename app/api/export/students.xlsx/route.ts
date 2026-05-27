@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
+import { requireRole } from "@/lib/auth";
 import { canShowPortrait } from "@/lib/content/canShowPortrait";
 import { getAllSchools } from "@/lib/content/schools";
 import { getAllStudents } from "@/lib/content/students";
@@ -11,9 +12,9 @@ import { getAllStudents } from "@/lib/content/students";
 // privacy review says we only export internal-board fields here.
 
 export async function GET() {
-  // TODO (Phase 4+): enforce admin role via requireRole("admin"). For now
-  // this route is wired but should be added to a Clerk-protected matcher
-  // before exposing publicly.
+  // Admin / IT only. requireRole redirects unauthorized users (non-admin or
+  // pending/rejected/suspended). The previous TODO is closed by this gate.
+  await requireRole("admin");
   const [students, schools] = await Promise.all([getAllStudents(), getAllSchools()]);
   const schoolName = new Map(schools.map((s) => [s.id, s.name]));
 
