@@ -36,7 +36,7 @@ if (!url) {
 const sql = postgres(url, { max: 1, prepare: false });
 try {
   const before = await sql`
-    SELECT id, email, role FROM users WHERE email = ${email} LIMIT 1
+    SELECT id, email, role, status FROM users WHERE email = ${email} LIMIT 1
   `;
   if (before.length === 0) {
     console.error(`No user found with email "${email}".`);
@@ -44,14 +44,20 @@ try {
     process.exit(2);
   }
   const user = before[0];
-  if (user.role === "admin") {
-    console.log(`${email} is already admin (id=${user.id}). No-op.`);
+  if (user.role === "admin" && user.status === "active") {
+    console.log(`${email} is already admin + active (id=${user.id}). No-op.`);
     process.exit(0);
   }
   await sql`
-    UPDATE users SET role = 'admin', updated_at = NOW() WHERE id = ${user.id}
+    UPDATE users
+       SET role = 'admin',
+           status = 'active',
+           updated_at = NOW()
+     WHERE id = ${user.id}
   `;
-  console.log(`Promoted ${email} from ${user.role} to admin (id=${user.id}).`);
+  console.log(
+    `Promoted ${email}: role ${user.role} -> admin, status ${user.status ?? "unknown"} -> active (id=${user.id}).`,
+  );
 } catch (err) {
   console.error("Update failed:", err.message ?? err);
   process.exit(3);

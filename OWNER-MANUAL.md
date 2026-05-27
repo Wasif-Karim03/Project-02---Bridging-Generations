@@ -214,29 +214,38 @@ We don't do refunds inside our admin (yet). For now:
 
 ### First admin (one-time bootstrap)
 
-Right after launch, there are zero admins. Two ways to create the first one:
+Right after launch, there are zero admins. Three ways to create the first one,
+in preferred order:
 
-**Option A — Script (recommended):**
+**Option A — `BOOTSTRAP_ADMIN_EMAIL` env var (recommended):**
 
-1. Sign up normally at `https://brigen.org/sign-up`.
-2. From a terminal in the repo, get the live DATABASE_URL and run the
-   helper:
+1. Set `BOOTSTRAP_ADMIN_EMAIL=your@email.com` in Netlify env vars (production
+   context). Redeploy.
+2. Sign up normally at `/sign-up` with that exact email.
+3. You're auto-approved with `role=admin` and `status=active`. Sign in — no
+   queue, no waiting page.
+
+Only that one email skips the approval queue. Every subsequent admin is
+created via Option B + role promotion in the admin UI.
+
+**Option B — `grant-admin` script:**
+
+1. Sign up normally at `/sign-up`. Your account lands in the pending queue.
+2. From a terminal in the repo, get the live DATABASE_URL and run:
    ```bash
    DATABASE_URL="$(netlify env:get DATABASE_URL)" npm run grant-admin your@email.com
    ```
-3. Sign out, sign back in. Visit `/dashboard/admin` — you're in.
+3. The script sets `role=admin` and `status=active`. Sign out, sign back in —
+   `/dashboard/admin` is reachable.
 
-The script is idempotent (no-ops if the email is already admin) and refuses
-to run without DATABASE_URL.
-
-**Option B — SQL fallback** (if you can't run the script):
+**Option C — SQL fallback** (if you can't run the script):
 
 1. Sign up at `/sign-up`.
 2. Open the Neon console: `https://console.neon.tech` → your project →
    **SQL Editor**.
 3. Run:
    ```sql
-   UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
+   UPDATE users SET role = 'admin', status = 'active' WHERE email = 'your@email.com';
    ```
 4. Sign out, sign back in. Visit `/dashboard/admin`.
 

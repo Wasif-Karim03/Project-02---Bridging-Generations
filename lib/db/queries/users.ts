@@ -4,6 +4,14 @@ import { getDb, isDbConfigured } from "@/db/client";
 import type { NewUser, User } from "@/db/schema";
 import { users } from "@/db/schema";
 
+// Email of the one account that's allowed to skip the approval queue.
+// Read at call time (not module load) so changing the env var doesn't
+// require a redeploy of code that already imported this module.
+function bootstrapAdminEmail(): string | null {
+  const v = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
+  return v && v.length > 0 ? v : null;
+}
+
 // Lookup the local mirror of a Clerk user. Returns null if no row exists
 // (Clerk created the user but the webhook hasn't run yet) or if the DB
 // isn't configured.
@@ -35,6 +43,11 @@ export async function getUserById(id: string): Promise<User | null> {
 
 // Idempotent upsert — called by the Clerk webhook + as a safety net at the
 // start of dashboard requests when the local mirror is stale.
+//
+// New-user policy: every signup lands as status=pending so an admin has to
+// approve. The one exception is BOOTSTRAP_ADMIN_EMAIL — that email gets
+// role=admin + status=active on its first signup. Subsequent admins are
+// promoted by existing admins via /dashboard/admin/users.
 export async function upsertUserFromClerk(args: {
   clerkUserId: string;
   email: string;
@@ -60,14 +73,41 @@ export async function upsertUserFromClerk(args: {
       .returning();
     return updated[0] ?? existing[0];
   }
+  const isBootstrap =
+    bootstrapAdminEmail() !== null && args.email.trim().toLowerCase() === bootstrapAdminEmail();
   const row: NewUser = {
     clerkUserId: args.clerkUserId,
     email: args.email,
     displayName: args.displayName ?? null,
-    role: "donor", // sensible default — admin grants higher roles via the dashboard
+    role: isBootstrap ? "admin" : "donor",
+    status: isBootstrap ? "active" : "pending",
   };
   const inserted = await db.insert(users).values(row).returning();
   return inserted[0] ?? null;
+}
+
+// Admin-only utility — flip a user's approval status. Used by the new
+// pending-signups queue (approve / reject / suspend / reinstate).
+export async function setUserStatus(
+  userId: string,
+  status: "pending" | "active" | "rejected" | "suspended",
+): Promise<void> {
+  if (!isDbConfigured()) return;
+  const db = getDb();
+  await db.update(users).set({ status, updatedAt: new Date() }).where(eq(users.id, userId));
+}
+
+// Admin-only — list every signup awaiting review. Driven by the new
+// /dashboard/admin/pending queue.
+export async function listPendingUsers(limit = 200): Promise<User[]> {
+  if (!isDbConfigured()) return [];
+  const db = getDb();
+  return db
+    .select()
+    .from(users)
+    .where(eq(users.status, "pending"))
+    .orderBy(desc(users.createdAt))
+    .limit(limit);
 }
 
 // Mark a local row deleted (or hard-delete) when Clerk fires user.deleted.
@@ -80,7 +120,17 @@ export async function deleteUserByClerkId(clerkUserId: string): Promise<void> {
 // Admin-only utility — promote a user to a new role.
 export async function setUserRole(
   userId: string,
-  role: "donor" | "mentor" | "admin" | "it" | "student",
+  role:
+    | "donor"
+    | "mentor"
+    | "admin"
+    | "it"
+    | "student"
+    | "accountant"
+    | "media"
+    | "lead"
+    | "pm"
+    | "comm",
 ): Promise<void> {
   if (!isDbConfigured()) return;
   const db = getDb();

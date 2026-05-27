@@ -43,6 +43,17 @@ export default async function DonorDashboard({
   const showMentorPending = welcome === "mentor";
   const usingMockData = !isDbConfigured();
   const dbUser = usingMockData ? null : await getCurrentDbUser();
+  // Status gate: pending / rejected / suspended donors get the waiting page,
+  // not the dashboard. Pending students keep seeing their student dashboard
+  // (per the spec — they can view their application status) so the gate
+  // doesn't fire on them here; it fires on /dashboard/donor only.
+  if (dbUser?.status && dbUser.status !== "active") {
+    redirect(
+      dbUser.status === "pending"
+        ? "/pending-approval"
+        : `/pending-approval?state=${dbUser.status}`,
+    );
+  }
   // Route-correctness: students / mentors / admins who land on the donor
   // dashboard bounce to their own home so they don't see an out-of-context
   // empty state. Skip in preview mode (no DB → no role to check).
