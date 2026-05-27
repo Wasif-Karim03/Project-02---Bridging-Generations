@@ -19,7 +19,17 @@ export type RoleChangeResult = {
 // trigger email — they're board-internal moves.
 export async function setUserRoleAction(
   userId: string,
-  role: "donor" | "mentor" | "admin" | "it" | "student",
+  role:
+    | "donor"
+    | "mentor"
+    | "admin"
+    | "it"
+    | "student"
+    | "accountant"
+    | "media"
+    | "lead"
+    | "pm"
+    | "comm",
 ): Promise<RoleChangeResult> {
   await requireRole("admin");
   try {

@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { isClerkConfigured, requireUserId } from "@/lib/auth";
+import { isDbConfigured } from "@/db/client";
+import { dashboardForRole, getCurrentDbUser, isClerkConfigured, requireUserId } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +11,23 @@ export default async function DashboardLanding() {
   // one is signed in. So if we reach this point, we have a userId.
   const userId = await requireUserId();
   const clerkOn = isClerkConfigured();
+
+  // Status / role routing: send pending users to the waiting page, and send
+  // approved users straight to their workspace. The card picker only shows
+  // for accounts with no clear single home (e.g., legacy donor accounts).
+  if (isDbConfigured()) {
+    const dbUser = await getCurrentDbUser();
+    if (dbUser) {
+      if (dbUser.status === "pending") redirect("/pending-approval");
+      if (dbUser.status === "rejected" || dbUser.status === "suspended") {
+        redirect(`/pending-approval?state=${dbUser.status}`);
+      }
+      // Active user with a role that has a clear home → skip the picker.
+      if (dbUser.role && dbUser.role !== "anonymous" && dbUser.role !== "donor") {
+        redirect(dashboardForRole(dbUser.role));
+      }
+    }
+  }
 
   return (
     <section className="flex flex-col gap-8">

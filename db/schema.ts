@@ -33,7 +33,24 @@ export const userRoleEnum = pgEnum("user_role", [
   "admin",
   "it",
   "student",
+  // Phase: multi-role auth expansion. Functional roles ship in their own
+  // PRs (3 = accountant, 4 = media). The placeholders below land in the
+  // enum now so /login-roles can render their "Coming soon" cards without
+  // an enum migration mid-rollout.
+  "accountant",
+  "media",
+  "lead",
+  "pm",
+  "comm",
 ]);
+
+// User status — gating who can access the dashboards beyond just having a
+// Clerk session. Every new signup lands as `pending` and the admin queue
+// flips them to `active`. The schema default is `active` so existing rows
+// stay accessible after this column is added (backfill-by-default);
+// upsertUserFromClerk explicitly writes `pending` for new accounts so the
+// gate only applies forward.
+export const userStatusEnum = pgEnum("user_status", ["pending", "active", "rejected", "suspended"]);
 
 export const applicationStatusEnum = pgEnum("application_status", [
   "submitted",
@@ -63,8 +80,12 @@ export const users = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     clerkUserId: varchar("clerk_user_id", { length: 64 }).notNull().unique(),
     role: userRoleEnum("role").notNull().default("anonymous"),
+    status: userStatusEnum("status").notNull().default("active"),
     email: varchar("email", { length: 255 }).notNull(),
     displayName: varchar("display_name", { length: 120 }),
+    // Self-reported phone, collected at signup for non-donor roles
+    // (mentor / accountant / media). Optional for legacy donor accounts.
+    phone: varchar("phone", { length: 40 }),
     // For accounts with role=student. Links the account to a Keystatic
     // student record (content/students/<slug>/) so the dashboard can pull
     // their public profile and the donations attributed to their slug.

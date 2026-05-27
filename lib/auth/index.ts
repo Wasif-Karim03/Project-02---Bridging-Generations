@@ -15,12 +15,34 @@ export function isClerkConfigured(): boolean {
   return Boolean(process.env.CLERK_SECRET_KEY);
 }
 
-export type Role = "donor" | "mentor" | "admin" | "it" | "student";
+export type Role =
+  | "donor"
+  | "mentor"
+  | "admin"
+  | "it"
+  | "student"
+  | "accountant"
+  | "media"
+  | "lead"
+  | "pm"
+  | "comm";
+
+export type UserStatus = "pending" | "active" | "rejected" | "suspended";
 
 export type AuthedUser = {
   userId: string;
   role?: Role;
+  status?: UserStatus;
 };
+
+// Bootstrap admin — the single email allowed to skip the approval queue.
+// Compared lowercase to avoid case-sensitivity bugs (Clerk normalizes some
+// providers' emails but not all). Returns false if the env var is empty.
+export function isBootstrapAdminEmail(email: string | null | undefined): boolean {
+  const bootstrap = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase();
+  if (!bootstrap || !email) return false;
+  return email.trim().toLowerCase() === bootstrap;
+}
 
 /**
  * Returns the current Clerk userId, or null if no one is signed in / Clerk
@@ -112,11 +134,41 @@ export async function requireRole(role: Role): Promise<AuthedUser> {
     // backfill (e.g. no email). Treat as unauthorized.
     redirect("/sign-in");
   }
+  // Status gate runs before the role check — a pending mentor shouldn't get
+  // bounced to their mentor dashboard just to be rejected there; they go
+  // straight to the waiting page.
+  if (dbUser.status === "pending") {
+    redirect("/pending-approval");
+  }
+  if (dbUser.status === "rejected" || dbUser.status === "suspended") {
+    redirect(`/pending-approval?state=${dbUser.status}`);
+  }
   const allowed = roleSatisfies(dbUser.role, role);
   if (!allowed) {
     redirect(dashboardForRole(dbUser.role));
   }
-  return { userId, role: dbUser.role as Role };
+  return { userId, role: dbUser.role as Role, status: dbUser.status as UserStatus };
+}
+
+// Like requireRole but only checks status, not role rank. Used by dashboard
+// layouts that already self-route on role — they still need to bounce
+// pending/rejected/suspended users to /pending-approval before rendering.
+export async function requireActiveUser(): Promise<AuthedUser> {
+  const userId = await requireUserId();
+  if (!isDbConfigured()) {
+    return { userId };
+  }
+  const dbUser = await getCurrentDbUser();
+  if (!dbUser) redirect("/sign-in");
+  if (dbUser.status === "pending") redirect("/pending-approval");
+  if (dbUser.status === "rejected" || dbUser.status === "suspended") {
+    redirect(`/pending-approval?state=${dbUser.status}`);
+  }
+  return {
+    userId,
+    role: dbUser.role as Role,
+    status: dbUser.status as UserStatus,
+  };
 }
 
 // Map a role to its home dashboard. Used by requireRole's fallback redirect
@@ -130,18 +182,37 @@ export function dashboardForRole(role: string): string {
     case "admin":
     case "it":
       return "/dashboard/admin";
+    case "accountant":
+      return "/dashboard/accountant";
+    case "media":
+      return "/dashboard/media";
+    // Placeholder roles (lead, pm, comm) land on the generic dashboard
+    // selector until their own workspaces ship.
+    case "lead":
+    case "pm":
+    case "comm":
+      return "/dashboard";
     default:
       return "/dashboard/donor";
   }
 }
 
-// Role hierarchy: admin/it ≥ mentor ≥ donor. Anything beneath the required
-// role is rejected; anything at or above is allowed through.
-// Students sit in their own track outside the donor → mentor → admin ladder.
-// They never need elevated access; they only ever see their own dashboard.
+// Role hierarchy. Tracks split into ladders:
+//   • donor → mentor → admin/it (the original civic ladder)
+//   • student (own track, never needs elevation)
+//   • accountant / media (workspace roles that report to admin)
+//   • lead / pm / comm (placeholders; rank 1 so they don't accidentally
+//     unlock anything until their feature work lands)
+// Anything at or above the required rank is allowed; anything beneath is
+// redirected to its own dashboard.
 const ROLE_RANK: Record<string, number> = {
   student: 1,
   donor: 1,
+  accountant: 1,
+  media: 1,
+  lead: 1,
+  pm: 1,
+  comm: 1,
   mentor: 2,
   admin: 3,
   it: 3,
