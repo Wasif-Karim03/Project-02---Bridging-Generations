@@ -16,6 +16,7 @@ import { getAllStudents } from "@/lib/content/students";
 import { getDonationsForUser, getStudentsSponsoredByUser } from "@/lib/db/queries/donations";
 import { getLatestReportPerStudent } from "@/lib/db/queries/weeklyReports";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
+import { DonationMethodPanel } from "./_components/DonationMethodPanel";
 
 export const metadata: Metadata = {
   title: "Donor dashboard",
@@ -145,6 +146,8 @@ export default async function DonorDashboard({
           students appear once the org provisions Neon and you make your first gift.
         </p>
       ) : null}
+
+      <DonationMethodPanel />
 
       {/* First-time donor onboarding — fires whenever the donor has no gifts
           on record, whether that's because they're brand-new (DB-mode) or

@@ -113,9 +113,46 @@ export const donorProfiles = pgTable("donor_profiles", {
   anonymous: boolean("anonymous").notNull().default(true),
   legalName: varchar("legal_name", { length: 200 }),
   publicInitials: varchar("public_initials", { length: 8 }),
+  // Phase: multi-role auth expansion (PR 5). Extra fields collected at
+  // donor signup — all optional so existing rows aren't disturbed.
+  address: text("address"),
+  preferredContactMethod: varchar("preferred_contact_method", { length: 40 }),
+  dateOfBirth: varchar("date_of_birth", { length: 40 }),
+  occupation: varchar("occupation", { length: 200 }),
+  organization: varchar("organization", { length: 200 }),
+  howHeard: varchar("how_heard", { length: 200 }),
+  newsletterOptIn: boolean("newsletter_opt_in").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Mentor 15-day calls. Separate from weekly_reports (which stays for the
+// existing weekly-cadence reporting); this table represents the structured
+// "every 15 days" call the spec describes. answers is a JSONB blob so the
+// question set can change without a migration — mentor_calls.answers.q1,
+// .q2, … keyed by question id from lib/mentor/callQuestions.ts.
+export const mentorCalls = pgTable(
+  "mentor_calls",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    mentorId: uuid("mentor_id")
+      .notNull()
+      .references(() => mentors.id, { onDelete: "cascade" }),
+    studentSlug: varchar("student_slug", { length: 80 }).notNull(),
+    calledAt: timestamp("called_at", { withTimezone: true }).notNull(),
+    // Display-only guideline. last_call_date + 15 days, recomputed at insert.
+    // Not enforced — used by the mentor dashboard to show "next call due".
+    nextCallDueAt: timestamp("next_call_due_at", { withTimezone: true }),
+    answers: jsonb("answers"),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byMentor: index("mentor_calls_mentor_idx").on(t.mentorId),
+    byStudent: index("mentor_calls_student_idx").on(t.studentSlug),
+    byCalledAt: index("mentor_calls_called_at_idx").on(t.calledAt),
+  }),
+);
 
 // ---------- Donations ----------
 // Written by the Stripe webhook (and later bKash webhook) on successful events.
@@ -450,6 +487,8 @@ export type MediaFolder = typeof mediaFolders.$inferSelect;
 export type NewMediaFolder = typeof mediaFolders.$inferInsert;
 export type MediaItem = typeof mediaItems.$inferSelect;
 export type NewMediaItem = typeof mediaItems.$inferInsert;
+export type MentorCall = typeof mentorCalls.$inferSelect;
+export type NewMentorCall = typeof mentorCalls.$inferInsert;
 
 // Re-export sql for callers who need raw expressions.
 export { sql };
