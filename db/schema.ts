@@ -288,6 +288,59 @@ export const weeklyReports = pgTable(
   }),
 );
 
+// ---------- Workspace profiles (role-specific extensions) ----------
+// Accountant profile extends users with the same shape as mentor signup:
+// address + profile picture + start/end dates + free-text "why this role".
+// One row per accountant; created at signup. Promoted to active by an
+// admin from the pending-signups queue.
+
+export const accountantProfiles = pgTable("accountant_profiles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  fullName: varchar("full_name", { length: 200 }).notNull(),
+  phone: varchar("phone", { length: 40 }),
+  address: text("address"),
+  photoUrl: varchar("photo_url", { length: 512 }),
+  startDate: varchar("start_date", { length: 40 }),
+  expectedEndDate: varchar("expected_end_date", { length: 40 }),
+  whyAccountant: text("why_accountant"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Manual donation ledger — accountants log gifts received outside the
+// Stripe webhook (bank transfer, cash, in-kind). Mirrors the shape of
+// `donations` so admins can reconcile the two streams in one view, but
+// kept separate so accountant edits never touch Stripe-attributed rows.
+export const manualDonationEntries = pgTable(
+  "manual_donation_entries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull().defaultNow(),
+    recordedBy: uuid("recorded_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull(),
+    donorEmail: varchar("donor_email", { length: 255 }),
+    donorName: varchar("donor_name", { length: 200 }),
+    donorUserId: uuid("donor_user_id").references(() => users.id, { onDelete: "set null" }),
+    amountCents: integer("amount_cents").notNull(),
+    currency: varchar("currency", { length: 3 }).notNull().default("usd"),
+    method: varchar("method", { length: 80 }).notNull(),
+    studentSlug: varchar("student_slug", { length: 80 }),
+    projectSlug: varchar("project_slug", { length: 80 }),
+    notes: text("notes"),
+  },
+  (t) => ({
+    byOccurredAt: index("manual_donations_occurred_at_idx").on(t.occurredAt),
+    byDonorUser: index("manual_donations_donor_user_idx").on(t.donorUserId),
+    byStudent: index("manual_donations_student_idx").on(t.studentSlug),
+  }),
+);
+
 // ---------- Rate limiting ----------
 // Per-bucket sliding-window rate limit shared across all serverless function
 // instances (the in-memory fallback in lib/forms/server.ts only survives a
@@ -320,6 +373,10 @@ export type StudentRegistration = typeof studentRegistrations.$inferSelect;
 export type Mentor = typeof mentors.$inferSelect;
 export type MentorStudentAssignment = typeof mentorStudentAssignments.$inferSelect;
 export type WeeklyReport = typeof weeklyReports.$inferSelect;
+export type AccountantProfile = typeof accountantProfiles.$inferSelect;
+export type NewAccountantProfile = typeof accountantProfiles.$inferInsert;
+export type ManualDonationEntry = typeof manualDonationEntries.$inferSelect;
+export type NewManualDonationEntry = typeof manualDonationEntries.$inferInsert;
 
 // Re-export sql for callers who need raw expressions.
 export { sql };
