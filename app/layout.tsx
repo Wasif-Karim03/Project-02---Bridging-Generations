@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { ClerkProviderGate } from "@/components/layout/ClerkProviderGate";
+import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { ViewTransitionRoot } from "@/components/layout/ViewTransitionRoot";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import "./globals.css";
@@ -47,6 +48,7 @@ export default async function RootLayout({
           <ClerkProviderGate>
             <NextIntlClientProvider locale={locale} messages={messages}>
               {children}
+              <CookieConsentBanner />
             </NextIntlClientProvider>
           </ClerkProviderGate>
         </body>

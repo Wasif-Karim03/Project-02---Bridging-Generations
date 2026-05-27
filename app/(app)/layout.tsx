@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
 import { SignOutOnTabClose } from "@/components/layout/SignOutOnTabClose";
 import { SiteChrome } from "@/components/layout/SiteChrome";
+import { ToastProvider } from "@/components/ui/Toast";
 import { isClerkConfigured } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -10,13 +11,16 @@ export const metadata: Metadata = {
 
 // Signed-in app shell. Reuses SiteChrome (Nav + Footer) but layers the
 // dashboard sub-nav below it. /dashboard routes never appear in sitemap or
-// SEO; we noindex via metadata.
+// SEO; we noindex via metadata. ToastProvider wraps everything so any
+// dashboard descendant can `useToast()` for success/error feedback.
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SiteChrome>
-      {isClerkConfigured() ? <SignOutOnTabClose /> : null}
-      <DashboardChrome>{children}</DashboardChrome>
-    </SiteChrome>
+    <ToastProvider>
+      <SiteChrome>
+        {isClerkConfigured() ? <SignOutOnTabClose /> : null}
+        <DashboardChrome>{children}</DashboardChrome>
+      </SiteChrome>
+    </ToastProvider>
   );
 }
 
