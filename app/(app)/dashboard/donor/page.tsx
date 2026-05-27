@@ -14,6 +14,7 @@ import {
 import { getAllSchools } from "@/lib/content/schools";
 import { getAllStudents } from "@/lib/content/students";
 import { getDonationsForUser, getStudentsSponsoredByUser } from "@/lib/db/queries/donations";
+import { latestCallByStudent } from "@/lib/db/queries/mentorCalls";
 import { getLatestReportPerStudent } from "@/lib/db/queries/weeklyReports";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
 import { DonationMethodPanel } from "./_components/DonationMethodPanel";
@@ -79,6 +80,12 @@ export default async function DonorDashboard({
   // Fetch latest mentor reports for sponsored students only — cheap.
   const sponsoredSlugs = sponsoredStudents.map((s) => s.studentSlug);
   const latestReports = await getLatestReportPerStudent(sponsoredSlugs);
+  // Latest 15-day mentor call per sponsored student. The "per-donation"
+  // visibility rule (per the spec): we only show calls for students the
+  // donor has actually made a succeeded donation to — already true here
+  // because sponsoredStudents is derived from donations. Calls themselves
+  // are surfaced read-only on the student card.
+  const latestCalls = await latestCallByStudent(sponsoredSlugs);
 
   // "Available students" = waiting-for-sponsor students this donor is NOT
   // already supporting. Surfaces in the "Browse students" section.
@@ -233,6 +240,7 @@ export default async function DonorDashboard({
               const portraitOk =
                 student?.consent?.portraitReleaseStatus === "granted" && student?.portrait?.src;
               const lastReport = latestReports[s.studentSlug];
+              const lastCall = latestCalls.get(s.studentSlug);
               return (
                 <li
                   key={s.studentSlug}
@@ -297,7 +305,18 @@ export default async function DonorDashboard({
                         </dd>
                       </div>
                     ) : null}
+                    {lastCall ? (
+                      <div className="flex justify-between">
+                        <dt className="text-ink-2">Last 15-day call</dt>
+                        <dd className="text-ink">
+                          <time dateTime={lastCall.calledAt.toISOString()}>
+                            {dateFormatter.format(lastCall.calledAt)}
+                          </time>
+                        </dd>
+                      </div>
+                    ) : null}
                   </dl>
+                  {lastCall?.answers ? <CallSummary answers={lastCall.answers} /> : null}
                 </li>
               );
             })}
@@ -520,4 +539,33 @@ function Stat({ label, value, sub }: { label: string; value: string; sub: string
       <p className="mt-1 text-meta uppercase tracking-[0.06em] text-ink-2">{sub}</p>
     </div>
   );
+}
+
+// Tiny excerpt of the most recent mentor call. Pulls 2 fields from the
+// answers JSON so the donor card stays compact. Full call detail is only
+// visible to mentors + admin; this is the "you're getting a read on how
+// your supported student is doing" cue.
+function CallSummary({ answers }: { answers: unknown }) {
+  if (!answers || typeof answers !== "object") return null;
+  const rec = answers as Record<string, unknown>;
+  const overall = typeof rec.q1 === "string" ? rec.q1 : null;
+  const excited = typeof rec.q4 === "string" ? rec.q4 : null;
+  if (!overall && !excited) return null;
+  return (
+    <div className="mt-1 flex flex-col gap-2 border-t border-hairline pt-3 text-body-sm">
+      <p className="text-meta uppercase tracking-[0.06em] text-accent">From the latest call</p>
+      {overall ? <p className="text-ink-2">{truncate(overall, 220)}</p> : null}
+      {excited ? (
+        <p className="text-ink-2">
+          <span className="text-ink">Excited about: </span>
+          {truncate(excited, 160)}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function truncate(s: string, max: number): string {
+  if (s.length <= max) return s;
+  return `${s.slice(0, max - 1).trimEnd()}…`;
 }
