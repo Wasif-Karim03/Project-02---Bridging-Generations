@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { NextResponse } from "next/server";
+import { requireRole } from "@/lib/auth";
 import { getAllSchools } from "@/lib/content/schools";
 import { getAllTeachers } from "@/lib/content/teachers";
 
@@ -12,6 +13,8 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 export async function GET() {
+  // Admin / IT only. Same gate as the other xlsx routes.
+  await requireRole("admin");
   const [teachers, schools] = await Promise.all([getAllTeachers(), getAllSchools()]);
   const schoolName = new Map(schools.map((s) => [s.id, s.name]));
 
