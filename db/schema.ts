@@ -315,6 +315,73 @@ export const accountantProfiles = pgTable("accountant_profiles", {
 // Stripe webhook (bank transfer, cash, in-kind). Mirrors the shape of
 // `donations` so admins can reconcile the two streams in one view, but
 // kept separate so accountant edits never touch Stripe-attributed rows.
+// Media profile — same shape as accountant_profiles (start/end dates,
+// why-this-role, photo). Distinct table so the two roles can diverge
+// later without a forced refactor.
+export const mediaProfiles = pgTable("media_profiles", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  fullName: varchar("full_name", { length: 200 }).notNull(),
+  phone: varchar("phone", { length: 40 }),
+  address: text("address"),
+  photoUrl: varchar("photo_url", { length: 512 }),
+  startDate: varchar("start_date", { length: 40 }),
+  expectedEndDate: varchar("expected_end_date", { length: 40 }),
+  whyMedia: text("why_media"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Media folder — one per event or project. Owned by the media-role user
+// who created it. Admins see folders across all media users.
+export const mediaFolders = pgTable(
+  "media_folders",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerUserId: uuid("owner_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: varchar("name", { length: 200 }).notNull(),
+    eventName: varchar("event_name", { length: 200 }),
+    eventDate: varchar("event_date", { length: 40 }),
+    description: text("description"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byOwner: index("media_folders_owner_idx").on(t.ownerUserId),
+    byEventDate: index("media_folders_event_date_idx").on(t.eventDate),
+  }),
+);
+
+// Media item — image / link / external URL inside a folder. We don't host
+// files yet (no blob storage); items carry a URL field pointing at Drive,
+// Cloudinary, or any direct image link. Type field distinguishes image vs
+// link vs other so the dashboard can render appropriately.
+export const mediaItems = pgTable(
+  "media_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    folderId: uuid("folder_id")
+      .notNull()
+      .references(() => mediaFolders.id, { onDelete: "cascade" }),
+    uploadedBy: uuid("uploaded_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "set null" }),
+    kind: varchar("kind", { length: 16 }).notNull(),
+    url: varchar("url", { length: 1024 }).notNull(),
+    title: varchar("title", { length: 200 }),
+    caption: text("caption"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byFolder: index("media_items_folder_idx").on(t.folderId),
+  }),
+);
+
 export const manualDonationEntries = pgTable(
   "manual_donation_entries",
   {
@@ -377,6 +444,12 @@ export type AccountantProfile = typeof accountantProfiles.$inferSelect;
 export type NewAccountantProfile = typeof accountantProfiles.$inferInsert;
 export type ManualDonationEntry = typeof manualDonationEntries.$inferSelect;
 export type NewManualDonationEntry = typeof manualDonationEntries.$inferInsert;
+export type MediaProfile = typeof mediaProfiles.$inferSelect;
+export type NewMediaProfile = typeof mediaProfiles.$inferInsert;
+export type MediaFolder = typeof mediaFolders.$inferSelect;
+export type NewMediaFolder = typeof mediaFolders.$inferInsert;
+export type MediaItem = typeof mediaItems.$inferSelect;
+export type NewMediaItem = typeof mediaItems.$inferInsert;
 
 // Re-export sql for callers who need raw expressions.
 export { sql };
