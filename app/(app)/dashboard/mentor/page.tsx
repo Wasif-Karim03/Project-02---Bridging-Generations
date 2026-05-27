@@ -111,6 +111,24 @@ export default async function MentorDashboard() {
         </ul>
       </section>
 
+      <section aria-labelledby="mentor-calls-title" className="flex flex-col gap-4">
+        <header className="flex items-baseline justify-between border-b border-hairline pb-3">
+          <h2 id="mentor-calls-title" className="text-heading-3 text-ink">
+            15-day calls
+          </h2>
+          <Link
+            href="/dashboard/mentor/calls/new"
+            className="inline-flex min-h-[40px] items-center bg-accent px-4 text-nav-link uppercase text-white transition-colors hover:bg-accent/90"
+          >
+            Log a call →
+          </Link>
+        </header>
+        <p className="text-body-sm text-ink-2">
+          The board expects a check-in call with each assigned student about every 15 days. Use the
+          form to log what you discussed — the next-call date is auto-suggested 15 days out.
+        </p>
+      </section>
+
       <section aria-labelledby="mentor-history-title" className="flex flex-col gap-4">
         <header className="flex items-baseline justify-between border-b border-hairline pb-3">
           <h2 id="mentor-history-title" className="text-heading-3 text-ink">
