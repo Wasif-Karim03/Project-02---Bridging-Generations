@@ -20,6 +20,14 @@
   # Skip Husky-style postinstall checks that don't apply in CI.
   NEXT_TELEMETRY_DISABLED = "1"
 
+# Skip deploy-preview builds entirely to conserve free-tier build minutes.
+# `ignore` returning exit 0 tells Netlify to cancel the build before it
+# starts. Develop locally via `npm run dev`; production builds still fire
+# on main pushes. Re-enable by deleting this block (or returning exit 1
+# from the ignore command) if PR previews become valuable again.
+[context.deploy-preview]
+  ignore = "exit 0"
+
 # The Netlify Next.js runtime handles routing, ISR, and image optimization.
 # Listed by name; the package itself is in package.json devDependencies so
 # Netlify pins the exact version on every deploy.
