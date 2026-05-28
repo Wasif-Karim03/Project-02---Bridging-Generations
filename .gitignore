@@ -74,3 +74,10 @@ CLAUDE.md
 
 # Local-only notes / credentials reference — never committed.
 .private/
+
+# OpenNext build artifacts (Cloudflare adapter scratch dir — only present
+# if someone runs the adapter locally; not used in production).
+.open-next/
+
+# Vercel local CLI state — created by `vercel link` / `vercel pull`.
+.vercel/
