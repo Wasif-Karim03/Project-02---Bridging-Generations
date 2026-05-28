@@ -445,33 +445,13 @@ export const manualDonationEntries = pgTable(
   }),
 );
 
-// ---------- Admin reverification (email OTP) ----------
-// On each new Clerk session, an admin must verify a 6-digit code emailed
-// to their account before /dashboard/admin/* is reachable. The code is
-// stored hashed (sha256) so a DB leak doesn't expose live codes. One row
-// per (user, sessionId) — the admin layout reads the most recent row for
-// this user+session and only accepts a matching code while
-// expires_at is in the future.
-
-export const adminOtpCodes = pgTable(
-  "admin_otp_codes",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    sessionId: varchar("session_id", { length: 128 }).notNull(),
-    codeHash: varchar("code_hash", { length: 128 }).notNull(),
-    sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
-    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-    verifiedAt: timestamp("verified_at", { withTimezone: true }),
-    attempts: integer("attempts").notNull().default(0),
-  },
-  (t) => ({
-    bySession: index("admin_otp_session_idx").on(t.userId, t.sessionId),
-    byExpiresAt: index("admin_otp_expires_at_idx").on(t.expiresAt),
-  }),
-);
+// admin_otp_codes — table previously held the per-session email-OTP
+// step-up for admins (see git history). The feature was removed because
+// transactional email isn't reliably delivering in this Resend free-tier
+// configuration without a verified sending domain. The table is left in
+// the database (orphaned, harmless) so we don't need a destructive
+// migration; if step-up returns later, restore the schema block + the
+// `lib/db/queries/adminOtp.ts` helpers from git.
 
 // ---------- Rate limiting ----------
 // Per-bucket sliding-window rate limit shared across all serverless function
@@ -505,8 +485,6 @@ export type StudentRegistration = typeof studentRegistrations.$inferSelect;
 export type Mentor = typeof mentors.$inferSelect;
 export type MentorStudentAssignment = typeof mentorStudentAssignments.$inferSelect;
 export type WeeklyReport = typeof weeklyReports.$inferSelect;
-export type AdminOtpCode = typeof adminOtpCodes.$inferSelect;
-export type NewAdminOtpCode = typeof adminOtpCodes.$inferInsert;
 export type AccountantProfile = typeof accountantProfiles.$inferSelect;
 export type NewAccountantProfile = typeof accountantProfiles.$inferInsert;
 export type ManualDonationEntry = typeof manualDonationEntries.$inferSelect;

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { isDbConfigured } from "@/db/client";
 import { getCurrentDbUser, isClerkConfigured, requireRole } from "@/lib/auth";
-import { isSessionVerifiedForAdmin } from "@/lib/db/queries/adminOtp";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
 import { AdminNav } from "./_components/AdminNav";
 import { AdminSignOutButton } from "./_components/AdminSignOutButton";
@@ -21,18 +19,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const clerkOn = isClerkConfigured();
   const dbReady = isDbConfigured();
   const dbUser = dbReady ? await getCurrentDbUser() : null;
-
-  // Step-up gate: a Clerk session alone isn't enough; the admin must have
-  // verified the email-OTP step for THIS session. Donor / mentor / student
-  // dashboards don't go through this — only the admin surface.
-  if (dbReady && dbUser && clerkOn) {
-    const { auth } = await import("@clerk/nextjs/server");
-    const { sessionId } = await auth();
-    if (sessionId) {
-      const verified = await isSessionVerifiedForAdmin({ userId: dbUser.id, sessionId });
-      if (!verified) redirect("/admin-verify");
-    }
-  }
   const adminName = dbUser?.displayName ?? dbUser?.email ?? "Admin";
   const adminBadge = dbUser ? donorCodeForUuid(dbUser.id).replace("BG-", "ADM-") : null;
 
