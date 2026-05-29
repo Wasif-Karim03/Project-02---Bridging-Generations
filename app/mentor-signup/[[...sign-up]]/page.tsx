@@ -9,10 +9,12 @@ export const metadata: Metadata = {
 };
 
 // Mentor sign-up. Creates the Clerk account (which the webhook mirrors as a
-// users row with role=donor by default). After sign-up the user lands on
-// /dashboard/donor with a "?welcome=mentor" flag — the dashboard surfaces a
-// "your mentor application is under review" banner. An admin promotes them
-// from donor → mentor at /dashboard/admin/users once they've been vetted.
+// users row with role=donor by default). After sign-up we send the applicant
+// to /mentor-signup/details for the full profile + application form. On submit
+// of that form, a mentor_applications row is created and the user lands on
+// /pending-approval. An admin reviews and approves from
+// /dashboard/admin/applications/mentor/[id], which promotes their role to
+// mentor and clears the pending status.
 
 export default async function MentorSignUpPage() {
   if (!isClerkConfigured()) {
@@ -33,10 +35,10 @@ export default async function MentorSignUpPage() {
           {isDev ? (
             <div className="mt-6 flex flex-col gap-3">
               <Link
-                href="/dashboard/donor?welcome=mentor"
+                href="/mentor-signup/details"
                 className="inline-flex min-h-[48px] items-center justify-center bg-accent px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent/90"
               >
-                Simulate sign-up → continue to dashboard
+                Simulate sign-up → continue to application form
               </Link>
               <Link
                 href="/mentor-login"
@@ -63,15 +65,15 @@ export default async function MentorSignUpPage() {
         <p className="text-eyebrow uppercase tracking-[0.12em] text-accent">Mentor portal</p>
         <h1 className="text-balance text-heading-2 text-ink">Become a mentor.</h1>
         <p className="max-w-[44ch] text-body text-ink-2">
-          Create your account here. After sign-up, our team reviews your application and unlocks
-          mentor features within a few days.
+          Step 1 of 2 — create your account here. On the next page you'll share the details our
+          board needs to review your application.
         </p>
       </div>
 
       <SignUp
         path="/mentor-signup"
         routing="path"
-        forceRedirectUrl="/dashboard/donor?welcome=mentor"
+        forceRedirectUrl="/mentor-signup/details"
         signInUrl="/mentor-login"
         appearance={{
           variables: {
