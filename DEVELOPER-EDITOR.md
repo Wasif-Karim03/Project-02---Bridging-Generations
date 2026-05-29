@@ -29,8 +29,8 @@ Set these in Vercel → Project → Settings → Environment Variables.
 | `DEVELOPER_PASSWORD` | **Yes** | The password the owner types to sign in. |
 | `DEVELOPER_SESSION_SECRET` | Recommended | Random string used to sign the session cookie. Rotating it logs everyone out. Falls back to `DEVELOPER_PASSWORD` if unset. |
 | `DEVELOPER_GITHUB_TOKEN` | **Yes (prod)** | GitHub token used to commit content. Without it, the editor runs in local-only mode and won't update the live site. |
-| `DEVELOPER_CONTENT_REPO` | No | `owner/name` of the repo to commit to. Defaults to `Wasif-Karim03/Project-02---Bridging-Generations`. |
-| `DEVELOPER_CONTENT_BRANCH` | No | Branch to commit to. Defaults to `main`. |
+| `DEVELOPER_CONTENT_REPO` | No | `owner/name` of the repo to commit to. Defaults to `Wasif-Karim03/Project-02---Bridging-Generations` — the confirmed deploy repo (see below). Leave unset unless that changes. |
+| `DEVELOPER_CONTENT_BRANCH` | No | Branch to commit to. Defaults to `main` (the production branch). Saving therefore publishes to production immediately, by design. |
 
 ### Creating the GitHub token
 
@@ -39,11 +39,18 @@ Set these in Vercel → Project → Settings → Environment Variables.
 3. **Permissions:** Repository → **Contents: Read and write**.
 4. Copy the token into `DEVELOPER_GITHUB_TOKEN` in Vercel.
 
-> ⚠️ **Confirm the repo.** `DEVELOPER_CONTENT_REPO` **must** be the repo Vercel
-> builds the site from, or saved edits will never appear live. Note that
-> `keystatic.config.ts` currently points its GitHub storage at a *different*
-> repo (`Bamyani1/bridging-generations`); set `DEVELOPER_CONTENT_REPO`
-> explicitly to whichever repo the Vercel project deploys.
+> ✅ **Deploy repo confirmed.** Vercel deploys the production site
+> (`bridging-generations.vercel.app`) from
+> **`Wasif-Karim03/Project-02---Bridging-Generations`**, branch `main`. Verified
+> 2026-05-29 via the GitHub deployments API — `vercel[bot]` posts Production
+> deployment statuses there, and `Bamyani1/bridging-generations` (the repo
+> `keystatic.config.ts` points at) has **none**. So the default is correct and
+> you can leave `DEVELOPER_CONTENT_REPO` unset.
+>
+> 🐞 **Side note:** because `keystatic.config.ts` targets the stale
+> `Bamyani1/bridging-generations`, the existing `/keystatic` editor's saves
+> wouldn't reach the live site in production. This `/developer` editor commits to
+> the correct repo. Consider fixing `keystatic.config.ts` to match (separate task).
 
 ## Security notes
 

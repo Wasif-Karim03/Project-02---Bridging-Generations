@@ -39,9 +39,14 @@ export function getStorageMode(): StorageMode {
 export type RepoTarget = { owner: string; name: string; branch: string };
 
 /**
- * Repo the editor commits content to in GitHub mode. Defaults to the repo this
- * project is deployed from. MUST be the repo Vercel builds, or saved edits will
- * never reach the live site.
+ * Repo the editor commits content to in GitHub mode. Defaults to the repo Vercel
+ * actually deploys the production site from.
+ *
+ * Confirmed 2026-05-29 via the GitHub deployments API: vercel[bot] posts its
+ * Production/Preview deployment statuses on `Wasif-Karim03/Project-02---Bridging-Generations`
+ * (branch `main`), while `Bamyani1/bridging-generations` (the repo keystatic.config.ts
+ * points at) has none — so that Keystatic target is stale and Keystatic edits there
+ * would never deploy. This editor commits to the live repo instead.
  */
 export function getContentRepo(): RepoTarget {
   const slug =
