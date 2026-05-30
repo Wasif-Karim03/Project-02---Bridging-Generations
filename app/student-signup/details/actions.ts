@@ -13,7 +13,7 @@ export type StudentApplicationState = { ok: true } | { ok: false; error: string 
 // Max passport photo size accepted from the form, in bytes. Stored as base64
 // in Postgres (private — never the public repo). 3MB is generous for a phone
 // photo while keeping rows from bloating the free-tier DB.
-const MAX_PHOTO_BYTES = 3 * 1024 * 1024;
+const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
 const ALLOWED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 // Persists a full scholarship application (mirroring the org's paper form) tied
@@ -33,7 +33,7 @@ async function readPhoto(
   const photo = formData.get("photo");
   if (!(photo instanceof File) || photo.size === 0) return null;
   if (photo.size > MAX_PHOTO_BYTES) {
-    return { error: "Photo is larger than 3MB. Please use a smaller image." };
+    return { error: "Photo is larger than 4MB. Please use a smaller image." };
   }
   if (!ALLOWED_PHOTO_TYPES.has(photo.type)) {
     return { error: "Photo must be a JPG, PNG, or WebP image." };

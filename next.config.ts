@@ -59,6 +59,13 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   transpilePackages: ["motion"],
+  experimental: {
+    // The student scholarship application uploads a passport photo via a Server
+    // Action; the default request-body cap is 1MB, which a phone photo blows
+    // past (and the form would error with a generic "Something went wrong").
+    // Raise it to comfortably fit our 4MB photo limit plus the form fields.
+    serverActions: { bodySizeLimit: "6mb" },
+  },
   // Keystatic reads YAML/MDX from content/ at runtime via Node's fs. The
   // standalone build tracer (`@vercel/nft`) doesn't see those files as
   // imports, so without an explicit include they're missing from the
