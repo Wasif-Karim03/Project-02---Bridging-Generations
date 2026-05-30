@@ -46,7 +46,7 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
       >
         <Field
           label="Passport-style photo"
-          hint="A clear head-and-shoulders photo. JPG, PNG, or WebP, up to 3MB. Kept private."
+          hint="A clear head-and-shoulders photo. JPG, PNG, or WebP, up to 4MB. Kept private."
         >
           {(p) => (
             <input
