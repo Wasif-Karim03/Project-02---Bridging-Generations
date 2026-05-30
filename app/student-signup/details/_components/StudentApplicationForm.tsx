@@ -21,15 +21,16 @@ const ETHNICITY_OPTIONS = [
   "Tripura",
   "Tanchangya",
   "Mro",
+  "Barua",
   "Bengali",
   "Other",
   "Prefer not to say",
 ] as const;
 
-// Reuses the shared Field / Input / Textarea primitives so the styling
-// matches the contact form + every other auth-adjacent surface on the site.
-// Sections use numbered editorial headers (01 / 02 …) to give the long form
-// visual rhythm and a sense of progress.
+// Mirrors the org's paper scholarship application form, section by section.
+// Reuses the shared Field / Input / Textarea primitives so styling matches the
+// rest of the site. The passport photo is uploaded and stored privately in the
+// database (never the public repo).
 export function StudentApplicationForm({ initialEmail }: { initialEmail?: string }) {
   const [state, formAction, pending] = useActionState<StudentApplicationState | null, FormData>(
     submitStudentApplicationAction,
@@ -40,200 +41,259 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
     <form action={formAction} className="flex flex-col gap-12" noValidate>
       <FormSection
         index="01"
-        title="About you"
-        subtitle="The basics our reviewers need to place your application."
+        title="Student details"
+        subtitle="The student's own information, and a recent passport-style photo."
       >
-        <Field label="Full name *">
-          {(p) => <Input {...p} name="studentName" autoComplete="name" required maxLength={120} />}
-        </Field>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Date of birth">
-            {(p) => <Input {...p} name="dateOfBirth" type="date" />}
-          </Field>
-          <Field label="Grade / class *" hint="e.g. Class 8 or HSC 1st year">
-            {(p) => <Input {...p} name="grade" required maxLength={40} />}
-          </Field>
-        </div>
-        <Field label="School name *">
-          {(p) => <Input {...p} name="school" required maxLength={200} />}
-        </Field>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Community / ethnicity">
-            {(p) => (
-              <SelectInput
-                {...p}
-                name="ethnicity"
-                options={ETHNICITY_OPTIONS}
-                placeholder="Select…"
-              />
-            )}
-          </Field>
-          <Field label="Family situation">
-            {(p) => (
-              <label
-                htmlFor={p.id}
-                className="inline-flex min-h-[48px] items-center gap-3 border border-hairline bg-ground-2 px-4 text-body text-ink"
-              >
-                <input
-                  id={p.id}
-                  type="checkbox"
-                  name="isOrphan"
-                  className="size-4 border border-hairline accent-accent"
-                />
-                I am an orphan
-              </label>
-            )}
-          </Field>
-        </div>
-      </FormSection>
-
-      <FormSection
-        index="02"
-        title="Family & guardian"
-        subtitle="Who supports you at home and how we can reach them."
-      >
-        <Field label="Guardian's full name *">
-          {(p) => <Input {...p} name="guardianName" required maxLength={120} />}
-        </Field>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Relation to you" hint="e.g. Father, Aunt, Grandparent">
-            {(p) => <Input {...p} name="guardianRelation" maxLength={80} />}
-          </Field>
-          <Field label="Guardian's occupation" hint="e.g. Day laborer, Farmer">
-            {(p) => <Input {...p} name="guardianOccupation" maxLength={200} />}
-          </Field>
-        </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Guardian's phone *" hint="We may call to verify your application.">
-            {(p) => (
-              <Input
-                {...p}
-                name="guardianPhone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                required
-                maxLength={40}
-                placeholder="+880 1XXX-XXXXXX"
-              />
-            )}
-          </Field>
-          <Field label="Alternate guardian phone" hint="Optional — a second person we can reach.">
-            {(p) => (
-              <Input
-                {...p}
-                name="alternateGuardianPhone"
-                type="tel"
-                inputMode="tel"
-                maxLength={40}
-              />
-            )}
-          </Field>
-        </div>
-        <Field label="Approximate family income">
+        <Field
+          label="Passport-style photo"
+          hint="A clear head-and-shoulders photo. JPG, PNG, or WebP, up to 3MB. Kept private."
+        >
           {(p) => (
-            <SelectInput
-              {...p}
-              name="familyIncome"
-              options={FAMILY_INCOME_OPTIONS}
-              placeholder="Select…"
+            <input
+              id={p.id}
+              name="photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="block w-full text-body-sm text-ink file:mr-4 file:min-h-[44px] file:cursor-pointer file:border-0 file:bg-accent file:px-4 file:text-nav-link file:uppercase file:text-white"
             />
           )}
         </Field>
-      </FormSection>
-
-      <FormSection
-        index="03"
-        title="Where you live & contact"
-        subtitle="So we can send your decision letter and stay in touch."
-      >
-        <Field label="Home address *" hint="Village / area, sub-district, district.">
-          {(p) => <Textarea {...p} name="address" required maxLength={2000} rows={3} />}
-        </Field>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Your phone" hint="If you have one — leave blank otherwise.">
-            {(p) => <Input {...p} name="phone" type="tel" inputMode="tel" maxLength={40} />}
+          <Field label="Registration No." hint="Leave blank if not assigned yet.">
+            {(p) => <Input {...p} name="registrationNo" maxLength={60} />}
           </Field>
-          <Field label="Email" hint="Defaults to your signup email if you leave it blank.">
+          <Field label="Full name *">
             {(p) => (
-              <Input
-                {...p}
-                name="email"
-                type="email"
-                autoComplete="email"
-                inputMode="email"
-                defaultValue={initialEmail}
-                maxLength={255}
-              />
+              <Input {...p} name="studentName" autoComplete="name" required maxLength={120} />
             )}
           </Field>
         </div>
-        <Field
-          label="National ID / birth certificate number"
-          hint="Optional — speeds up identity verification when you're approved."
-        >
-          {(p) => <Input {...p} name="nationalIdNumber" maxLength={40} />}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <Field label="Gender">
+            {(p) => (
+              <NativeSelect {...p} name="gender" placeholder="Select…">
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Other">Other</option>
+              </NativeSelect>
+            )}
+          </Field>
+          <Field label="Date of birth">
+            {(p) => <Input {...p} name="dateOfBirth" type="date" />}
+          </Field>
+          <Field label="An orphan?">
+            {(p) => (
+              <NativeSelect {...p} name="isOrphan" defaultValue="no">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </NativeSelect>
+            )}
+          </Field>
+        </div>
+        <Field label="Ethnicity">
+          {(p) => (
+            <NativeSelect {...p} name="ethnicity" placeholder="Select…">
+              {ETHNICITY_OPTIONS.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </NativeSelect>
+          )}
         </Field>
       </FormSection>
 
-      <FormSection
-        index="04"
-        title="Emergency contact"
-        subtitle="Someone other than your guardian — a teacher, older sibling, community elder."
-      >
+      <FormSection index="02" title="Parents" subtitle="The student's mother and father.">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Full name">
-            {(p) => <Input {...p} name="emergencyContactName" maxLength={120} />}
+          <Field label="Father's name">
+            {(p) => <Input {...p} name="fatherName" maxLength={120} />}
           </Field>
-          <Field label="Relation to you" hint="e.g. Teacher, Cousin">
-            {(p) => <Input {...p} name="emergencyContactRelation" maxLength={80} />}
+          <Field label="Mother's name">
+            {(p) => <Input {...p} name="motherName" maxLength={120} />}
           </Field>
         </div>
-        <Field label="Phone">
-          {(p) => (
-            <Input {...p} name="emergencyContactPhone" type="tel" inputMode="tel" maxLength={40} />
-          )}
+        <Field label="Contact" hint="A phone number to reach the parents.">
+          {(p) => <Input {...p} name="parentsContact" type="tel" inputMode="tel" maxLength={40} />}
         </Field>
+      </FormSection>
+
+      <FormSection index="03" title="Address" subtitle="Where the student and family live.">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Village / area">
+            {(p) => <Input {...p} name="village" maxLength={200} />}
+          </Field>
+          <Field label="Post office">
+            {(p) => <Input {...p} name="postOffice" maxLength={160} />}
+          </Field>
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Police station / upazila">
+            {(p) => <Input {...p} name="policeStation" maxLength={160} />}
+          </Field>
+          <Field label="District">{(p) => <Input {...p} name="district" maxLength={120} />}</Field>
+        </div>
+      </FormSection>
+
+      <FormSection index="04" title="Academic info" subtitle="The student's class and school.">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Class *" hint="e.g. 7, Class 8, HSC 1st year">
+            {(p) => <Input {...p} name="grade" required maxLength={40} />}
+          </Field>
+          <Field label="School / institute *">
+            {(p) => <Input {...p} name="school" required maxLength={200} />}
+          </Field>
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <Field label="Current roll no.">
+            {(p) => <Input {...p} name="currentRollNo" maxLength={60} />}
+          </Field>
+          <Field label="Former roll no.">
+            {(p) => <Input {...p} name="formerRollNo" maxLength={60} />}
+          </Field>
+          <Field label="Total students in class">
+            {(p) => <Input {...p} name="totalStudents" maxLength={40} />}
+          </Field>
+        </div>
       </FormSection>
 
       <FormSection
         index="05"
-        title="Your story"
-        subtitle="The board reads these personally. Be honest — there are no wrong answers."
+        title="Family & financial"
+        subtitle="The family's situation and what the student is asking for."
       >
-        <Field label="Hobby" hint="What do you do for fun?">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Father's profession" hint="e.g. Day laborer, Un-employed">
+            {(p) => <Input {...p} name="fatherProfession" maxLength={160} />}
+          </Field>
+          <Field label="Mother's profession" hint="e.g. House-wife">
+            {(p) => <Input {...p} name="motherProfession" maxLength={160} />}
+          </Field>
+        </div>
+        <Field
+          label="Family monthly income"
+          hint="Pick a range, or type an amount below in Purpose."
+        >
           {(p) => (
-            <Input
-              {...p}
-              name="hobby"
-              maxLength={200}
-              placeholder="e.g. Reading, cricket, drawing"
-            />
-          )}
-        </Field>
-        <Field label="What do you want to be when you grow up?" hint="Your goal — short or long.">
-          {(p) => (
-            <Textarea
-              {...p}
-              name="lifeTarget"
-              maxLength={1000}
-              rows={3}
-              placeholder="e.g. A primary school teacher in my village"
-            />
+            <NativeSelect {...p} name="familyIncome" placeholder="Select…">
+              {FAMILY_INCOME_OPTIONS.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))}
+            </NativeSelect>
           )}
         </Field>
         <Field
-          label="Tell us why you're applying *"
-          hint="A few sentences about your situation and what a scholarship would mean to you."
+          label="Purpose"
+          hint="What the support is for, and any income detail (e.g. 'Day labour, 3000/= per month')."
         >
+          {(p) => <Textarea {...p} name="purpose" rows={2} maxLength={2000} />}
+        </Field>
+        <Field label="Required amount" hint="e.g. 2000/-">
+          {(p) => <Input {...p} name="requiredAmount" maxLength={60} />}
+        </Field>
+      </FormSection>
+
+      <FormSection
+        index="06"
+        title="Amount nature"
+        subtitle="How the requested amount should be paid."
+      >
+        <Field label="Payment type">
+          {(p) => (
+            <div
+              id={p.id}
+              className="flex flex-wrap gap-6 border border-hairline bg-ground-2 px-4 py-3 text-body text-ink"
+            >
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="amountNature"
+                  value="installments"
+                  defaultChecked
+                  className="size-4 accent-accent"
+                />
+                By installments
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="amountNature"
+                  value="one_time"
+                  className="size-4 accent-accent"
+                />
+                One time
+              </label>
+            </div>
+          )}
+        </Field>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Per installment" hint="Amount per installment, if by installments.">
+            {(p) => <Input {...p} name="perInstallment" maxLength={60} />}
+          </Field>
+          <Field label="Duration">
+            {(p) => (
+              <div className="flex gap-3">
+                <Input {...p} name="durationValue" maxLength={40} placeholder="e.g. 2" />
+                <NativeSelect id={`${p.id}-unit`} name="durationUnit" defaultValue="years">
+                  <option value="years">years</option>
+                  <option value="months">months</option>
+                </NativeSelect>
+              </div>
+            )}
+          </Field>
+        </div>
+      </FormSection>
+
+      <FormSection
+        index="07"
+        title="Guardian"
+        subtitle="The guardian responsible for the student (if different from a parent)."
+      >
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Guardian's name">
+            {(p) => <Input {...p} name="guardianName" maxLength={120} />}
+          </Field>
+          <Field label="Guardian's contact">
+            {(p) => <Input {...p} name="guardianPhone" type="tel" inputMode="tel" maxLength={40} />}
+          </Field>
+        </div>
+        <Field label="Guardian's address">
+          {(p) => <Textarea {...p} name="guardianAddress" rows={2} maxLength={2000} />}
+        </Field>
+      </FormSection>
+
+      <FormSection index="08" title="Other" subtitle="Anything else the board should know.">
+        <Field label="Comment" hint="A short note about the student's situation.">
           {(p) => (
             <Textarea
               {...p}
               name="message"
-              required
+              rows={4}
               maxLength={4000}
-              rows={6}
               autoCapitalize="sentences"
+              placeholder="e.g. She is a good student; her father is un-employed since the corona disaster."
+            />
+          )}
+        </Field>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Student signature" hint="Type the student's name to sign.">
+            {(p) => <Input {...p} name="studentSignature" maxLength={160} />}
+          </Field>
+          <Field label="Contact" hint="A phone number to reach the student.">
+            {(p) => <Input {...p} name="phone" type="tel" inputMode="tel" maxLength={40} />}
+          </Field>
+        </div>
+        <Field label="Email" hint="Defaults to your signup email if left blank.">
+          {(p) => (
+            <Input
+              {...p}
+              name="email"
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              defaultValue={initialEmail}
+              maxLength={255}
             />
           )}
         </Field>
@@ -265,8 +325,7 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
   );
 }
 
-// Editorial section header — uses the same numbered rhythm the rest of the
-// site uses for long-form content (mission/vision, donation-journey, etc.).
+// Editorial section header — numbered rhythm matching the rest of the site.
 function FormSection({
   index,
   title,
@@ -294,19 +353,21 @@ function FormSection({
   );
 }
 
-// Select styled to match Input. Field passes id + describedby + aria-invalid
-// — we forward all of them so error highlighting works.
-function SelectInput({
+// Select styled to match Input. Field passes id + describedby + aria-invalid,
+// which we forward so error highlighting works.
+function NativeSelect({
   id,
   name,
-  options,
   placeholder,
+  defaultValue,
+  children,
   ...rest
 }: {
   id: string;
   name: string;
-  options: readonly string[];
   placeholder?: string;
+  defaultValue?: string;
+  children: React.ReactNode;
   "aria-describedby"?: string;
   "aria-invalid"?: boolean;
 }) {
@@ -314,16 +375,12 @@ function SelectInput({
     <select
       id={id}
       name={name}
-      defaultValue=""
-      className="min-h-[48px] border border-hairline bg-ground-2 px-4 text-body text-ink focus:border-accent focus:outline-none"
+      defaultValue={defaultValue ?? ""}
+      className="min-h-[48px] w-full border border-hairline bg-ground-2 px-4 text-body text-ink focus:border-accent focus:outline-none"
       {...rest}
     >
       {placeholder ? <option value="">{placeholder}</option> : null}
-      {options.map((o) => (
-        <option key={o} value={o}>
-          {o}
-        </option>
-      ))}
+      {children}
     </select>
   );
 }

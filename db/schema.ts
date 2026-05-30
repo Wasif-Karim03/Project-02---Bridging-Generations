@@ -267,6 +267,33 @@ export const studentRegistrations = pgTable("student_registrations", {
   message: text("message"),
   hobby: varchar("hobby", { length: 200 }),
   lifeTarget: text("life_target"),
+  // --- Full scholarship-application fields (mirror the org's paper form) ---
+  // Passport photo stored privately in the DB (base64) — never in the public
+  // repo, since these are child PII and consent-gated.
+  photoData: text("photo_data"),
+  photoMimeType: varchar("photo_mime_type", { length: 80 }),
+  registrationNo: varchar("registration_no", { length: 60 }),
+  gender: varchar("gender", { length: 20 }),
+  fatherName: varchar("father_name", { length: 120 }),
+  motherName: varchar("mother_name", { length: 120 }),
+  parentsContact: varchar("parents_contact", { length: 40 }),
+  fatherProfession: varchar("father_profession", { length: 160 }),
+  motherProfession: varchar("mother_profession", { length: 160 }),
+  village: varchar("village", { length: 200 }),
+  postOffice: varchar("post_office", { length: 160 }),
+  policeStation: varchar("police_station", { length: 160 }),
+  district: varchar("district", { length: 120 }),
+  currentRollNo: varchar("current_roll_no", { length: 60 }),
+  formerRollNo: varchar("former_roll_no", { length: 60 }),
+  totalStudents: varchar("total_students", { length: 40 }),
+  purpose: text("purpose"),
+  requiredAmount: varchar("required_amount", { length: 60 }),
+  amountNature: varchar("amount_nature", { length: 20 }),
+  perInstallment: varchar("per_installment", { length: 60 }),
+  durationValue: varchar("duration_value", { length: 40 }),
+  durationUnit: varchar("duration_unit", { length: 20 }),
+  guardianAddress: text("guardian_address"),
+  studentSignature: varchar("student_signature", { length: 160 }),
   status: applicationStatusEnum("status").notNull().default("submitted"),
   // Review trail — populated when an admin approves or rejects the
   // application. reviewerNotes holds the rejection reason (or any approval
