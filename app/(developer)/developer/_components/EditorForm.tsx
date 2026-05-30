@@ -392,35 +392,58 @@ function ImageControl({
   }
 
   return (
-    <div className="space-y-1.5">
-      <Label field={field} htmlFor={id} />
+    <div className="space-y-2">
+      <Label field={field} />
       {value ? (
         // biome-ignore lint/performance/noImgElement: preview of an arbitrary uploaded path; next/image needs configured domains
         <img
           src={value}
           alt=""
-          className="max-h-40 rounded-lg border border-hairline object-contain"
+          className="max-h-44 rounded-lg border border-hairline object-contain"
         />
-      ) : null}
-      <input
-        id={id}
-        type="file"
-        accept="image/*"
-        disabled={uploading}
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) upload(file);
-        }}
-        className="block text-sm"
-      />
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="/images/…  (filled automatically after upload)"
-        className={inputClass}
-      />
-      {uploading ? <p className="text-ink-2 text-xs">Uploading…</p> : null}
+      ) : (
+        <div className="flex h-28 items-center justify-center rounded-lg border border-hairline border-dashed bg-ground-2 text-ink-2 text-xs">
+          No image yet
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-3">
+        {/* The native file input is hidden; the label is the visible button so
+            the owner just clicks "Upload" and picks a file from their device. */}
+        <label
+          htmlFor={id}
+          className={`inline-flex cursor-pointer items-center rounded-lg px-4 py-2 font-medium text-sm ${
+            uploading
+              ? "cursor-not-allowed bg-ground-3 text-ink-2"
+              : "bg-accent text-white hover:opacity-90"
+          }`}
+        >
+          {uploading ? "Uploading…" : value ? "Replace image" : "Upload image"}
+        </label>
+        <input
+          id={id}
+          type="file"
+          accept="image/*"
+          disabled={uploading}
+          className="sr-only"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) upload(file);
+            e.target.value = "";
+          }}
+        />
+        {value && !uploading ? (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="text-ink-2 text-sm underline underline-offset-4 hover:text-ink"
+          >
+            Remove
+          </button>
+        ) : null}
+      </div>
+
+      <p className="text-ink-2 text-xs">Pick a JPG, PNG, or WebP from your device (max 8MB).</p>
       {error ? <p className="text-accent-2-text text-xs">{error}</p> : null}
     </div>
   );
