@@ -519,6 +519,36 @@ const donorProfileEntity: Entity = {
 // SINGLETONS (one record each)
 // =====================================================================
 
+const pageMediaEntity: Entity = {
+  key: "pageMedia",
+  type: "singleton",
+  label: "Hero images",
+  group: "Media",
+  dir: "content/page-media",
+  fileKind: "yaml",
+  blurb: "The big banner image at the top of each page.",
+  fields: [
+    { key: "homeSlide1Image", label: "Home — hero slide 1", kind: "image", dir: "site" },
+    { key: "homeSlide2Image", label: "Home — hero slide 2", kind: "image", dir: "site" },
+    { key: "homeSlide3Image", label: "Home — hero slide 3", kind: "image", dir: "site" },
+    { key: "aboutHeroImage", label: "About page hero", kind: "image", dir: "site" },
+    { key: "mentorsHeroImage", label: "Mentors page hero", kind: "image", dir: "site" },
+    {
+      key: "missionVisionHeroImage",
+      label: "Mission & Vision page hero",
+      kind: "image",
+      dir: "site",
+    },
+    {
+      key: "donationJourneyHeroImage",
+      label: "Donation journey page hero",
+      kind: "image",
+      dir: "site",
+    },
+    { key: "scholarshipsHeroImage", label: "Scholarships page hero", kind: "image", dir: "site" },
+  ],
+};
+
 const statsSnapshotEntity: Entity = {
   key: "statsSnapshot",
   type: "singleton",
@@ -869,6 +899,7 @@ const termsPageEntity: Entity = {
 export const ENTITIES: Entity[] = [
   statsSnapshotEntity,
   siteSettingsEntity,
+  pageMediaEntity,
   studentEntity,
   schoolEntity,
   projectEntity,

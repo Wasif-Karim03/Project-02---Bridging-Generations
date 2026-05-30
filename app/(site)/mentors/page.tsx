@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { getTeamMembersByGroup } from "@/lib/content/boardMembers";
+import { getPageMedia } from "@/lib/content/pageMedia";
 import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MentorsPage() {
-  const mentors = await getTeamMembersByGroup("mentor");
+  const [mentors, pageMedia] = await Promise.all([getTeamMembersByGroup("mentor"), getPageMedia()]);
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -71,7 +72,7 @@ export default async function MentorsPage() {
           <Reveal stagger="right" delay={150}>
             <div className="relative aspect-[4/5] w-full overflow-hidden bg-ground-2">
               <Image
-                src="/activity-visit.jpg"
+                src={pageMedia.mentorsHeroImage || "/activity-visit.jpg"}
                 alt="A mentor sitting with a student at a school visit"
                 fill
                 sizes="(min-width: 1024px) 40vw, 100vw"

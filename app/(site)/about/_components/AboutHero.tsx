@@ -6,9 +6,10 @@ import { Reveal } from "@/components/ui/Reveal";
 
 type AboutHeroProps = {
   foundingYear: number;
+  heroImage?: string;
 };
 
-export async function AboutHero({ foundingYear }: AboutHeroProps) {
+export async function AboutHero({ foundingYear, heroImage }: AboutHeroProps) {
   const t = await getTranslations("about");
   return (
     <section
@@ -43,7 +44,7 @@ export async function AboutHero({ foundingYear }: AboutHeroProps) {
         <Reveal stagger="right" delay={150}>
           <div className="relative aspect-[4/5] w-full overflow-hidden bg-ground-2">
             <Image
-              src="/home-mission.jpg"
+              src={heroImage || "/home-mission.jpg"}
               alt="A schoolboy in uniform sits in a library corner reading a book"
               fill
               sizes="(min-width: 1024px) 40vw, 100vw"

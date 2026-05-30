@@ -6,6 +6,7 @@ import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
+import { getPageMedia } from "@/lib/content/pageMedia";
 import { getScholarshipsPage } from "@/lib/content/scholarshipsPage";
 import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ScholarshipsSubPage() {
-  const page = await getScholarshipsPage();
+  const [page, pageMedia] = await Promise.all([getScholarshipsPage(), getPageMedia()]);
   const overview = page?.overview ? await page.overview() : "";
   const eligibility = page?.eligibility ? await page.eligibility() : "";
 
@@ -70,7 +71,7 @@ export default async function ScholarshipsSubPage() {
           <Reveal stagger="right" delay={150}>
             <div className="relative aspect-[4/5] w-full overflow-hidden bg-ground-2">
               <Image
-                src="/project-scholarship.jpg"
+                src={pageMedia.scholarshipsHeroImage || "/project-scholarship.jpg"}
                 alt="A sponsored student at her desk holding her notebook"
                 fill
                 sizes="(min-width: 1024px) 40vw, 100vw"

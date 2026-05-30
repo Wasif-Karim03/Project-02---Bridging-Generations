@@ -17,6 +17,7 @@ import {
   donatePageSingleton,
   donationJourneySingleton,
   donorsPageSingleton,
+  pageMediaSingleton,
   privacyPageSingleton,
   projectsPageSingleton,
   scholarshipsPageSingleton,
@@ -66,5 +67,6 @@ export default config({
     studentsPage: studentsPageSingleton,
     projectsPage: projectsPageSingleton,
     scholarshipsPage: scholarshipsPageSingleton,
+    pageMedia: pageMediaSingleton,
   },
 });

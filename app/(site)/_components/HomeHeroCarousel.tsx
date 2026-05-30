@@ -17,7 +17,13 @@ type Slide = {
   cta: { href: string; label: string };
 };
 
-export function HomeHeroCarousel() {
+// Hero image paths come from the CMS (pageMedia singleton) so the owner can
+// swap them in the editor; defaults preserve the original artwork.
+type HomeHeroCarouselProps = {
+  slideImages?: { slide1: string; slide2: string; slide3: string };
+};
+
+export function HomeHeroCarousel({ slideImages }: HomeHeroCarouselProps) {
   const t = useTranslations("home");
   const shouldReduceMotion = useReducedMotion();
 
@@ -25,21 +31,21 @@ export function HomeHeroCarousel() {
     {
       eyebrow: t("slide1Eyebrow"),
       headline: t("slide1Headline"),
-      image: "/home-hero.jpg",
+      image: slideImages?.slide1 || "/home-hero.jpg",
       imageAlt: "Students in a Bangladesh classroom hold up their drawings beside their teacher",
       cta: { href: "/be-a-donor", label: t("slide1Cta") },
     },
     {
       eyebrow: t("slide2Eyebrow"),
       headline: t("slide2Headline"),
-      image: "/activity-visit.jpg",
+      image: slideImages?.slide2 || "/activity-visit.jpg",
       imageAlt: "A field visit at a Hill Tracts school — staff and students gathered outside",
       cta: { href: "/be-a-donor", label: t("slide2Cta") },
     },
     {
       eyebrow: t("slide3Eyebrow"),
       headline: t("slide3Headline"),
-      image: "/home-mission.jpg",
+      image: slideImages?.slide3 || "/home-mission.jpg",
       imageAlt: "A schoolboy in uniform reads a book in a library corner",
       cta: { href: "/be-a-donor", label: t("slide3Cta") },
     },

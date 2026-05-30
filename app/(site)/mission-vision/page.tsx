@@ -7,6 +7,7 @@ import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
+import { getPageMedia } from "@/lib/content/pageMedia";
 import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MissionVisionPage() {
-  const t = await getTranslations("missionVision");
+  const [t, pageMedia] = await Promise.all([getTranslations("missionVision"), getPageMedia()]);
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -50,7 +51,7 @@ export default async function MissionVisionPage() {
           <Reveal stagger="right" delay={150}>
             <div className="relative aspect-[4/5] w-full overflow-hidden bg-ground-2">
               <Image
-                src="/home-mission.jpg"
+                src={pageMedia.missionVisionHeroImage || "/home-mission.jpg"}
                 alt="A schoolboy in uniform sits in a library corner reading a book"
                 fill
                 sizes="(min-width: 1024px) 40vw, 100vw"

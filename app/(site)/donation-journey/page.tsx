@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getDonationJourney } from "@/lib/content/donationJourney";
+import { getPageMedia } from "@/lib/content/pageMedia";
 import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DonationJourneyPage() {
-  const journey = await getDonationJourney();
+  const [journey, pageMedia] = await Promise.all([getDonationJourney(), getPageMedia()]);
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -30,6 +31,7 @@ export default async function DonationJourneyPage() {
         headline={journey.headline}
         intro={journey.intro}
         totalRaisedAllTime={journey.totalRaisedAllTime ?? 0}
+        heroImage={pageMedia.donationJourneyHeroImage}
       />
       <YearTimeline entries={journey.yearlyEntries} />
       <LifetimeImpact

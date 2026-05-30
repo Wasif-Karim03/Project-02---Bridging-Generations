@@ -4,6 +4,7 @@ import { TestimonialPanel } from "@/components/domain/TestimonialPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllBoardMembers, getAllTeamMembersGrouped } from "@/lib/content/boardMembers";
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
+import { getPageMedia } from "@/lib/content/pageMedia";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getAllTestimonials } from "@/lib/content/testimonials";
 import { pageAlternates } from "@/lib/seo/alternates";
@@ -22,11 +23,12 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const [siteSettings, boardMembers, grouped, testimonials] = await Promise.all([
+  const [siteSettings, boardMembers, grouped, testimonials, pageMedia] = await Promise.all([
     getSiteSettings(),
     getAllBoardMembers(),
     getAllTeamMembersGrouped(),
     getAllTestimonials(),
+    getPageMedia(),
   ]);
 
   const partnerQuote = testimonials.find((t) => t.speakerRole === "partner");
@@ -58,7 +60,7 @@ export default async function AboutPage() {
 
   return (
     <div className="atmospheric-page">
-      <AboutHero foundingYear={siteSettings.foundingYear} />
+      <AboutHero foundingYear={siteSettings.foundingYear} heroImage={pageMedia.aboutHeroImage} />
       <AboutMissionVision
         missionFull={siteSettings.missionFull}
         visionFull={siteSettings.visionFull}

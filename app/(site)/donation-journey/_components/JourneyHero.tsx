@@ -8,9 +8,10 @@ type JourneyHeroProps = {
   headline: string;
   intro: string;
   totalRaisedAllTime: number;
+  heroImage?: string;
 };
 
-export async function JourneyHero({ totalRaisedAllTime }: JourneyHeroProps) {
+export async function JourneyHero({ totalRaisedAllTime, heroImage }: JourneyHeroProps) {
   const t = await getTranslations("donationJourney");
   const formatted = `$${totalRaisedAllTime.toLocaleString("en-US")}`;
 
@@ -21,7 +22,7 @@ export async function JourneyHero({ totalRaisedAllTime }: JourneyHeroProps) {
     >
       {/* Background photo */}
       <Image
-        src="/donors-hero.jpg"
+        src={heroImage || "/donors-hero.jpg"}
         alt=""
         fill
         priority
