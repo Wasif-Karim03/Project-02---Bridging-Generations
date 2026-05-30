@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Feature, Row } from "@/components/ui/editorial";
@@ -26,6 +27,7 @@ type StoryWithConsent = {
 };
 
 export default async function SuccessStoriesPage() {
+  const t = await getTranslations("successStoriesPage");
   const [stories, students] = await Promise.all([
     getAllSuccessStoriesPublished(),
     getAllStudents(),
@@ -120,9 +122,9 @@ export default async function SuccessStoriesPage() {
         </div>
       </section>
       <CTAFooterPanel
-        headline="Back the next story."
-        body="Sponsorship is how these stories start. $30 a month covers tuition, books, daily meals, and materials for one student — long enough to see a whole arc through."
-        ctaLabel="Sponsor a Student"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/donate"
         tone="teal"
         titleId="success-stories-cta-title"

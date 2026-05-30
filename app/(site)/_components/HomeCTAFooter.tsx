@@ -1,15 +1,17 @@
+import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { Reveal } from "@/components/ui/Reveal";
 
-export function HomeCTAFooter() {
+export async function HomeCTAFooter() {
+  const t = await getTranslations("homeExtra");
   return (
     <Reveal stagger="up">
       <CTAFooterPanel
-        headline="Join us. Sponsor a child — or apply for a scholarship."
-        body="$30 a month covers tuition, books, daily meals, and materials for one student. Students in the Hill Tracts can apply for a scholarship in under 10 minutes."
-        ctaLabel="Be a Donor"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/be-a-donor"
-        secondaryCtaLabel="Apply as a student"
+        secondaryCtaLabel={t("ctaSecondaryLabel")}
         secondaryCtaHref="/student-signup"
         tone="cream"
         titleId="home-cta-footer-title"

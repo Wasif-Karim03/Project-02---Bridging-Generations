@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { RulesSection } from "@/components/content/RulesSection";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
@@ -25,11 +26,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ProjectsPage() {
-  const [{ active, paused, funded }, projectsPage, teachers, schools] = await Promise.all([
+  const [{ active, paused, funded }, projectsPage, teachers, schools, t] = await Promise.all([
     getProjectsByStatus(),
     getProjectsPage(),
     getAllTeachers(),
     getAllSchools(),
+    getTranslations("projectsPageExtra"),
   ]);
   const list = [...active, ...paused];
   const totalRaised = list.reduce((sum, p) => sum + p.fundingRaised, 0);
@@ -58,19 +60,17 @@ export default async function ProjectsPage() {
       >
         <div className="mx-auto flex max-w-[1280px] flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <Eyebrow>Sub-program</Eyebrow>
+            <Eyebrow>{t("scholarshipsEyebrow")}</Eyebrow>
             <h2 className="mt-2 max-w-[28ch] text-balance text-heading-3 text-ink">
-              Scholarships — our flagship sub-program.
+              {t("scholarshipsHeading")}
             </h2>
-            <p className="mt-2 max-w-[60ch] text-body-sm text-ink-2">
-              Eligibility, what we cover, and how to apply.
-            </p>
+            <p className="mt-2 max-w-[60ch] text-body-sm text-ink-2">{t("scholarshipsLine")}</p>
           </div>
           <Link
             href="/projects/scholarships"
             className="inline-flex min-h-[48px] items-center bg-accent px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
           >
-            See Scholarships
+            {t("scholarshipsCta")}
           </Link>
         </div>
       </section>
@@ -102,13 +102,11 @@ export default async function ProjectsPage() {
           className="bg-ground-2 px-4 py-20 sm:px-6 lg:px-[6%] lg:py-28"
         >
           <div className="mx-auto max-w-[1280px]">
-            <Eyebrow>Schools</Eyebrow>
+            <Eyebrow>{t("schoolsEyebrow")}</Eyebrow>
             <h2 className="mt-2 max-w-[36ch] text-balance text-heading-2 text-ink">
-              The schools where every project is delivered.
+              {t("schoolsHeading")}
             </h2>
-            <p className="mt-3 max-w-[60ch] text-body text-ink-2">
-              Each partner school has its own overview, student roster, and teacher list.
-            </p>
+            <p className="mt-3 max-w-[60ch] text-body text-ink-2">{t("schoolsLine")}</p>
             <ul className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {schools.map((school) => (
                 <li key={school.id}>
@@ -123,7 +121,7 @@ export default async function ProjectsPage() {
                       <p className="line-clamp-2 text-body-sm text-ink-2">{school.description}</p>
                     ) : null}
                     <span className="mt-auto text-nav-link uppercase text-accent">
-                      View school →
+                      {t("schoolCardCta")}
                     </span>
                   </Link>
                 </li>
@@ -143,16 +141,16 @@ export default async function ProjectsPage() {
 
       <RulesSection
         id="rules"
-        eyebrow="Project rules"
-        title="How projects, applications, and revocation work."
+        eyebrow={t("rulesEyebrow")}
+        title={t("rulesTitle")}
         intro={projectsPage?.rulesIntro}
         body={rulesBody}
       />
 
       <CTAFooterPanel
-        headline="Back a project that moves the needle."
-        body="Every gift goes straight to a named line item — not overhead. Start or increase a sponsorship, or direct a gift to a specific project above."
-        ctaLabel="Donate now"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/donate"
         tone="cream"
         titleId="projects-cta-title"

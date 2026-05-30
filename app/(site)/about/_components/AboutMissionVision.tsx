@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Dropcap } from "@/components/content/Dropcap";
 import { SceneBreak } from "@/components/content/SceneBreak";
 
@@ -12,7 +13,8 @@ type AboutMissionVisionProps = {
 // screenshot capture or pre-hydration paint, leaving ~250px of empty
 // cream where the trust content should be. R4.1 removes the gate so
 // load-bearing copy can never be invisible.
-export function AboutMissionVision({ missionFull, visionFull }: AboutMissionVisionProps) {
+export async function AboutMissionVision({ missionFull, visionFull }: AboutMissionVisionProps) {
+  const t = await getTranslations("aboutExtra");
   return (
     <section
       id="mission"
@@ -23,7 +25,7 @@ export function AboutMissionVision({ missionFull, visionFull }: AboutMissionVisi
         <div className="flex flex-col gap-5">
           <SceneBreak />
           <h2 id="about-mission-title" className="text-balance text-heading-1 text-ink">
-            Our Mission
+            {t("missionLabel")}
           </h2>
           <Dropcap>
             <p className="text-body-lg text-ink-2">{missionFull}</p>
@@ -32,7 +34,7 @@ export function AboutMissionVision({ missionFull, visionFull }: AboutMissionVisi
         <div className="flex flex-col gap-5">
           <SceneBreak />
           <h2 id="about-vision-title" className="text-balance text-heading-1 text-ink">
-            Our Vision
+            {t("visionLabel")}
           </h2>
           <Dropcap>
             <p className="text-body-lg text-ink-2">{visionFull}</p>

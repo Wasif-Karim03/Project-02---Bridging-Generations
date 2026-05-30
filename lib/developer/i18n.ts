@@ -61,6 +61,19 @@ const SECTION_LABELS: Record<string, string> = {
   gallery: "Gallery page",
   students: "Students page — filters",
   common: "Shared buttons & labels",
+  homeExtra: "Home page — sections & CTA",
+  aboutExtra: "About page — sections & team labels",
+  mentorsPage: "Mentors page",
+  activitiesPage: "Activities page",
+  testimonialsPage: "Testimonials page",
+  successStoriesPage: "Success stories page",
+  studentsPageExtra: "Students page — sections & CTA",
+  projectsPageExtra: "Projects page — sections & CTA",
+  scholarshipsPageExtra: "Scholarships page — sections",
+  donatePageExtra: "Donate page — sections",
+  contactPageExtra: "Contact page — sections",
+  donorsPageExtra: "Donor profile page",
+  applyPages: "Apply pages (mentor / scholarship)",
 };
 
 export function sectionLabel(section: string): string {

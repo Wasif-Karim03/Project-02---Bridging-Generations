@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "next-view-transitions";
 import { useMemo } from "react";
 
@@ -18,6 +19,7 @@ type HomeNewsTickerProps = {
 // loop without a visible jump. Pauses on hover; respects
 // prefers-reduced-motion.
 export function HomeNewsTicker({ items }: HomeNewsTickerProps) {
+  const t = useTranslations("homeExtra");
   // Memo runs unconditionally — the empty-list branch returns *after* hooks.
   const doubled = useMemo(() => [...items, ...items], [items]);
 
@@ -33,7 +35,9 @@ export function HomeNewsTicker({ items }: HomeNewsTickerProps) {
       className="relative overflow-hidden border-b border-hairline bg-ground-3"
     >
       <div className="mx-auto flex max-w-[1280px] items-center px-4 sm:px-6 lg:px-[6%]">
-        <p className="shrink-0 pr-4 py-2 text-eyebrow uppercase text-accent">Latest</p>
+        <p className="shrink-0 pr-4 py-2 text-eyebrow uppercase text-accent">
+          {t("newsTickerLabel")}
+        </p>
         <div className="group relative flex-1 overflow-hidden">
           <div
             className="ticker-track flex whitespace-nowrap py-2"

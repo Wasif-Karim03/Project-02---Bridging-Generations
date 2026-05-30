@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { ActivityCard } from "@/components/domain/ActivityCard";
 import { TimelineRail } from "@/components/ui/editorial";
@@ -27,6 +28,7 @@ function monthKey(iso: string): string | null {
 }
 
 export function ActivityFilter({ activities }: ActivityFilterProps) {
+  const t = useTranslations("activitiesPage");
   const [selection, setSelection] = useState<Selection>(ALL);
 
   const availableTags = useMemo(() => {
@@ -49,14 +51,14 @@ export function ActivityFilter({ activities }: ActivityFilterProps) {
       tagCounts.set(a.tag, (tagCounts.get(a.tag) ?? 0) + 1);
     }
     return [
-      { value: ALL, label: "All", count: activities.length },
+      { value: ALL, label: t("filterAll"), count: activities.length },
       ...availableTags.map((tag) => ({
         value: tag,
         label: ACTIVITY_TAG_LABELS[tag],
         count: tagCounts.get(tag) ?? 0,
       })),
     ];
-  }, [activities, availableTags]);
+  }, [activities, availableTags, t]);
 
   return (
     <>
@@ -67,7 +69,7 @@ export function ActivityFilter({ activities }: ActivityFilterProps) {
         ariaLabel="Filter activities by type"
       />
       {filtered.length === 0 ? (
-        <p className="text-body text-ink-2">No activities match this filter yet.</p>
+        <p className="text-body text-ink-2">{t("emptyState")}</p>
       ) : (
         <TimelineRail ariaLabel="Recent activities timeline" className="flex flex-col">
           {filtered.flatMap((activity, index) => {

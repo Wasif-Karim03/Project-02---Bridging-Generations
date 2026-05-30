@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { MDXRenderer } from "@/components/content/MDXRenderer";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
 
 export default async function ScholarshipsSubPage() {
   const [page, pageMedia] = await Promise.all([getScholarshipsPage(), getPageMedia()]);
+  const t = await getTranslations("scholarshipsPageExtra");
   const overview = page?.overview ? await page.overview() : "";
   const eligibility = page?.eligibility ? await page.eligibility() : "";
 
@@ -62,7 +64,7 @@ export default async function ScholarshipsSubPage() {
                     href="/students"
                     className="inline-flex min-h-[48px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
                   >
-                    See current students
+                    {t("seeStudentsCta")}
                   </Link>
                 </div>
               ) : null}
@@ -90,9 +92,9 @@ export default async function ScholarshipsSubPage() {
           className="scroll-mt-20 bg-ground px-4 py-20 sm:px-6 lg:px-[6%] lg:py-28"
         >
           <div className="mx-auto max-w-[840px]">
-            <Eyebrow>Overview</Eyebrow>
+            <Eyebrow>{t("overviewEyebrow")}</Eyebrow>
             <h2 id="overview-title" className="mt-3 text-balance text-heading-1 text-ink">
-              How scholarships work.
+              {t("overviewHeading")}
             </h2>
             <div className="mt-8">
               <MDXRenderer source={overview} />
@@ -108,9 +110,9 @@ export default async function ScholarshipsSubPage() {
           className="scroll-mt-20 bg-ground-2 px-4 py-20 sm:px-6 lg:px-[6%] lg:py-28"
         >
           <div className="mx-auto max-w-[840px]">
-            <Eyebrow>Eligibility</Eyebrow>
+            <Eyebrow>{t("eligibilityEyebrow")}</Eyebrow>
             <h2 id="eligibility-title" className="mt-3 text-balance text-heading-1 text-ink">
-              Who can apply.
+              {t("eligibilityHeading")}
             </h2>
             <div className="mt-8">
               <MDXRenderer source={eligibility} />
@@ -120,8 +122,8 @@ export default async function ScholarshipsSubPage() {
       ) : null}
 
       <CTAFooterPanel
-        headline="Apply or sponsor a student."
-        body="Whether you're an applicant, a guardian, or a sponsor — the next step is the same: send us a note."
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
         ctaLabel={page?.applyCtaLabel || "Apply now"}
         ctaHref={page?.applyCtaHref || "/contact"}
         tone="cream"

@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { ChapterBreak } from "@/components/motif/ChapterBreak";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Row } from "@/components/ui/editorial";
@@ -13,7 +14,7 @@ type AboutTransparencyProps = {
   contactEmail: string;
 };
 
-export function AboutTransparency({
+export async function AboutTransparency({
   orgName,
   foundingYear,
   ein,
@@ -22,6 +23,7 @@ export function AboutTransparency({
   mailingAddress,
   contactEmail,
 }: AboutTransparencyProps) {
+  const t = await getTranslations("aboutExtra");
   const hasAnyFinancialLink = Boolean(form990Url) || Boolean(candidProfileUrl);
   const showEin = !isPlaceholder(ein) && ein !== "00-0000000";
   const showMailingAddress = !isPlaceholder(mailingAddress);
@@ -35,32 +37,32 @@ export function AboutTransparency({
       <div className="mx-auto flex max-w-[1280px] flex-col gap-10 lg:gap-14">
         <ChapterBreak />
         <div className="flex flex-col gap-4">
-          <Eyebrow>Transparency</Eyebrow>
+          <Eyebrow>{t("transparencyEyebrow")}</Eyebrow>
           <h2
             id="about-transparency-title"
             className="max-w-[24ch] text-balance text-heading-1 text-ink"
           >
-            Where your donation goes.
+            {t("transparencyHeading")}
           </h2>
         </div>
         <ul className="flex flex-col">
           <Row as="li" noImage className="max-sm:border-t-transparent max-sm:py-4">
-            <Row.Eyebrow>Legal</Row.Eyebrow>
+            <Row.Eyebrow>{t("legalLabel")}</Row.Eyebrow>
             <div className="flex flex-col gap-2 text-body text-ink-2">
               <span className="text-ink">{orgName}</span>
               <span>Founded {foundingYear}</span>
-              <span>501(c)(3) nonprofit</span>
+              <span>{t("nonprofitStatus")}</span>
               {showEin ? (
                 <span>
                   EIN <span className="tabular-nums">{ein}</span>
                 </span>
               ) : (
-                <span>EIN published once the board confirms the filing.</span>
+                <span>{t("einPending")}</span>
               )}
             </div>
           </Row>
           <Row as="li" noImage className="max-sm:border-t-transparent max-sm:py-4">
-            <Row.Eyebrow>Financials</Row.Eyebrow>
+            <Row.Eyebrow>{t("financialsLabel")}</Row.Eyebrow>
             <div className="flex flex-col gap-3 text-body text-ink-2">
               {hasAnyFinancialLink ? (
                 <ul className="flex flex-col gap-2">
@@ -72,7 +74,7 @@ export function AboutTransparency({
                         rel="noopener noreferrer"
                         className="text-accent underline underline-offset-[3px] transition hover:text-accent-2-text"
                       >
-                        Most recent IRS Form 990
+                        {t("form990LinkLabel")}
                       </a>
                     </li>
                   ) : null}
@@ -84,29 +86,24 @@ export function AboutTransparency({
                         rel="noopener noreferrer"
                         className="text-accent underline underline-offset-[3px] transition hover:text-accent-2-text"
                       >
-                        Candid / GuideStar profile
+                        {t("candidLinkLabel")}
                       </a>
                     </li>
                   ) : null}
                 </ul>
               ) : (
-                <p>
-                  We publish our IRS Form 990 annually. Links appear here as soon as each year's
-                  filing is available.
-                </p>
+                <p>{t("form990Pending")}</p>
               )}
-              <p>
-                Stripe processes donations and issues automated receipts at the time of each gift.
-              </p>
+              <p>{t("stripeReceipts")}</p>
             </div>
           </Row>
           <Row as="li" noImage className="max-sm:border-t-transparent max-sm:py-4">
-            <Row.Eyebrow>Governance</Row.Eyebrow>
+            <Row.Eyebrow>{t("governanceLabel")}</Row.Eyebrow>
             <div className="flex flex-col gap-3 text-body text-ink-2">
               {showMailingAddress ? (
                 <address className="whitespace-pre-line not-italic">{mailingAddress}</address>
               ) : (
-                <p>We operate remotely. Mail reaches us through the email below.</p>
+                <p>{t("remoteOperations")}</p>
               )}
               <a
                 href={`mailto:${contactEmail}`}
@@ -114,7 +111,7 @@ export function AboutTransparency({
               >
                 {contactEmail}
               </a>
-              <p>The board is unpaid. 100% of project-designated donations go to program costs.</p>
+              <p>{t("boardUnpaid")}</p>
             </div>
           </Row>
         </ul>

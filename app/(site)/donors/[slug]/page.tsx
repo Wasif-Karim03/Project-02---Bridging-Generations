@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -49,6 +50,7 @@ const DESIGNATION_LABELS: Record<string, string> = {
 
 export default async function DonorProfilePage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
+  const tx = await getTranslations("donorsPageExtra");
   const profile = await getDonorProfileBySlug(slug);
 
   if (!profile || profile.isAnonymous) {
@@ -94,7 +96,7 @@ export default async function DonorProfilePage({ params }: { params: Promise<Par
               href="/donors"
               className="text-meta uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent-2-text focus-visible:text-accent-2-text focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-accent"
             >
-              ← Back to donors
+              {tx("backToDonors")}
             </Link>
           </nav>
 
@@ -119,7 +121,7 @@ export default async function DonorProfilePage({ params }: { params: Promise<Par
             {byYearMonth.size > 0 ? (
               <section aria-labelledby="donor-calendar-title">
                 <h2 id="donor-calendar-title" className="mb-4 text-heading-4 text-ink">
-                  Donation calendar
+                  {tx("calendarHeading")}
                 </h2>
                 <DonorCalendarView byYearMonth={byYearMonth} />
               </section>
@@ -129,7 +131,7 @@ export default async function DonorProfilePage({ params }: { params: Promise<Par
             {sortedHistory.length > 0 ? (
               <section aria-labelledby="donor-history-title">
                 <h2 id="donor-history-title" className="mb-6 text-heading-4 text-ink">
-                  All donations
+                  {tx("allDonationsHeading")}
                 </h2>
                 <ol className="flex flex-col gap-px border border-hairline">
                   {sortedHistory.map((entry, i) => {
@@ -171,9 +173,9 @@ export default async function DonorProfilePage({ params }: { params: Promise<Par
         </div>
       </main>
       <CTAFooterPanel
-        headline="Support a student."
-        body="Your gift funds tuition, daily meals, books, and materials for children across the Chittagong Hill Tracts."
-        ctaLabel="Become a donor"
+        headline={tx("ctaHeadline")}
+        body={tx("ctaBody")}
+        ctaLabel={tx("ctaLabel")}
         ctaHref="/be-a-donor"
         tone="teal"
         titleId="donor-profile-cta-title"

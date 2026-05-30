@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { ProgramCard } from "@/components/domain/ProgramCard";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -12,7 +13,8 @@ type HomeProgramsGridProps = {
 // %, $ remaining, and a per-project Donate Now CTA. We use the `card` scale
 // of ProgramCard so the visual language remains consistent with the rest of
 // the site's editorial primitives.
-export function HomeProgramsGrid({ projects }: HomeProgramsGridProps) {
+export async function HomeProgramsGrid({ projects }: HomeProgramsGridProps) {
+  const t = await getTranslations("homeExtra");
   return (
     <section
       id="programs"
@@ -23,16 +25,16 @@ export function HomeProgramsGrid({ projects }: HomeProgramsGridProps) {
         <Reveal stagger="up">
           <header className="mb-12 flex flex-col gap-4 lg:mb-16 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex flex-col gap-3">
-              <Eyebrow>How we help</Eyebrow>
+              <Eyebrow>{t("programsEyebrow")}</Eyebrow>
               <h2 id="home-programs-title" className="text-balance text-heading-2 text-ink">
-                Our projects
+                {t("programsHeadline")}
               </h2>
             </div>
             <Link
               href="/projects"
               className="group inline-flex min-h-[44px] items-center gap-1 py-2 text-nav-link uppercase text-accent transition hover:text-accent-2-text active:text-accent-2-text"
             >
-              See all projects
+              {t("programsSeeAll")}
               <span
                 aria-hidden="true"
                 className="transition-transform motion-safe:group-hover:translate-x-1 motion-safe:group-active:translate-x-1"
@@ -53,7 +55,7 @@ export function HomeProgramsGrid({ projects }: HomeProgramsGridProps) {
             </ul>
           </Reveal>
         ) : (
-          <p className="text-body-sm text-ink-2">No projects to show yet.</p>
+          <p className="text-body-sm text-ink-2">{t("programsEmpty")}</p>
         )}
       </div>
     </section>

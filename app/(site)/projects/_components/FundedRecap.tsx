@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { ProgramCard } from "@/components/domain/ProgramCard";
 import type { Project } from "@/lib/content/projects";
 
@@ -5,8 +6,9 @@ type FundedRecapProps = {
   projects: Project[];
 };
 
-export function FundedRecap({ projects }: FundedRecapProps) {
+export async function FundedRecap({ projects }: FundedRecapProps) {
   if (projects.length === 0) return null;
+  const t = await getTranslations("projectsPageExtra");
   const isSingle = projects.length === 1;
   return (
     <section
@@ -16,12 +18,9 @@ export function FundedRecap({ projects }: FundedRecapProps) {
       <div className="mx-auto flex max-w-[1280px] flex-col gap-10">
         <header className="flex flex-col gap-2">
           <h2 id="projects-funded-title" className="text-balance text-heading-1 text-ink">
-            Fully funded — thank you
+            {t("fundedHeading")}
           </h2>
-          <p className="max-w-[56ch] text-body text-ink-2">
-            These projects closed with every dollar raised. Huge thanks to the donors who made them
-            happen.
-          </p>
+          <p className="max-w-[56ch] text-body text-ink-2">{t("fundedBody")}</p>
         </header>
         {isSingle ? (
           <ProgramCard project={projects[0]} scale="feature" />

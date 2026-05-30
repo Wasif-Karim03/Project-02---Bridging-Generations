@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
@@ -9,12 +10,13 @@ type DonateHeroProps = {
   orgName: string;
 };
 
-export function DonateHero({ headline, intro, ein, orgName }: DonateHeroProps) {
+export async function DonateHero({ headline, intro, ein, orgName }: DonateHeroProps) {
+  const t = await getTranslations("donatePageExtra");
   const einIsReal = !isPlaceholder(ein) && ein !== "00-0000000";
   return (
     <Reveal>
       <div className="flex flex-col gap-5">
-        <Eyebrow>Give</Eyebrow>
+        <Eyebrow>{t("heroEyebrow")}</Eyebrow>
         <h1 className="text-balance text-display-2 text-ink">{headline}</h1>
         <p className="max-w-[44ch] text-body-lg text-ink-2">{intro}</p>
         <dl className="mt-2 flex flex-col gap-1 text-meta uppercase tracking-[0.1em] text-ink-2">

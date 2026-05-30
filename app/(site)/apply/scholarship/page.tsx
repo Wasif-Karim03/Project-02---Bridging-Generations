@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -15,7 +16,8 @@ export const metadata: Metadata = {
   alternates: pageAlternates("/apply/scholarship"),
 };
 
-export default function ApplyScholarshipPage() {
+export default async function ApplyScholarshipPage() {
+  const t = await getTranslations("applyPages");
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
     { name: "Scholarships", url: "/projects/scholarships" },
@@ -35,22 +37,18 @@ export default function ApplyScholarshipPage() {
               id="apply-hero-title"
               className="mt-3 max-w-[28ch] text-balance text-display-2 text-ink"
             >
-              Apply for a Bridging Generations scholarship.
+              {t("scholarshipHeroHeadline")}
             </h1>
-            <p className="mt-4 max-w-[60ch] text-body-lg text-ink-2">
-              Open to students enrolled at our partner schools across the Chittagong Hill Tracts.
-              The board reviews every application against published eligibility rules and replies
-              within four weeks.
-            </p>
+            <p className="mt-4 max-w-[60ch] text-body-lg text-ink-2">{t("scholarshipHeroBody")}</p>
             <p className="mt-3 text-meta uppercase tracking-[0.06em] text-ink-2">
-              Read the{" "}
+              {t("scholarshipRulesIntroBefore")}{" "}
               <Link
                 href="/students#rules"
                 className="text-accent underline underline-offset-[3px] hover:no-underline"
               >
-                scholarship rules
+                {t("scholarshipRulesLinkLabel")}
               </Link>{" "}
-              before applying.
+              {t("scholarshipRulesIntroAfter")}
             </p>
           </Reveal>
         </div>
@@ -100,9 +98,9 @@ export default function ApplyScholarshipPage() {
       </section>
 
       <CTAFooterPanel
-        headline="Not eligible — but want to support?"
-        body="If you can't apply but would like to sponsor a student, see how to give."
-        ctaLabel="Be a Donor"
+        headline={t("scholarshipCtaHeadline")}
+        body={t("scholarshipCtaBody")}
+        ctaLabel={t("scholarshipCtaLabel")}
         ctaHref="/be-a-donor"
         tone="cream"
         titleId="apply-cta-title"

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllActivitiesPublished } from "@/lib/content/activities";
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ActivitiesPage() {
+  const t = await getTranslations("activitiesPage");
   const activities = await getAllActivitiesPublished();
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
@@ -40,9 +42,9 @@ export default async function ActivitiesPage() {
         </div>
       </section>
       <CTAFooterPanel
-        headline="Support the next update on this list."
-        body="Every activity here is someone's donation at work — a meal served, a scholarship awarded, a delivery made. Start a recurring sponsorship to keep the list going."
-        ctaLabel="Donate now"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/donate"
         tone="cream"
         titleId="activities-cta-title"

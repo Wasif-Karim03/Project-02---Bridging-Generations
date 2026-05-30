@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { TestimonialCard } from "@/components/domain/TestimonialCard";
 import { type FilterChipOption, FilterChips } from "@/components/ui/FilterChips";
@@ -49,6 +50,7 @@ function readSelectionFromParam(raw: string | null): Selection {
 }
 
 export function TestimonialsGrid({ testimonials, roleCounts }: TestimonialsGridProps) {
+  const t = useTranslations("testimonialsPage");
   const searchParams = useSearchParams();
   const initial = readSelectionFromParam(searchParams.get("role"));
   const [selection, setSelection] = useState<Selection>(initial);
@@ -111,7 +113,7 @@ export function TestimonialsGrid({ testimonials, roleCounts }: TestimonialsGridP
       />
       {filtered.length === 0 ? (
         <p className="text-body text-ink-2" aria-live="polite">
-          No testimonials in this group yet.
+          {t("emptyState")}
         </p>
       ) : (
         <div className="flex flex-col" aria-live="polite">

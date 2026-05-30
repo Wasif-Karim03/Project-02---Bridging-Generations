@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Link } from "next-view-transitions";
 import { useMemo, useState } from "react";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -18,6 +19,7 @@ const TABS = [{ value: "all" as const, label: "All" }, ...GALLERY_CATEGORY_OPTIO
 // Tabs: All / Humanity / Activities / Projects / Students / Publication.
 // Client-side filter (no route change) so motion + transitions stay smooth.
 export function HomeGallery({ images }: HomeGalleryProps) {
+  const t = useTranslations("homeExtra");
   const [active, setActive] = useState<string>("all");
 
   const filtered = useMemo(() => {
@@ -39,16 +41,16 @@ export function HomeGallery({ images }: HomeGalleryProps) {
         <Reveal stagger="up">
           <header className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex flex-col gap-3">
-              <Eyebrow>From the field</Eyebrow>
+              <Eyebrow>{t("galleryEyebrow")}</Eyebrow>
               <h2 id="home-gallery-title" className="text-balance text-heading-2 text-ink">
-                Gallery
+                {t("galleryHeadline")}
               </h2>
             </div>
             <Link
               href="/gallery"
               className="group inline-flex min-h-[44px] items-center gap-1 py-2 text-nav-link uppercase text-accent transition hover:text-accent-2-text"
             >
-              See full gallery
+              {t("gallerySeeFull")}
               <span
                 aria-hidden="true"
                 className="transition-transform motion-safe:group-hover:translate-x-1"
@@ -86,7 +88,7 @@ export function HomeGallery({ images }: HomeGalleryProps) {
         </div>
 
         {visible.length === 0 ? (
-          <p className="text-body-sm text-ink-2">No photographs in this category yet.</p>
+          <p className="text-body-sm text-ink-2">{t("galleryEmpty")}</p>
         ) : (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 lg:gap-4">
             {visible.map((img) => (

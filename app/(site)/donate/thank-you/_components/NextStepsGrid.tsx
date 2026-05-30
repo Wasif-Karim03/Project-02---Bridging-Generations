@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { HorizonLine } from "@/components/motif/HorizonLine";
 import { Feature, Row, Tile } from "@/components/ui/editorial";
 import { Reveal } from "@/components/ui/Reveal";
@@ -8,9 +9,10 @@ import { ShareRow } from "./ShareRow";
 import { SubscribeForm } from "./SubscribeForm";
 
 export async function NextStepsGrid() {
-  const [stories, students] = await Promise.all([
+  const [stories, students, t] = await Promise.all([
     getAllSuccessStoriesPublished(),
     getAllStudents(),
+    getTranslations("donatePageExtra"),
   ]);
   const studentById = new Map(students.map((s) => [s.id, s]));
   const story = stories.find((s) =>
@@ -34,7 +36,7 @@ export async function NextStepsGrid() {
           <div className="relative z-10 mx-auto max-w-[1280px]">
             <Feature breakout={false}>
               <Feature.Body>
-                <Feature.Eyebrow>Stay in touch</Feature.Eyebrow>
+                <Feature.Eyebrow>{t("stayInTouchEyebrow")}</Feature.Eyebrow>
                 <Feature.Headline as="h2">
                   <span id="thank-you-subscribe-title">Stay on the quarterly update.</span>
                 </Feature.Headline>
@@ -60,7 +62,7 @@ export async function NextStepsGrid() {
       >
         <div className="mx-auto max-w-[1280px]">
           <Row hideRule={false} noImage>
-            <Row.Eyebrow>Pass it on</Row.Eyebrow>
+            <Row.Eyebrow>{t("passItOnEyebrow")}</Row.Eyebrow>
             <Row.Headline as="h2">
               <span id="thank-you-share-title">Telling a friend fills the next sponsorship.</span>
             </Row.Headline>

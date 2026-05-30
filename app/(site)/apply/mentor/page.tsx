@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -15,7 +16,8 @@ export const metadata: Metadata = {
   alternates: pageAlternates("/apply/mentor"),
 };
 
-export default function ApplyMentorPage() {
+export default async function ApplyMentorPage() {
+  const t = await getTranslations("applyPages");
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
     { name: "Mentors", url: "/mentors" },
@@ -35,13 +37,9 @@ export default function ApplyMentorPage() {
               id="apply-mentor-title"
               className="mt-3 max-w-[28ch] text-balance text-display-2 text-ink"
             >
-              Mentor a Bridging Generations student.
+              {t("mentorHeroHeadline")}
             </h1>
-            <p className="mt-4 max-w-[60ch] text-body-lg text-ink-2">
-              One hour a week, real impact. The board reviews every applicant — subject fit and
-              references — within three weeks. Once approved, you're matched with one or more
-              students for at least one term.
-            </p>
+            <p className="mt-4 max-w-[60ch] text-body-lg text-ink-2">{t("mentorHeroBody")}</p>
           </Reveal>
         </div>
       </section>
@@ -56,9 +54,9 @@ export default function ApplyMentorPage() {
       </section>
 
       <CTAFooterPanel
-        headline="Not a mentor — but want to help?"
-        body="Sponsor a student or back a project. Every $30/month keeps a child in the classroom."
-        ctaLabel="See how to sponsor"
+        headline={t("mentorCtaHeadline")}
+        body={t("mentorCtaBody")}
+        ctaLabel={t("mentorCtaLabel")}
         ctaHref="/donate"
         tone="cream"
         titleId="apply-mentor-cta-title"

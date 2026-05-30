@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { TestimonialPanel } from "@/components/domain/TestimonialPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
+  const t = await getTranslations("aboutExtra");
   const [siteSettings, boardMembers, grouped, testimonials, pageMedia] = await Promise.all([
     getSiteSettings(),
     getAllBoardMembers(),
@@ -79,15 +81,15 @@ export default async function AboutPage() {
         <TestimonialPanel
           testimonial={partnerQuote}
           titleId="about-partner-quote-title"
-          ctaLabel="Partner with us"
+          ctaLabel={t("partnerCtaLabel")}
           ctaHref="/contact"
           id="partners"
         />
       ) : null}
       <CTAFooterPanel
-        headline="Stand with us."
-        body="Every sponsorship keeps one more student in the classroom. Help us carry this work into the next year."
-        ctaLabel="Donate"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/donate"
         tone="cream"
         titleId="about-cta-title"

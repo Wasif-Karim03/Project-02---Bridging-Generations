@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Dropcap } from "@/components/content/Dropcap";
 import { MarginaliaRail } from "@/components/content/MarginaliaRail";
 import { MDXRenderer } from "@/components/content/MDXRenderer";
@@ -54,6 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function SuccessStorySlugPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
+  const t = await getTranslations("successStoriesPage");
   const story = await getSuccessStoryBySlug(slug);
   if (!story) notFound();
 
@@ -124,7 +126,7 @@ export default async function SuccessStorySlugPage({ params }: { params: Promise
               id="success-story-related-title"
               className="text-eyebrow tracking-[0.18em] text-ink-2 uppercase"
             >
-              Continue reading
+              {t("continueReading")}
             </p>
             <h2 className="mt-5 text-balance text-heading-2 text-ink">
               <a
