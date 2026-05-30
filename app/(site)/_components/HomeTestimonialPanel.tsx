@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { AmberMark } from "@/components/motif/AmberMark";
 import { HandDrawnUnderline } from "@/components/motif/HandDrawnUnderline";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +14,8 @@ type HomeTestimonialPanelProps = {
 // CTA target:   /contact (Send feedback)
 // Self-contained variant of TestimonialPanel so the spec copy can sit above
 // the quote without distorting the shared TestimonialPanel API used by /about.
-export function HomeTestimonialPanel({ testimonial }: HomeTestimonialPanelProps) {
+export async function HomeTestimonialPanel({ testimonial }: HomeTestimonialPanelProps) {
+  const t = await getTranslations("homeExtra");
   const { quote, speakerName, speakerTitle, speakerRole, highlightWord } = testimonial;
   const role =
     speakerTitle && speakerTitle.length > 0
@@ -31,12 +33,12 @@ export function HomeTestimonialPanel({ testimonial }: HomeTestimonialPanelProps)
         <span aria-hidden="true" className="teal-panel-glyph" />
         <div className="relative z-10 mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-[6%]">
           <div className="mb-10 flex flex-col gap-3 text-white">
-            <Eyebrow className="text-accent-3!">Testimonial</Eyebrow>
+            <Eyebrow className="text-accent-3!">{t("testimonialEyebrow")}</Eyebrow>
             <h2
               id="home-testimonial-title"
               className="max-w-[28ch] text-balance text-heading-1 text-white"
             >
-              Your positive comment is our inspiration.
+              {t("testimonialHeadline")}
             </h2>
           </div>
           <blockquote className="flex flex-col gap-10">
@@ -67,7 +69,7 @@ export function HomeTestimonialPanel({ testimonial }: HomeTestimonialPanelProps)
                 <span className="text-meta uppercase text-white/75">{role}</span>
               </div>
               <Button variant="primary" href="/contact">
-                Send Feedback
+                {t("testimonialSendFeedback")}
               </Button>
             </footer>
           </blockquote>

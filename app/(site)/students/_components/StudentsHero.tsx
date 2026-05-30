@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import type { Testimonial } from "@/lib/content/testimonials";
 import { StudentsPullQuote } from "./StudentsPullQuote";
@@ -8,7 +9,8 @@ type StudentsHeroProps = {
   pullQuote: Testimonial | null;
 };
 
-export function StudentsHero({ studentCount, schoolCount, pullQuote }: StudentsHeroProps) {
+export async function StudentsHero({ studentCount, schoolCount, pullQuote }: StudentsHeroProps) {
+  const tx = await getTranslations("studentsPageExtra");
   return (
     <section
       aria-labelledby="students-hero-title"
@@ -21,7 +23,7 @@ export function StudentsHero({ studentCount, schoolCount, pullQuote }: StudentsH
             id="students-hero-title"
             className="max-w-[20ch] text-balance text-display-2 text-ink"
           >
-            Student Directory
+            {tx("directoryTitle")}
           </h1>
           <p className="max-w-[44ch] text-body-lg text-ink-2">
             {studentCount} sponsored students across {schoolCount} partner schools. First names

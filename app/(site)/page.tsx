@@ -3,6 +3,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { getRecentActivities } from "@/lib/content/activities";
 import { getAllGalleryImages } from "@/lib/content/galleryImages";
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
+import { getPageMedia } from "@/lib/content/pageMedia";
 import { getFeaturedProjects } from "@/lib/content/projects";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getSpotlightStudents } from "@/lib/content/students";
@@ -39,6 +40,7 @@ export default async function Home() {
     students,
     testimonial,
     galleryImages,
+    pageMedia,
   ] = await Promise.all([
     getSiteSettings(),
     getFeaturedProjects(6),
@@ -50,6 +52,7 @@ export default async function Home() {
     getSpotlightStudents(3),
     getFeaturedTestimonial(),
     getAllGalleryImages(),
+    getPageMedia(),
   ]);
 
   const tickerItems = tickerActivities.map((a) => ({
@@ -89,7 +92,13 @@ export default async function Home() {
       {/* 1. Scrolling news ticker */}
       <HomeNewsTicker items={tickerItems} />
       {/* 2. Hero slider (3 full-width slides) */}
-      <HomeHeroCarousel />
+      <HomeHeroCarousel
+        slideImages={{
+          slide1: pageMedia.homeSlide1Image,
+          slide2: pageMedia.homeSlide2Image,
+          slide3: pageMedia.homeSlide3Image,
+        }}
+      />
       {/* 3. About BG section */}
       <HomeMissionBand missionFull={settings.missionFull} />
       {/* 4. Success Stories — 3 cards */}

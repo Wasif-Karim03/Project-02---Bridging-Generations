@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { FaqAccordion } from "@/components/domain/FaqAccordion";
 import { TestimonialPanel } from "@/components/domain/TestimonialPanel";
@@ -40,11 +41,12 @@ function parseAmounts(raw: string | null | undefined, fallback: number): number[
 }
 
 export default async function DonatePage() {
-  const [donatePage, siteSettings, testimonials, projects] = await Promise.all([
+  const [donatePage, siteSettings, testimonials, projects, t] = await Promise.all([
     getDonatePage(),
     getSiteSettings(),
     getAllTestimonials(),
     getAllProjects(),
+    getTranslations("donatePageExtra"),
   ]);
 
   const supportTestimonial =
@@ -112,7 +114,7 @@ export default async function DonatePage() {
             <div className="flex flex-col gap-3">
               <Eyebrow>Answers</Eyebrow>
               <h2 id="donate-faq-title" className="text-balance text-heading-2 text-ink">
-                Frequently asked questions.
+                {t("faqHeading")}
               </h2>
               {donatePage.transactionSourceNote ? (
                 <p className="max-w-[60ch] text-body text-ink-2">

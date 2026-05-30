@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Feature } from "@/components/ui/editorial";
 
 type SecondaryOption = {
@@ -11,24 +12,25 @@ type GivingOptionsStripProps = {
   monthlySuggestion: number;
 };
 
-export function GivingOptionsStrip({ monthlySuggestion }: GivingOptionsStripProps) {
+export async function GivingOptionsStrip({ monthlySuggestion }: GivingOptionsStripProps) {
+  const t = await getTranslations("donatePageExtra");
   const secondaries: SecondaryOption[] = [
     {
-      label: "Give once",
-      amount: "Any amount",
-      body: "Use the form above and choose Give once at checkout — every dollar still routes to program costs.",
+      label: t("giveOnceLabel"),
+      amount: t("giveOnceAmount"),
+      body: t("giveOnceBody"),
       href: "#donate-hero-title",
     },
     {
-      label: "Designate a project",
-      amount: "Project-tied",
-      body: "Back the meal program, the girls' scholarship fund, or a school-supply delivery.",
+      label: t("designateLabel"),
+      amount: t("designateAmount"),
+      body: t("designateBody"),
       href: "/projects",
     },
     {
-      label: "Honor or memorial gift",
-      amount: "Card included",
-      body: "Mark a birthday, a teacher, or a family member. Write us and we'll send a card to whomever you name.",
+      label: t("honorLabel"),
+      amount: t("honorAmount"),
+      body: t("honorBody"),
       href: "/contact",
     },
   ];
@@ -39,18 +41,15 @@ export function GivingOptionsStrip({ monthlySuggestion }: GivingOptionsStripProp
     >
       <div className="mx-auto flex max-w-[1280px] flex-col gap-12 lg:gap-16">
         <h2 id="giving-options-title" className="max-w-[20ch] text-balance text-heading-1 text-ink">
-          Other ways to give
+          {t("otherWaysHeading")}
         </h2>
         <Feature breakout={false}>
           <Feature.Body>
-            <Feature.Eyebrow>Sponsor monthly</Feature.Eyebrow>
+            <Feature.Eyebrow>{t("monthlyEyebrow")}</Feature.Eyebrow>
             <Feature.Headline as="h3" href="#donate-hero-title">
-              ${monthlySuggestion}/mo keeps one student in the classroom
+              {t("monthlyHeadline", { amount: monthlySuggestion })}
             </Feature.Headline>
-            <Feature.Lede>
-              Tuition, books, daily meals, and materials for the full school year. The single most
-              leveraged way to give — recurring sponsors are how the program plans staffing.
-            </Feature.Lede>
+            <Feature.Lede>{t("monthlyLede")}</Feature.Lede>
           </Feature.Body>
         </Feature>
         <ul className="flex flex-col border-t border-hairline">

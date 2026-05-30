@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Reveal } from "@/components/ui/Reveal";
 import { StickyCTA } from "@/components/ui/StickyCTA";
 import { getDonatePage } from "@/lib/content/donatePage";
@@ -18,10 +19,11 @@ type ThankYouPageProps = {
 };
 
 export default async function DonateThankYouPage({ searchParams }: ThankYouPageProps) {
-  const [donatePage, siteSettings, giftContext] = await Promise.all([
+  const [donatePage, siteSettings, giftContext, t] = await Promise.all([
     getDonatePage(),
     getSiteSettings(),
     searchParams.then((params) => getGiftContext(params)),
+    getTranslations("donatePageExtra"),
   ]);
 
   const isLive =
@@ -40,7 +42,7 @@ export default async function DonateThankYouPage({ searchParams }: ThankYouPageP
               id="thank-you-hero-title"
               className="max-w-[22ch] text-balance text-display-2 text-ink"
             >
-              Your support changes a child's year.
+              {t("thankYouHeadline")}
             </h1>
             <p className="max-w-[60ch] whitespace-pre-line text-body-lg text-ink-2">{body}</p>
             <ThankYouPersonalization context={giftContext} />

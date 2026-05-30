@@ -1,14 +1,21 @@
+import { getTranslations } from "next-intl/server";
+
 type DonorStatsProps = {
   totalDonated: number;
   yearsActive: number;
   studentsSupported: number;
 };
 
-export function DonorStats({ totalDonated, yearsActive, studentsSupported }: DonorStatsProps) {
+export async function DonorStats({
+  totalDonated,
+  yearsActive,
+  studentsSupported,
+}: DonorStatsProps) {
+  const tx = await getTranslations("donorsPageExtra");
   const stats = [
-    { label: "Total donated", value: `$${totalDonated.toLocaleString("en-US")}` },
-    { label: "Years active", value: String(yearsActive) },
-    { label: "Students supported", value: String(studentsSupported) },
+    { label: tx("statTotalDonated"), value: `$${totalDonated.toLocaleString("en-US")}` },
+    { label: tx("statYearsActive"), value: String(yearsActive) },
+    { label: tx("statStudentsSupported"), value: String(studentsSupported) },
   ];
 
   return (

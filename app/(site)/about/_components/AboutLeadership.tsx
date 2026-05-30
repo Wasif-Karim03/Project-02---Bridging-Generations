@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { BoardMemberCard } from "@/components/domain/BoardMemberCard";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import type { TeamGroup, TeamGroupedMembers } from "@/lib/content/boardMembers";
@@ -13,42 +14,44 @@ type SectionConfig = {
   intro?: string;
 };
 
-// Render order mirrors the spec: Board → Moderators → R&D → Accounting →
-// Coordinators → (Mentors live on /mentors as a dedicated showcase, not here)
-const SECTIONS: SectionConfig[] = [
-  {
-    group: "board",
-    eyebrow: "Leadership",
-    title: "Board of Directors",
-    intro: "The five board members guiding Bridging Generations across continents.",
-  },
-  {
-    group: "moderator",
-    eyebrow: "Moderators",
-    title: "Communications & moderation",
-    intro: "The communicators who keep students, donors, and the board in sync.",
-  },
-  {
-    group: "rnd",
-    eyebrow: "R&D",
-    title: "Research & Development",
-    intro: "The volunteers researching scholarships, schools, and where to grow next.",
-  },
-  {
-    group: "accounting",
-    eyebrow: "Accounting",
-    title: "Accounting",
-    intro: "The people tracking every donated dollar and report.",
-  },
-  {
-    group: "coordinator",
-    eyebrow: "Coordinators",
-    title: "Co-ordinators",
-    intro: "On-the-ground coordinators between schools, students, and the board.",
-  },
-];
+export async function AboutLeadership({ grouped }: AboutLeadershipProps) {
+  const t = await getTranslations("aboutExtra");
 
-export function AboutLeadership({ grouped }: AboutLeadershipProps) {
+  // Render order mirrors the spec: Board → Moderators → R&D → Accounting →
+  // Coordinators → (Mentors live on /mentors as a dedicated showcase, not here)
+  const SECTIONS: SectionConfig[] = [
+    {
+      group: "board",
+      eyebrow: t("boardEyebrow"),
+      title: t("boardTitle"),
+      intro: t("boardIntro"),
+    },
+    {
+      group: "moderator",
+      eyebrow: t("moderatorEyebrow"),
+      title: t("moderatorTitle"),
+      intro: t("moderatorIntro"),
+    },
+    {
+      group: "rnd",
+      eyebrow: t("rndEyebrow"),
+      title: t("rndTitle"),
+      intro: t("rndIntro"),
+    },
+    {
+      group: "accounting",
+      eyebrow: t("accountingEyebrow"),
+      title: t("accountingTitle"),
+      intro: t("accountingIntro"),
+    },
+    {
+      group: "coordinator",
+      eyebrow: t("coordinatorEyebrow"),
+      title: t("coordinatorTitle"),
+      intro: t("coordinatorIntro"),
+    },
+  ];
+
   // If nobody is configured for any of the on-page sections, skip.
   const hasAny = SECTIONS.some((s) => grouped[s.group].length > 0);
   if (!hasAny) return null;
@@ -61,12 +64,12 @@ export function AboutLeadership({ grouped }: AboutLeadershipProps) {
     >
       <div className="mx-auto flex max-w-[1280px] flex-col gap-16 lg:gap-24">
         <header className="flex flex-col gap-4">
-          <Eyebrow>The team</Eyebrow>
+          <Eyebrow>{t("leadershipEyebrow")}</Eyebrow>
           <h2
             id="about-leadership-title"
             className="max-w-[28ch] text-balance text-heading-1 text-ink"
           >
-            The people behind Bridging Generations.
+            {t("leadershipHeading")}
           </h2>
         </header>
         {SECTIONS.map((section) => {

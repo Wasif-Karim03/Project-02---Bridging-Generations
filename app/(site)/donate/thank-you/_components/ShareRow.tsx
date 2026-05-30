@@ -1,14 +1,15 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 const SHARE_URL = "https://bridginggenerations.org/donate";
-const SHARE_MESSAGE =
-  "I'm sponsoring a student in the Chittagong Hill Tracts via Bridging Generations: https://bridginggenerations.org/donate";
 
 type ShareStatus = "idle" | "shared" | "copied" | "error";
 
 export function ShareRow() {
+  const t = useTranslations("donatePageExtra");
+  const SHARE_MESSAGE = t("shareMessage");
   const [status, setStatus] = useState<ShareStatus>("idle");
 
   async function handleShare() {

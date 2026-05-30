@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -38,7 +39,8 @@ type TestimonialsHeroProps = {
   roleCounts?: Partial<Record<RoleValue, number>>;
 };
 
-export function TestimonialsHero({ count, roleCounts }: TestimonialsHeroProps) {
+export async function TestimonialsHero({ count, roleCounts }: TestimonialsHeroProps) {
+  const t = await getTranslations("testimonialsPage");
   // Stamp-row roles must reflect what the page actually delivers — the
   // hardcoded "parents · teachers · students · alumni · partners" strip
   // promised five roles the page no longer matches. Source the list from
@@ -52,16 +54,14 @@ export function TestimonialsHero({ count, roleCounts }: TestimonialsHeroProps) {
     >
       <Reveal>
         <div className="mx-auto flex max-w-[1280px] flex-col gap-6">
-          <Eyebrow>Voices</Eyebrow>
+          <Eyebrow>{t("heroEyebrow")}</Eyebrow>
           <h1
             id="testimonials-hero-title"
             className="max-w-[18ch] text-balance text-display-2 text-ink"
           >
-            Testimonials.
+            {t("heroHeadline")}
           </h1>
-          <p className="max-w-[44ch] text-body-lg text-ink-2">
-            On what this work has meant to them, in their own words.
-          </p>
+          <p className="max-w-[44ch] text-body-lg text-ink-2">{t("heroDescription")}</p>
           <ul className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-t border-hairline pt-4 text-meta uppercase tracking-[0.1em] text-ink-2">
             <li>
               {count} {count === 1 ? "voice" : "voices"}

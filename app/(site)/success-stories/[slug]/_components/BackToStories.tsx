@@ -1,6 +1,8 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 
-export function BackToStories() {
+export async function BackToStories() {
+  const t = await getTranslations("successStoriesPage");
   return (
     <div className="bg-ground px-4 pt-10 sm:px-6 lg:px-[6%]">
       <div className="mx-auto max-w-[1100px]">
@@ -14,7 +16,7 @@ export function BackToStories() {
           >
             ←
           </span>
-          All stories
+          {t("allStories")}
         </Link>
       </div>
     </div>

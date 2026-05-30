@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -28,6 +29,7 @@ const ROLE_VALUES = [
 ] as const;
 
 export default async function TestimonialsPage() {
+  const t = await getTranslations("testimonialsPage");
   const testimonials = await getAllTestimonials();
 
   const roleCounts: Record<string, number> = { all: testimonials.length };
@@ -61,9 +63,9 @@ export default async function TestimonialsPage() {
         </div>
       </section>
       <CTAFooterPanel
-        headline="Add yours."
-        body="Know a parent, teacher, or alum whose story belongs here? Point them our way — we publish with permission."
-        ctaLabel="Contact us"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/contact"
         tone="cream"
         titleId="testimonials-cta-title"

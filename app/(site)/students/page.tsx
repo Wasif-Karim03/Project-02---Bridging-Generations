@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Link } from "next-view-transitions";
 import { RulesSection } from "@/components/content/RulesSection";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
 const HSC_SSC_GRADES = new Set([10, 11, 12]);
 
 export default async function StudentsPage() {
+  const tx = await getTranslations("studentsPageExtra");
   const [allSchools, grouped, allStudents, testimonials, studentsPage] = await Promise.all([
     getAllSchools(),
     getStudentsGroupedBySchool(),
@@ -113,49 +115,45 @@ export default async function StudentsPage() {
       <RulesSection
         id="rules"
         eyebrow="Scholarship rules"
-        title="What sponsorship requires of our students."
+        title={tx("rulesTitle")}
         intro={studentsPage?.rulesIntro}
         body={rulesBody}
       />
       <section aria-label="Apply" className="bg-ground-3 px-4 py-16 sm:px-6 lg:px-[6%] lg:py-20">
         <div className="mx-auto flex max-w-[1280px] flex-col items-start gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-eyebrow uppercase text-accent">Apply</p>
+            <p className="text-eyebrow uppercase text-accent">{tx("applyEyebrow")}</p>
             <h2 className="mt-2 max-w-[36ch] text-balance text-heading-3 text-ink">
-              Are you a student? Apply for a scholarship.
+              {tx("applyHeading")}
             </h2>
-            <p className="mt-2 max-w-[48ch] text-body-sm text-ink-2">
-              Create a free student account, share your details, and our board will review your
-              application. Once approved, you'll get a unique Student ID and can sign in to see who
-              is sponsoring you and how much they've given.
-            </p>
+            <p className="mt-2 max-w-[48ch] text-body-sm text-ink-2">{tx("applyBody")}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link
               href="/student-signup"
               className="inline-flex min-h-[48px] items-center bg-accent px-5 text-nav-link uppercase text-white transition-colors hover:bg-accent/90"
             >
-              Apply as a student →
+              {tx("applyStudentCta")}
             </Link>
             <Link
               href="/student-login"
               className="inline-flex min-h-[48px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
             >
-              Sign in
+              {tx("signInCta")}
             </Link>
             <Link
               href="/mentor-login"
               className="inline-flex min-h-[48px] items-center border border-hairline px-5 text-nav-link uppercase text-ink hover:border-accent hover:text-accent"
             >
-              Apply as mentor
+              {tx("applyMentorCta")}
             </Link>
           </div>
         </div>
       </section>
       <CTAFooterPanel
-        headline="Your sponsorship puts a name on this page."
-        body="Every $30 / month sponsorship covers tuition, books, daily meals, and materials for one student. The next sponsorship pays for the next name on this list."
-        ctaLabel="Sponsor a Student"
+        headline={tx("ctaHeadline")}
+        body={tx("ctaBody")}
+        ctaLabel={tx("ctaLabel")}
         ctaHref="/donate"
         tone="teal"
         titleId="students-cta-title"

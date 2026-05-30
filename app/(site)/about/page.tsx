@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { TestimonialPanel } from "@/components/domain/TestimonialPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllBoardMembers, getAllTeamMembersGrouped } from "@/lib/content/boardMembers";
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
+import { getPageMedia } from "@/lib/content/pageMedia";
 import { getSiteSettings } from "@/lib/content/siteSettings";
 import { getAllTestimonials } from "@/lib/content/testimonials";
 import { pageAlternates } from "@/lib/seo/alternates";
@@ -22,11 +24,13 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const [siteSettings, boardMembers, grouped, testimonials] = await Promise.all([
+  const t = await getTranslations("aboutExtra");
+  const [siteSettings, boardMembers, grouped, testimonials, pageMedia] = await Promise.all([
     getSiteSettings(),
     getAllBoardMembers(),
     getAllTeamMembersGrouped(),
     getAllTestimonials(),
+    getPageMedia(),
   ]);
 
   const partnerQuote = testimonials.find((t) => t.speakerRole === "partner");
@@ -58,7 +62,7 @@ export default async function AboutPage() {
 
   return (
     <div className="atmospheric-page">
-      <AboutHero foundingYear={siteSettings.foundingYear} />
+      <AboutHero foundingYear={siteSettings.foundingYear} heroImage={pageMedia.aboutHeroImage} />
       <AboutMissionVision
         missionFull={siteSettings.missionFull}
         visionFull={siteSettings.visionFull}
@@ -77,15 +81,15 @@ export default async function AboutPage() {
         <TestimonialPanel
           testimonial={partnerQuote}
           titleId="about-partner-quote-title"
-          ctaLabel="Partner with us"
+          ctaLabel={t("partnerCtaLabel")}
           ctaHref="/contact"
           id="partners"
         />
       ) : null}
       <CTAFooterPanel
-        headline="Stand with us."
-        body="Every sponsorship keeps one more student in the classroom. Help us carry this work into the next year."
-        ctaLabel="Donate"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/donate"
         tone="cream"
         titleId="about-cta-title"

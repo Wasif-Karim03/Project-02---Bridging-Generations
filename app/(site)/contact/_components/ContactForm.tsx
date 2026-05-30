@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
@@ -18,6 +19,7 @@ function SubmitButton({ pending }: { pending: boolean }) {
 }
 
 export function ContactForm() {
+  const tx = useTranslations("contactPageExtra");
   const [state, formAction, pending] = useActionState<ContactActionState, FormData>(
     submitContactForm,
     initialContactState,
@@ -124,9 +126,7 @@ export function ContactForm() {
         </label>
       </div>
 
-      <p className="text-meta text-ink-2">
-        We use your email only to reply. No list, no automation.
-      </p>
+      <p className="text-meta text-ink-2">{tx("privacyNotice")}</p>
 
       <SubmitButton pending={pending} />
     </form>

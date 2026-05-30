@@ -1,11 +1,13 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 type DonateAfterNoteProps = {
   note: string;
 };
 
-export function DonateAfterNote({ note }: DonateAfterNoteProps) {
+export async function DonateAfterNote({ note }: DonateAfterNoteProps) {
   if (!note.trim()) return null;
+  const t = await getTranslations("donatePageExtra");
   return (
     <section
       aria-labelledby="donate-after-title"
@@ -13,7 +15,7 @@ export function DonateAfterNote({ note }: DonateAfterNoteProps) {
     >
       <div className="mx-auto flex max-w-[900px] flex-col gap-3 text-body text-ink-2">
         <h2 id="donate-after-title" className="text-eyebrow uppercase tracking-[0.1em] text-accent">
-          After you give
+          {t("afterGiveHeading")}
         </h2>
         <p className="text-balance whitespace-pre-line">{note}</p>
         <p>

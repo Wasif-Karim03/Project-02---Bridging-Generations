@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { Reveal } from "@/components/ui/Reveal";
@@ -18,7 +19,11 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const [contactPage, siteSettings] = await Promise.all([getContactPage(), getSiteSettings()]);
+  const [contactPage, siteSettings, t] = await Promise.all([
+    getContactPage(),
+    getSiteSettings(),
+    getTranslations("contactPageExtra"),
+  ]);
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -33,7 +38,7 @@ export default async function ContactPage() {
       >
         <Reveal>
           <div className="mx-auto flex max-w-[1280px] flex-col gap-5">
-            <Eyebrow>Reach out</Eyebrow>
+            <Eyebrow>{t("eyebrow")}</Eyebrow>
             <h1
               id="contact-hero-title"
               className="max-w-[22ch] text-balance text-display-2 text-ink"
@@ -51,7 +56,7 @@ export default async function ContactPage() {
         <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:gap-16">
           <div className="flex flex-col gap-6">
             <h2 id="contact-form-title" className="text-balance text-heading-3 text-ink">
-              Send a message.
+              {t("formTitle")}
             </h2>
             <ContactForm />
           </div>
