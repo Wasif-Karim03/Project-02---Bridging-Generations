@@ -61,6 +61,25 @@ export default async function DeveloperHome() {
       </p>
 
       <div className="mt-8 space-y-10">
+        <section>
+          <h2 className="font-medium text-ink-2 text-xs uppercase tracking-wide">Page text</h2>
+          <ul className="mt-3 divide-y divide-hairline rounded-xl border border-hairline bg-ground-2">
+            <li>
+              <Link
+                href="/developer/translations"
+                className="flex items-center justify-between px-4 py-3 hover:bg-ground-3"
+              >
+                <span>
+                  <span className="font-medium">Page text (English & বাংলা)</span>
+                  <span className="block text-ink-2 text-xs">
+                    Headings, buttons, nav, and hero copy across the site — in both languages.
+                  </span>
+                </span>
+                <span className="text-ink-2 text-xs">Edit →</span>
+              </Link>
+            </li>
+          </ul>
+        </section>
         {groups.map(({ group, items }) => (
           <section key={group}>
             <h2 className="font-medium text-ink-2 text-xs uppercase tracking-wide">{group}</h2>
