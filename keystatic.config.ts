@@ -32,11 +32,16 @@ import {
 // Production should always have KEYSTATIC_GITHUB_CLIENT_ID set.
 const useGitHub = Boolean(process.env.KEYSTATIC_GITHUB_CLIENT_ID);
 
+// The repo Vercel actually deploys from — confirmed via the GitHub deployments
+// API (vercel[bot] posts Production statuses here). Previously pointed at the
+// stale `Bamyani1/bridging-generations`, which has no deployments, so Keystatic
+// saves never reached the live site. The password-gated /developer editor is
+// the primary content editor; this keeps /keystatic correct as a fallback.
 export default config({
   storage: useGitHub
     ? {
         kind: "github",
-        repo: { owner: "Bamyani1", name: "bridging-generations" },
+        repo: { owner: "Wasif-Karim03", name: "Project-02---Bridging-Generations" },
       }
     : { kind: "local" },
   ui: {
