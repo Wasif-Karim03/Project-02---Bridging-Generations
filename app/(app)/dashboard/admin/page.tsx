@@ -103,13 +103,17 @@ export default async function AdminDashboard() {
                   <td className="py-3 text-right align-top">
                     <div className="flex flex-col items-end gap-2">
                       <span
-                        className={
-                          a.status === "submitted"
-                            ? "inline-block bg-accent-2 px-2 py-0.5 text-meta uppercase tracking-[0.06em] text-white"
-                            : a.status === "approved"
-                              ? "inline-block bg-accent px-2 py-0.5 text-meta uppercase tracking-[0.06em] text-white"
-                              : "inline-block border border-hairline px-2 py-0.5 text-meta uppercase tracking-[0.06em] text-ink-2"
-                        }
+                        className={`inline-block px-2 py-0.5 text-meta uppercase tracking-[0.06em] ${
+                          a.status === "approved"
+                            ? "bg-accent text-white"
+                            : a.status === "rejected"
+                              ? "bg-accent-2-text text-white"
+                              : a.status === "under_review"
+                                ? "bg-accent-3 text-ink"
+                                : a.status === "submitted"
+                                  ? "bg-accent-2 text-white"
+                                  : "border border-hairline text-ink-2"
+                        }`}
                       >
                         {APPLICATION_STATUS_LABEL[a.status]}
                       </span>

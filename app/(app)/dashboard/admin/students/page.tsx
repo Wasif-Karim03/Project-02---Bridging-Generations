@@ -90,6 +90,7 @@ export default async function AdminStudentsPage() {
                 const reg = registrations[i];
                 const isLinked = Boolean(u.studentSlug);
                 const isRejected = reg?.status === "rejected";
+                const isApproved = reg?.status === "approved";
                 const studentName = reg?.studentName ?? u.displayName ?? u.email;
                 return (
                   <Fragment key={u.id}>
@@ -109,6 +110,7 @@ export default async function AdminStudentsPage() {
                       <td className="py-3 pr-4">
                         <StatusBadge
                           isLinked={isLinked}
+                          isApproved={isApproved}
                           isRejected={isRejected}
                           hasRegistration={Boolean(reg)}
                         />
@@ -146,14 +148,25 @@ export default async function AdminStudentsPage() {
 
 function StatusBadge({
   isLinked,
+  isApproved,
   isRejected,
   hasRegistration,
 }: {
   isLinked: boolean;
+  isApproved: boolean;
   isRejected: boolean;
   hasRegistration: boolean;
 }) {
+  // Linked = approved AND has a public profile; approved = the board's decision
+  // even before a profile is set up. Both count as "approved" to the admin.
   if (isLinked) {
+    return (
+      <span className="inline-block bg-accent px-2 py-0.5 text-meta uppercase tracking-[0.06em] text-white">
+        Approved · linked
+      </span>
+    );
+  }
+  if (isApproved) {
     return (
       <span className="inline-block bg-accent px-2 py-0.5 text-meta uppercase tracking-[0.06em] text-white">
         Approved
