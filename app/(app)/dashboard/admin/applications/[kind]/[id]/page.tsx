@@ -42,7 +42,7 @@ export default async function AdminApplicationDetailPage({
   const detail = await getApplicationById(kind, id);
   if (!detail) notFound();
 
-  const { applicantLabel, applicantEmail, submittedAt, status, fields, photo } =
+  const { applicantLabel, applicantEmail, submittedAt, status, fields, hasPhoto } =
     extractDisplay(detail);
   // Every kind now has a reviewer_notes column; pull it off directly.
   const existingNotes = (detail.data as { reviewerNotes: string | null }).reviewerNotes ?? "";
@@ -78,10 +78,10 @@ export default async function AdminApplicationDetailPage({
           <h2 id="submission-title" className="text-heading-3 text-ink">
             Submission
           </h2>
-          {photo ? (
-            // biome-ignore lint/performance/noImgElement: private base64 photo from the DB; not a public asset
+          {hasPhoto ? (
+            // biome-ignore lint/performance/noImgElement: admin-only private photo served from an API route; next/image needs config
             <img
-              src={`data:${photo.mime};base64,${photo.data}`}
+              src={`/api/admin/application-photo/${kind}/${id}`}
               alt={`${applicantLabel} portrait`}
               className="h-48 w-40 rounded border border-hairline object-cover"
             />
@@ -155,7 +155,7 @@ function extractDisplay(detail: ApplicationDetail): {
   submittedAt: Date;
   status: ApplicationStatus;
   fields: Array<[string, string]>;
-  photo: { data: string; mime: string } | null;
+  hasPhoto: boolean;
 } {
   if (detail.kind === "scholarship") {
     const r = detail.data;
@@ -176,7 +176,7 @@ function extractDisplay(detail: ApplicationDetail): {
         ["Family income", r.familyIncome ?? ""],
         ["Message", r.message],
       ],
-      photo: null,
+      hasPhoto: false,
     };
   }
   if (detail.kind === "mentor") {
@@ -204,7 +204,7 @@ function extractDisplay(detail: ApplicationDetail): {
         ["Expected end date", r.expectedEndDate ?? ""],
         ["Why mentor", r.whyMentor],
       ],
-      photo: r.photoData ? { data: r.photoData, mime: r.photoMimeType ?? "image/jpeg" } : null,
+      hasPhoto: Boolean(r.photoData),
     };
   }
   const r = detail.data;
@@ -255,6 +255,6 @@ function extractDisplay(detail: ApplicationDetail): {
       ["Signature", r.studentSignature ?? ""],
       ["Comment", r.message ?? ""],
     ],
-    photo: r.photoData ? { data: r.photoData, mime: r.photoMimeType ?? "image/jpeg" } : null,
+    hasPhoto: Boolean(r.photoData),
   };
 }
