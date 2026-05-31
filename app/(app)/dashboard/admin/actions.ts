@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentDbUser, requireRole } from "@/lib/auth";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { setApplicationStatus } from "@/lib/db/queries/applications";
+import { notifyApplicantOfDecision } from "@/lib/notifications/applicationDecision";
 
 export type ApprovalResult = {
   status: "success" | "error";
@@ -34,6 +35,7 @@ export async function setApplicationStatusAction(
     });
     revalidatePath("/dashboard/admin");
     revalidatePath("/dashboard/admin/applications");
+    await notifyApplicantOfDecision(kind, id, status);
     return {
       status: "success",
       message: `Application marked ${status.replace(/_/g, " ")}.`,
