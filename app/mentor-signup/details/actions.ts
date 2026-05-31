@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getDb, isDbConfigured } from "@/db/client";
 import { mentorApplications } from "@/db/schema";
 import { getCurrentDbUser, requireUserId } from "@/lib/auth";
+import { readUploadedPhoto } from "@/lib/forms/photoUpload";
 import { sendEmail } from "@/lib/forms/server";
 
 export type MentorApplicationState = { ok: true } | { ok: false; error: string };
@@ -52,6 +53,15 @@ export async function submitMentorApplicationAction(
   const startTerm = String(formData.get("startTerm") ?? "")
     .trim()
     .slice(0, 80);
+  const grades = String(formData.get("grades") ?? "")
+    .trim()
+    .slice(0, 120);
+  const startDate = String(formData.get("startDate") ?? "")
+    .trim()
+    .slice(0, 40);
+  const expectedEndDate = String(formData.get("expectedEndDate") ?? "")
+    .trim()
+    .slice(0, 40);
   const whyMentor = String(formData.get("whyMentor") ?? "")
     .trim()
     .slice(0, 4000);
@@ -77,6 +87,9 @@ export async function submitMentorApplicationAction(
     return { ok: false, error: "Photo URL must start with http:// or https://." };
   }
 
+  const photo = await readUploadedPhoto(formData, "photo");
+  if (photo && "error" in photo) return { ok: false, error: photo.error };
+
   if (!isDbConfigured()) {
     redirect("/pending-approval?application=mentor");
   }
@@ -101,10 +114,15 @@ export async function submitMentorApplicationAction(
         occupation,
         educationStatus,
         classOrYear: classOrYear || null,
+        grades: grades || null,
         photoUrl: photoUrl || null,
+        photoData: photo?.data ?? null,
+        photoMimeType: photo?.mime ?? null,
         subjects,
         hoursPerWeek: hoursPerWeek || null,
         startTerm: startTerm || null,
+        startDate: startDate || null,
+        expectedEndDate: expectedEndDate || null,
         whyMentor,
       });
   } catch (err) {

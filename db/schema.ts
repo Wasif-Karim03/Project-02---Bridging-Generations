@@ -225,6 +225,14 @@ export const mentorApplications = pgTable("mentor_applications", {
   hoursPerWeek: varchar("hours_per_week", { length: 40 }),
   startTerm: varchar("start_term", { length: 80 }),
   whyMentor: text("why_mentor").notNull(),
+  // Extended mentor profile (mirrors the student application's depth).
+  grades: varchar("grades", { length: 120 }),
+  startDate: varchar("start_date", { length: 40 }),
+  expectedEndDate: varchar("expected_end_date", { length: 40 }),
+  // Uploaded profile photo stored privately as base64 (the photo_url field
+  // above remains an optional link alternative).
+  photoData: text("photo_data"),
+  photoMimeType: varchar("photo_mime_type", { length: 80 }),
   status: applicationStatusEnum("status").notNull().default("submitted"),
   approvedUserId: uuid("approved_user_id").references(() => users.id, { onDelete: "set null" }),
   approvedAt: timestamp("approved_at", { withTimezone: true }),

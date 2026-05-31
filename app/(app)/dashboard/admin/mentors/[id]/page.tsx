@@ -7,6 +7,7 @@ import { getUserById } from "@/lib/db/queries/users";
 import { getAssignmentsForMentor, getRecentReportsForMentor } from "@/lib/db/queries/weeklyReports";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
 import { MentorAssignmentEditor } from "./_components/MentorAssignmentEditor";
+import { MentorStatusControl } from "./_components/MentorStatusControl";
 
 export const metadata: Metadata = {
   title: "Mentor detail (admin)",
@@ -78,6 +79,11 @@ export default async function AdminMentorDetailPage({
         <Stat label="Email" value={user.email} />
         <Stat label="Joined" value={dateFormatter.format(user.createdAt)} />
         <Stat label="Active students" value={String(assignedSlugs.length)} />
+      </section>
+
+      <section className="flex flex-col gap-3 border border-hairline bg-ground-2 p-5">
+        <p className="text-eyebrow uppercase tracking-[0.1em] text-accent">Mentorship status</p>
+        <MentorStatusControl mentorUserId={user.id} stopped={user.status === "suspended"} />
       </section>
 
       <section aria-labelledby="assignments-title" className="flex flex-col gap-4">
