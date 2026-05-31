@@ -195,13 +195,16 @@ function extractDisplay(detail: ApplicationDetail): {
         ["Profession", r.occupation ?? ""],
         ["School / college / university", r.educationStatus ?? ""],
         ["Class / year", r.classOrYear ?? ""],
-        ["Photo URL", r.photoUrl ?? ""],
+        ["Grades / GPA", r.grades ?? ""],
+        ["Photo link", r.photoUrl ?? ""],
         ["Subjects", r.subjects],
         ["Hours per week", r.hoursPerWeek ?? ""],
-        ["Start term", r.startTerm ?? ""],
+        ["When can start", r.startTerm ?? ""],
+        ["Start date", r.startDate ?? ""],
+        ["Expected end date", r.expectedEndDate ?? ""],
         ["Why mentor", r.whyMentor],
       ],
-      photo: null,
+      photo: r.photoData ? { data: r.photoData, mime: r.photoMimeType ?? "image/jpeg" } : null,
     };
   }
   const r = detail.data;

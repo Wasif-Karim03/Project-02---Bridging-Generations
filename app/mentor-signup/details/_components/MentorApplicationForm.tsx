@@ -70,8 +70,22 @@ export function MentorApplicationForm({ initialEmail }: { initialEmail?: string 
           {(p) => <Input {...p} name="country" maxLength={80} placeholder="e.g. Bangladesh" />}
         </Field>
         <Field
-          label="Photo URL"
-          hint="Optional link to a recent profile photo — LinkedIn, Google Drive, etc."
+          label="Profile photo"
+          hint="Upload a recent head-and-shoulders photo (JPG/PNG/WebP, up to 4MB). Kept private."
+        >
+          {(p) => (
+            <input
+              id={p.id}
+              name="photo"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="block w-full text-body-sm text-ink file:mr-4 file:min-h-[44px] file:cursor-pointer file:border-0 file:bg-accent file:px-4 file:text-nav-link file:uppercase file:text-white"
+            />
+          )}
+        </Field>
+        <Field
+          label="…or paste a photo link"
+          hint="Optional alternative to uploading — LinkedIn, Google Drive, etc."
         >
           {(p) => (
             <Input
@@ -121,6 +135,9 @@ export function MentorApplicationForm({ initialEmail }: { initialEmail?: string 
         >
           {(p) => <Input {...p} name="classOrYear" maxLength={120} />}
         </Field>
+        <Field label="Grades / GPA" hint='Your academic result — e.g. "CGPA 3.8/4.0", "GPA 5.0".'>
+          {(p) => <Input {...p} name="grades" maxLength={120} />}
+        </Field>
         <Field label="Profession *" hint="What you do now — student, teacher, engineer, etc.">
           {(p) => (
             <Input
@@ -165,6 +182,14 @@ export function MentorApplicationForm({ initialEmail }: { initialEmail?: string 
                 placeholder="Select…"
               />
             )}
+          </Field>
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <Field label="Start date" hint="The date you can begin mentoring.">
+            {(p) => <Input {...p} name="startDate" type="date" />}
+          </Field>
+          <Field label="Expected end date" hint="When you expect to finish — an estimate is fine.">
+            {(p) => <Input {...p} name="expectedEndDate" type="date" />}
           </Field>
         </div>
       </FormSection>

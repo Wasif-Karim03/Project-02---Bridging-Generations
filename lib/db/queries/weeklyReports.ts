@@ -144,6 +144,18 @@ export async function getOrCreateMentor(mentorUserId: string): Promise<string | 
 }
 
 /**
+ * Stop (endedAt = now) or reinstate (endedAt = null) a mentor's mentorship.
+ * Creates the mentors row if needed so the admin can stop a freshly-approved
+ * mentor too.
+ */
+export async function setMentorEndedAt(mentorUserId: string, endedAt: Date | null): Promise<void> {
+  if (!isDbConfigured()) return;
+  await getOrCreateMentor(mentorUserId);
+  const db = getDb();
+  await db.update(mentors).set({ endedAt }).where(eq(mentors.userId, mentorUserId));
+}
+
+/**
  * Assign a student (by Keystatic slug) to a mentor. Idempotent — the
  * primary key on (mentorId, studentSlug) prevents duplicates; we catch and
  * swallow the unique-violation case.
