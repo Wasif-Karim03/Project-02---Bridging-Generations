@@ -267,9 +267,9 @@ function StudentApplicationDetails({ reg }: { reg: StudentRegistration }) {
       </summary>
       <div className="flex flex-col gap-6 px-4 py-4 sm:flex-row">
         {reg.photoData ? (
-          // biome-ignore lint/performance/noImgElement: private base64 photo from the DB; not a public asset
+          // biome-ignore lint/performance/noImgElement: admin-only private photo served from an API route; next/image needs config
           <img
-            src={`data:${reg.photoMimeType ?? "image/jpeg"};base64,${reg.photoData}`}
+            src={`/api/admin/application-photo/student-sponsorship/${reg.id}`}
             alt={`${reg.studentName} portrait`}
             className="h-40 w-32 shrink-0 rounded border border-hairline object-cover"
           />
