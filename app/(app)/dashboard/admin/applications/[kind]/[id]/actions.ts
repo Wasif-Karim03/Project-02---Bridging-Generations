@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentDbUser, requireRole } from "@/lib/auth";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { setApplicationStatus } from "@/lib/db/queries/applications";
+import { notifyApplicantOfDecision } from "@/lib/notifications/applicationDecision";
 
 export type ReviewActionState = {
   status: "idle" | "success" | "error";
@@ -73,6 +74,12 @@ export async function submitApplicationReview(
     revalidatePath("/dashboard/admin");
     revalidatePath("/dashboard/admin/applications");
     revalidatePath(`/dashboard/admin/applications/${kind}/${id}`);
+    // Best-effort decision email to the applicant (never blocks the action).
+    await notifyApplicantOfDecision(
+      kind as ApplicationRow["kind"],
+      id,
+      nextStatus as ApplicationStatus,
+    );
     return {
       status: "success",
       message: `Updated to ${nextStatus.replace(/_/g, " ")}.`,

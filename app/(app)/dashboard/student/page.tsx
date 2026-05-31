@@ -159,6 +159,37 @@ export default async function StudentDashboard() {
     );
   }
 
+  // State 2a: approved by the board, public profile not set up yet. The
+  // approval decision lives on the registration status; the Keystatic slug
+  // (public profile) is a separate, later step.
+  if (registration.status === "approved" && !studentSlug) {
+    return (
+      <div className="flex flex-col gap-8">
+        <header className="flex flex-col gap-2">
+          <Eyebrow>Student dashboard</Eyebrow>
+          <h1 className="text-balance text-heading-1 text-ink">Your application is approved! 🎉</h1>
+          <p className="max-w-[60ch] text-body text-ink-2">
+            Congratulations — the board has approved your scholarship application. We're now setting
+            up your public student profile; once that's ready this page will show your sponsors and
+            their donations. You'll get an email when it's live.
+          </p>
+          <StudentIdBadge code={studentCode} />
+        </header>
+        {registration.reviewerNotes ? (
+          <section className="flex flex-col gap-3 border-2 border-accent bg-accent/5 px-5 py-5">
+            <p className="text-eyebrow uppercase tracking-[0.1em] text-accent">
+              Note from the board
+            </p>
+            <p className="max-w-[60ch] whitespace-pre-line text-body text-ink">
+              {registration.reviewerNotes}
+            </p>
+          </section>
+        ) : null}
+        <PendingDetails registration={registration} />
+      </div>
+    );
+  }
+
   // State 2b: pending review (application submitted, admin hasn't decided yet)
   if (!studentSlug) {
     return (
