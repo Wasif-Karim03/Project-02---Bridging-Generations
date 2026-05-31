@@ -63,6 +63,7 @@ export function UsersTableWithSearch({ users }: Props) {
                   <th className="py-3 pr-4 text-left">Display name</th>
                   <th className="py-3 pr-4 text-left">Clerk ID</th>
                   <th className="py-3 pr-4 text-left">Joined</th>
+                  <th className="py-3 pr-4 text-left">Status</th>
                   <th className="py-3 text-right">Role</th>
                 </tr>
               </thead>
@@ -78,6 +79,9 @@ export function UsersTableWithSearch({ users }: Props) {
                       <time dateTime={u.createdAt.toISOString()}>
                         {dateFormatter.format(u.createdAt)}
                       </time>
+                    </td>
+                    <td className="py-3 pr-4 align-top">
+                      <StatusPill status={u.status} />
                     </td>
                     <td className="py-3 text-right align-top">
                       {u.role === "anonymous" ? (
@@ -106,7 +110,8 @@ export function UsersTableWithSearch({ users }: Props) {
                     {dateFormatter.format(u.createdAt)}
                   </time>
                 </p>
-                <div className="mt-1">
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <StatusPill status={u.status} />
                   {u.role === "anonymous" ? (
                     <span className="text-meta uppercase tracking-[0.06em] text-accent-2-text">
                       Pending sync
@@ -121,5 +126,23 @@ export function UsersTableWithSearch({ users }: Props) {
         </>
       )}
     </div>
+  );
+}
+
+// Account status (separate from the application decision): active / pending /
+// rejected / suspended.
+function StatusPill({ status }: { status: string }) {
+  const cls =
+    status === "active"
+      ? "bg-accent text-white"
+      : status === "pending"
+        ? "bg-accent-3 text-ink"
+        : status === "suspended" || status === "rejected"
+          ? "bg-accent-2-text text-white"
+          : "border border-hairline text-ink-2";
+  return (
+    <span className={`inline-block px-2 py-0.5 text-meta uppercase tracking-[0.06em] ${cls}`}>
+      {status}
+    </span>
   );
 }

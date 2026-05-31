@@ -59,7 +59,7 @@ export default async function AdminAuditLogPage() {
                   {stampFormatter.format(e.reviewedAt)}
                 </time>
                 <span className="text-meta uppercase tracking-[0.06em] text-accent">
-                  {APPLICATION_KIND_LABEL[e.kind]}
+                  {APPLICATION_KIND_LABEL[e.kind] ?? e.kind}
                 </span>
                 <StatusBadge status={e.status} />
               </div>
@@ -74,7 +74,7 @@ export default async function AdminAuditLogPage() {
                 >
                   {e.applicantName}
                 </Link>{" "}
-                to <strong>{APPLICATION_STATUS_LABEL[e.status]}</strong>
+                to <strong>{APPLICATION_STATUS_LABEL[e.status] ?? e.status}</strong>
               </p>
               {e.reviewerNotes ? (
                 <p className="mt-2 whitespace-pre-line border-l-2 border-accent-3 pl-3 text-body-sm text-ink-2">
@@ -101,7 +101,7 @@ function StatusBadge({ status }: { status: ApplicationStatus }) {
     <span
       className={`inline-block px-2 py-0.5 text-meta uppercase tracking-[0.06em] ${styleByStatus[status]}`}
     >
-      {APPLICATION_STATUS_LABEL[status]}
+      {APPLICATION_STATUS_LABEL[status] ?? status}
     </span>
   );
 }
