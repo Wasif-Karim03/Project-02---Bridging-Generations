@@ -10,7 +10,7 @@ mailingAddress: 87-38 112th St, Richmond Hill NY 11418 USA
 contactEmail: bridginggeneration20@gmail.com
 secondaryEmail: ''
 phoneNumber: '+8801898911452'
-whatsappNumber: '8801898911452'
+whatsappNumber: '+8801898911452'
 socialLinks:
   instagram: ''
   facebook: https://web.facebook.com/105308550996328/
@@ -25,7 +25,7 @@ metaDefaults:
   twitterHandle: ''
 copy:
   navDonateCta: Donate
-  footerTagline: Educational fundraising for underprivileged students in Bangladesh — since 2019.
+  footerTagline: TO BUILD A GENERATION EMPOWERED THROUGH EDUCATION,LEADERSHIP,COMPASSION AND OPPORTUNITY
   donateButtonPrimary: Sponsor a student
   donateButtonSecondary: Donate once
   contactFormSuccess: Thanks — your message is in. We reply within two business days.
