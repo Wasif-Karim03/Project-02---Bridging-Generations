@@ -2,49 +2,74 @@
 
 import { revalidatePath } from "next/cache";
 import { isDbConfigured } from "@/db/client";
-import { dashboardForRole, requireRole } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { getUserById, setUserStatus } from "@/lib/db/queries/users";
 import { sendSignupApprovedEmail } from "@/lib/notifications/signupApproved";
 import { sendSignupRejectedEmail } from "@/lib/notifications/signupRejected";
 
+// Result returned to the client so a failure shows a message instead of
+// crashing the page (these actions previously returned void and any throw —
+// a transient DB hiccup, an email error — hit the global error boundary).
+export type PendingActionResult = { ok: true } | { ok: false; error: string };
+
 // Approve a pending signup. Flips status to 'active', then emails the user.
-export async function approvePendingSignupAction(userId: string): Promise<void> {
+// The status flip is the actual approval; the notification email is best-effort
+// (Resend's free tier only delivers to the account address) and never blocks it.
+export async function approvePendingSignupAction(userId: string): Promise<PendingActionResult> {
   await requireRole("admin");
-  if (!isDbConfigured()) return;
-  const user = await getUserById(userId);
-  if (!user) return;
-  await setUserStatus(userId, "active");
-  revalidatePath("/dashboard/admin/pending");
-  revalidatePath("/dashboard/admin/users");
-  const loginPath = dashboardForRole(user.role).replace("/dashboard/", "/").replace(/^\//, "/");
-  // Map roles to their actual sign-in URLs.
-  const signInUrl = roleSignInUrl(user.role);
-  await sendSignupApprovedEmail({
-    email: user.email,
-    displayName: user.displayName,
-    roleLabel: user.role,
-    loginUrl: `https://brigen.org${signInUrl}`,
-  });
-  // loginPath silencer — unused here, the function exports a single arg
-  void loginPath;
+  if (!isDbConfigured()) return { ok: true };
+  try {
+    const user = await getUserById(userId);
+    if (!user) return { ok: false, error: "That user no longer exists." };
+    await setUserStatus(userId, "active");
+    revalidatePath("/dashboard/admin/pending");
+    revalidatePath("/dashboard/admin/users");
+    try {
+      await sendSignupApprovedEmail({
+        email: user.email,
+        displayName: user.displayName,
+        roleLabel: user.role,
+        loginUrl: `https://brigen.org${roleSignInUrl(user.role)}`,
+      });
+    } catch (err) {
+      console.error("[admin/pending] approval email failed (status still updated)", err);
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("[admin/pending] approve failed", err);
+    return { ok: false, error: err instanceof Error ? err.message : "Could not approve." };
+  }
 }
 
 // Reject a pending signup with optional reason. Flips status to 'rejected'.
-export async function rejectPendingSignupAction(userId: string, formData: FormData): Promise<void> {
+export async function rejectPendingSignupAction(
+  userId: string,
+  formData: FormData,
+): Promise<PendingActionResult> {
   await requireRole("admin");
-  if (!isDbConfigured()) return;
-  const user = await getUserById(userId);
-  if (!user) return;
-  const reason = String(formData.get("reason") ?? "").trim();
-  await setUserStatus(userId, "rejected");
-  revalidatePath("/dashboard/admin/pending");
-  revalidatePath("/dashboard/admin/users");
-  await sendSignupRejectedEmail({
-    email: user.email,
-    displayName: user.displayName,
-    roleLabel: user.role,
-    reason: reason || null,
-  });
+  if (!isDbConfigured()) return { ok: true };
+  try {
+    const user = await getUserById(userId);
+    if (!user) return { ok: false, error: "That user no longer exists." };
+    const reason = String(formData.get("reason") ?? "").trim();
+    await setUserStatus(userId, "rejected");
+    revalidatePath("/dashboard/admin/pending");
+    revalidatePath("/dashboard/admin/users");
+    try {
+      await sendSignupRejectedEmail({
+        email: user.email,
+        displayName: user.displayName,
+        roleLabel: user.role,
+        reason: reason || null,
+      });
+    } catch (err) {
+      console.error("[admin/pending] rejection email failed (status still updated)", err);
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("[admin/pending] reject failed", err);
+    return { ok: false, error: err instanceof Error ? err.message : "Could not reject." };
+  }
 }
 
 // Suspend an active user.

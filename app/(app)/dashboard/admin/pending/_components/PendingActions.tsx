@@ -6,17 +6,22 @@ import { approvePendingSignupAction, rejectPendingSignupAction } from "../action
 export function PendingActions({ userId }: { userId: string }) {
   const [pending, startTransition] = useTransition();
   const [rejecting, setRejecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function onApprove() {
+    setError(null);
     startTransition(async () => {
-      await approvePendingSignupAction(userId);
+      const result = await approvePendingSignupAction(userId);
+      if (!result.ok) setError(result.error);
     });
   }
 
   function onConfirmReject(formData: FormData) {
+    setError(null);
     startTransition(async () => {
-      await rejectPendingSignupAction(userId, formData);
-      setRejecting(false);
+      const result = await rejectPendingSignupAction(userId, formData);
+      if (result.ok) setRejecting(false);
+      else setError(result.error);
     });
   }
 
@@ -52,23 +57,30 @@ export function PendingActions({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="flex gap-2">
-      <button
-        type="button"
-        onClick={onApprove}
-        disabled={pending}
-        className="inline-flex min-h-[36px] items-center bg-accent px-3 text-nav-link uppercase text-white transition-colors hover:bg-accent/90 disabled:opacity-60"
-      >
-        {pending ? "Approving…" : "Approve"}
-      </button>
-      <button
-        type="button"
-        onClick={() => setRejecting(true)}
-        disabled={pending}
-        className="inline-flex min-h-[36px] items-center border border-hairline px-3 text-nav-link uppercase text-ink transition-colors hover:border-accent-2-text hover:text-accent-2-text disabled:opacity-60"
-      >
-        Reject
-      </button>
+    <div className="flex flex-col gap-1.5">
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onApprove}
+          disabled={pending}
+          className="inline-flex min-h-[36px] items-center bg-accent px-3 text-nav-link uppercase text-white transition-colors hover:bg-accent/90 disabled:opacity-60"
+        >
+          {pending ? "Approving…" : "Approve"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setRejecting(true)}
+          disabled={pending}
+          className="inline-flex min-h-[36px] items-center border border-hairline px-3 text-nav-link uppercase text-ink transition-colors hover:border-accent-2-text hover:text-accent-2-text disabled:opacity-60"
+        >
+          Reject
+        </button>
+      </div>
+      {error ? (
+        <p role="alert" className="max-w-[40ch] text-accent-2-text text-meta">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
