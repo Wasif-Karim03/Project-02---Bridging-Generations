@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { requireUserId } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { getDonorProfile } from "@/lib/db/queries/donorProfiles";
 import { DonorProfileEditor } from "./_components/DonorProfileEditor";
 
@@ -13,7 +13,9 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function DonorProfilePage() {
-  const userId = await requireUserId();
+  // Gate on the donor role (+ active status) so a non-donor or not-yet-approved
+  // account can't reach the public-profile editor. Mirrors the donor dashboard.
+  const { userId } = await requireRole("donor");
   const profile = await getDonorProfile(userId);
 
   return (
