@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isDbConfigured } from "@/db/client";
 import { requireRole } from "@/lib/auth";
 import { getUserByClerkId } from "@/lib/db/queries/users";
 import { insertWeeklyReport } from "@/lib/db/queries/weeklyReports";
@@ -43,28 +44,38 @@ export async function submitWeeklyReportAction(
 
   try {
     // Translate Clerk userId → local users.id; the mentor record keys off it.
+    // requireRole("mentor") already resolves (and JIT-creates) the local users
+    // row, so in DB mode this lookup succeeds. If it somehow doesn't, bail
+    // loudly instead of writing a row keyed off the wrong id.
     const localUser = await getUserByClerkId(clerkUserId);
-    if (!localUser) {
-      // In preview mode this is fine — insertWeeklyReport is itself a no-op.
-      // With DB but no local users row: the Clerk webhook hasn't fired yet.
-      await insertWeeklyReport({
-        mentorUserId: clerkUserId,
-        studentSlug: payload.studentSlug,
-        weekOf,
-        attendance: payload.attendance,
-        studyNotes: payload.studyNotes,
-        actionItems: payload.actionItems,
-      });
-    } else {
-      await insertWeeklyReport({
-        mentorUserId: localUser.id,
-        studentSlug: payload.studentSlug,
-        weekOf,
-        attendance: payload.attendance,
-        studyNotes: payload.studyNotes,
-        actionItems: payload.actionItems,
-      });
+    if (!localUser && isDbConfigured()) {
+      return {
+        status: "error",
+        message: "Your account isn't fully set up yet. Please refresh and try again.",
+      };
     }
+
+    const report = await insertWeeklyReport({
+      mentorUserId: localUser?.id ?? clerkUserId,
+      studentSlug: payload.studentSlug,
+      weekOf,
+      attendance: payload.attendance,
+      studyNotes: payload.studyNotes,
+      actionItems: payload.actionItems,
+    });
+
+    // insertWeeklyReport returns null (without throwing) when there's no
+    // matching `mentors` row — e.g. the user got the mentor role directly
+    // rather than through the application-approval path that creates it.
+    // Surface that instead of falsely reporting success and dropping the
+    // report. In preview mode (no DB) the null is expected, so let it pass.
+    if (!report && isDbConfigured()) {
+      return {
+        status: "error",
+        message: "No mentor profile is linked to your account yet. Contact an admin.",
+      };
+    }
+
     revalidatePath("/dashboard/mentor");
     return {
       status: "success",

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUserId } from "@/lib/auth";
+import { requireRole } from "@/lib/auth";
 import { type DonorProfileShape, upsertDonorProfile } from "@/lib/db/queries/donorProfiles";
 
 export type SaveProfileResult = {
@@ -12,7 +12,9 @@ export type SaveProfileResult = {
 export async function saveDonorProfileAction(
   patch: Partial<DonorProfileShape>,
 ): Promise<SaveProfileResult> {
-  const userId = await requireUserId();
+  // requireRole("donor") enforces sign-in + the donor role + status=active,
+  // so a non-donor (or a not-yet-approved donor) can't write a donor profile.
+  const { userId } = await requireRole("donor");
   try {
     await upsertDonorProfile(userId, patch);
     revalidatePath("/dashboard/donor/profile");
