@@ -2,7 +2,7 @@ import "server-only";
 import { and, desc, eq, gte, inArray } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
 import type { MentorCall } from "@/db/schema";
-import { donations, mentorCalls } from "@/db/schema";
+import { donations, mentorCalls, mentors, users } from "@/db/schema";
 
 // Mentor reads calls for a single student (their dashboard's call log).
 export async function listMentorCallsForStudent(studentSlug: string): Promise<MentorCall[]> {
@@ -13,6 +13,31 @@ export async function listMentorCallsForStudent(studentSlug: string): Promise<Me
     .from(mentorCalls)
     .where(eq(mentorCalls.studentSlug, studentSlug))
     .orderBy(desc(mentorCalls.calledAt));
+}
+
+export type StudentReport = MentorCall & { mentorName: string };
+
+// Every report collected for a student, by ANY mentor (so a new mentor sees
+// the full history their predecessors built). Joins through to the mentor's
+// display name for attribution. Most-recent first.
+export async function listStudentReportsWithMentor(studentSlug: string): Promise<StudentReport[]> {
+  if (!isDbConfigured()) return [];
+  const db = getDb();
+  const rows = await db
+    .select({
+      call: mentorCalls,
+      displayName: users.displayName,
+      email: users.email,
+    })
+    .from(mentorCalls)
+    .leftJoin(mentors, eq(mentors.id, mentorCalls.mentorId))
+    .leftJoin(users, eq(users.id, mentors.userId))
+    .where(eq(mentorCalls.studentSlug, studentSlug))
+    .orderBy(desc(mentorCalls.calledAt));
+  return rows.map((r) => ({
+    ...r.call,
+    mentorName: r.displayName ?? r.email ?? "Unknown mentor",
+  }));
 }
 
 // Mentor's full call log across all their assigned students. Used to drive

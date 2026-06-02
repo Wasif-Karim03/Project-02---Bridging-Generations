@@ -63,5 +63,7 @@ export async function logMentorCallAction(
     return { ok: false, error: "Could not save the call. Try again." };
   }
 
-  redirect("/dashboard/mentor");
+  // Land on the student's profile so the mentor sees the report they just
+  // collected at the top of the history.
+  redirect(`/dashboard/mentor/student/${studentSlug}`);
 }
