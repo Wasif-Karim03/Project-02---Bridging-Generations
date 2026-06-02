@@ -4,15 +4,21 @@ import { useActionState } from "react";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import type { MentorCallQuestion } from "@/lib/mentor/callQuestions";
+import type {
+  MentorCallQuestion,
+  MentorCallSection,
+  MentorGuidancePoint,
+} from "@/lib/mentor/callQuestions";
 import { logMentorCallAction } from "../actions";
 
 type Props = {
   studentOptions: Array<{ slug: string; label: string }>;
   questions: MentorCallQuestion[];
+  sections: MentorCallSection[];
+  guidance: MentorGuidancePoint[];
 };
 
-export function LogCallForm({ studentOptions, questions }: Props) {
+export function LogCallForm({ studentOptions, questions, sections, guidance }: Props) {
   const [state, formAction, pending] = useActionState(logMentorCallAction, null);
   const error = state && state.ok === false ? state.error : null;
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -28,6 +34,22 @@ export function LogCallForm({ studentOptions, questions }: Props) {
           {error}
         </p>
       ) : null}
+
+      {/* How-to-mentor reference — collapsed by default so it guides without
+          getting in the way. */}
+      <details className="border border-hairline bg-ground-2">
+        <summary className="cursor-pointer list-none px-4 py-3 text-meta uppercase tracking-[0.06em] text-accent hover:bg-ground-3">
+          How to mentor — quick guide ▾
+        </summary>
+        <ul className="flex flex-col gap-3 border-hairline border-t px-4 py-4">
+          {guidance.map((g) => (
+            <li key={g.en} className="text-body-sm">
+              <p className="text-ink">{g.en}</p>
+              <p className="mt-0.5 text-ink-2">{g.bn}</p>
+            </li>
+          ))}
+        </ul>
+      </details>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field label="Student">
@@ -55,13 +77,33 @@ export function LogCallForm({ studentOptions, questions }: Props) {
         </Field>
       </div>
 
-      <section className="flex flex-col gap-5">
-        {questions.map((q) => (
-          <Field key={q.id} label={q.prompt} hint={q.hint}>
-            {(p) => <Textarea {...p} name={`ans_${q.id}`} rows={3} maxLength={2000} />}
-          </Field>
-        ))}
-      </section>
+      <p className="text-body-sm text-ink-2">
+        Fill in what's relevant — every question is optional. Each prompt shows English and Bangla;
+        ask from whichever the student is more comfortable with.
+      </p>
+
+      {/* One collapsible block per section; the first (check-in) starts open. */}
+      {sections.map((sec, i) => {
+        const items = questions.filter((q) => q.section === sec.key);
+        if (items.length === 0) return null;
+        return (
+          <details key={sec.key} open={i === 0} className="border border-hairline bg-ground">
+            <summary className="cursor-pointer list-none border-hairline border-b px-4 py-3 hover:bg-ground-2">
+              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">
+                {sec.title}
+              </span>
+              <span className="ml-2 text-meta text-ink-2">{sec.titleBn}</span>
+            </summary>
+            <div className="flex flex-col gap-5 px-4 py-4">
+              {items.map((q) => (
+                <Field key={q.id} label={q.prompt} hint={q.promptBn}>
+                  {(p) => <Textarea {...p} name={`ans_${q.id}`} rows={2} maxLength={2000} />}
+                </Field>
+              ))}
+            </div>
+          </details>
+        );
+      })}
 
       <Field
         label="Additional notes"

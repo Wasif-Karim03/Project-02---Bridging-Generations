@@ -3,7 +3,7 @@ import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isDbConfigured } from "@/db/client";
 import { getCurrentDbUser, requireRole } from "@/lib/auth";
-import { getStudentBySlug } from "@/lib/content/students";
+import { getAllStudents, getStudentBySlug } from "@/lib/content/students";
 import { getAssignmentsForMentor, getLatestReportPerStudent } from "@/lib/db/queries/weeklyReports";
 
 export const metadata: Metadata = {
@@ -29,10 +29,12 @@ export default async function MentorDashboard() {
   // Real assignments for the signed-in mentor (empty until the admin matches
   // them with students on /dashboard/admin/mentors/[id]).
   const slugs = dbUser ? await getAssignmentsForMentor(dbUser.id) : [];
-  const [students, lastReports] = await Promise.all([
+  const [students, lastReports, allStudents] = await Promise.all([
     Promise.all(slugs.map((s) => getStudentBySlug(s))),
     getLatestReportPerStudent(slugs),
+    getAllStudents(),
   ]);
+  const assignedSet = new Set(slugs);
   const assignments = slugs.map((slug, i) => {
     const student = students[i];
     const last = lastReports[slug]?.weekOf ?? null;
@@ -134,6 +136,74 @@ export default async function MentorDashboard() {
           The board expects a check-in call with each assigned student about every 15 days. Use the
           form to log what you discussed — the next-call date is auto-suggested 15 days out.
         </p>
+      </section>
+
+      <section aria-labelledby="mentor-directory-title" className="flex flex-col gap-4">
+        <header className="flex items-baseline justify-between border-b border-hairline pb-3">
+          <h2 id="mentor-directory-title" className="text-heading-3 text-ink">
+            All students
+          </h2>
+          <span className="text-meta uppercase tracking-[0.06em] text-ink-2">
+            {allStudents.length} total
+          </span>
+        </header>
+        <p className="text-body-sm text-ink-2">
+          The full student directory. You can log calls and file reports for the students assigned
+          to you; the rest are listed for reference (name, grade, school only).
+        </p>
+        {allStudents.length === 0 ? (
+          <p className="border border-hairline border-dashed bg-ground-2 px-4 py-8 text-center text-body text-ink-2">
+            No student profiles published yet. They appear here as the board adds students in the
+            content editor.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-body-sm">
+              <thead>
+                <tr className="border-b border-hairline text-meta uppercase tracking-[0.06em] text-ink-2">
+                  <th className="py-3 pr-4 text-left">Student</th>
+                  <th className="py-3 pr-4 text-left">Grade</th>
+                  <th className="py-3 pr-4 text-left">School</th>
+                  <th className="py-3 text-right">Assigned to you</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allStudents.map((s) => {
+                  const mine = assignedSet.has(s.id);
+                  return (
+                    <tr key={s.id} className="border-b border-hairline last:border-b-0">
+                      <td className="py-3 pr-4 align-top text-ink">
+                        {mine ? (
+                          <Link
+                            href={`/dashboard/mentor/report?student=${s.id}`}
+                            className="font-semibold text-accent underline underline-offset-[3px] hover:no-underline"
+                          >
+                            {s.displayName}
+                          </Link>
+                        ) : (
+                          <span className="font-semibold">{s.displayName}</span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4 align-top text-ink-2">{s.grade ?? "—"}</td>
+                      <td className="py-3 pr-4 align-top text-ink-2">{s.schoolId ?? "—"}</td>
+                      <td className="py-3 text-right align-top">
+                        {mine ? (
+                          <span className="inline-block bg-accent px-2 py-0.5 text-meta uppercase tracking-[0.06em] text-white">
+                            Yours
+                          </span>
+                        ) : (
+                          <span className="text-meta uppercase tracking-[0.06em] text-ink-2">
+                            —
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </div>
   );
