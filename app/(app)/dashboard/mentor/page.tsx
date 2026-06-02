@@ -4,7 +4,8 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { isDbConfigured } from "@/db/client";
 import { getCurrentDbUser, requireRole } from "@/lib/auth";
 import { getAllStudents, getStudentBySlug } from "@/lib/content/students";
-import { getAssignmentsForMentor, getLatestReportPerStudent } from "@/lib/db/queries/weeklyReports";
+import { latestCallByStudent } from "@/lib/db/queries/mentorCalls";
+import { getAssignmentsForMentor } from "@/lib/db/queries/weeklyReports";
 
 export const metadata: Metadata = {
   title: "Mentor dashboard",
@@ -29,15 +30,15 @@ export default async function MentorDashboard() {
   // Real assignments for the signed-in mentor (empty until the admin matches
   // them with students on /dashboard/admin/mentors/[id]).
   const slugs = dbUser ? await getAssignmentsForMentor(dbUser.id) : [];
-  const [students, lastReports, allStudents] = await Promise.all([
+  const [students, lastCalls, allStudents] = await Promise.all([
     Promise.all(slugs.map((s) => getStudentBySlug(s))),
-    getLatestReportPerStudent(slugs),
+    latestCallByStudent(slugs),
     getAllStudents(),
   ]);
   const assignedSet = new Set(slugs);
   const assignments = slugs.map((slug, i) => {
     const student = students[i];
-    const last = lastReports[slug]?.weekOf ?? null;
+    const last = lastCalls.get(slug)?.calledAt ?? null;
     return {
       studentSlug: slug,
       studentName: student?.displayName ?? slug,
@@ -53,8 +54,9 @@ export default async function MentorDashboard() {
         <Eyebrow>Mentor</Eyebrow>
         <h1 className="text-balance text-heading-1 text-ink">Your students.</h1>
         <p className="text-body text-ink-2">
-          File a weekly report for each student you mentor. The board reads these — they're how we
-          notice when a student is struggling before the school does.
+          Open a student to see their full record and collect a report after each call. The board
+          and future mentors read these — they're how we notice when a student is struggling before
+          the school does.
         </p>
       </header>
 
@@ -123,18 +125,19 @@ export default async function MentorDashboard() {
       <section aria-labelledby="mentor-calls-title" className="flex flex-col gap-4">
         <header className="flex items-baseline justify-between border-b border-hairline pb-3">
           <h2 id="mentor-calls-title" className="text-heading-3 text-ink">
-            15-day calls
+            Collect a report
           </h2>
           <Link
             href="/dashboard/mentor/calls/new"
             className="inline-flex min-h-[40px] items-center bg-accent px-4 text-nav-link uppercase text-white transition-colors hover:bg-accent/90"
           >
-            Log a call →
+            Collect report →
           </Link>
         </header>
         <p className="text-body-sm text-ink-2">
-          The board expects a check-in call with each assigned student about every 15 days. Use the
-          form to log what you discussed — the next-call date is auto-suggested 15 days out.
+          Call each assigned student twice a month. On the call, open their profile and collect a
+          report — every question with its Bangla translation. Each report saves under the student
+          for the board and future mentors to read.
         </p>
       </section>
 

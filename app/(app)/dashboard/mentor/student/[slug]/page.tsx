@@ -21,8 +21,6 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-const promptById = new Map(MENTOR_CALL_QUESTIONS.map((q) => [q.id, q]));
-
 export default async function MentorStudentProfilePage({
   params,
 }: {
@@ -85,12 +83,6 @@ export default async function MentorStudentProfilePage({
             className="inline-flex min-h-[44px] items-center bg-accent px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent/90"
           >
             Collect report →
-          </Link>
-          <Link
-            href={`/dashboard/mentor/report?student=${slug}`}
-            className="inline-flex min-h-[44px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
-          >
-            File weekly report
           </Link>
         </div>
       </header>
