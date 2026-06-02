@@ -119,9 +119,19 @@ export function LogCallForm({
             </summary>
             <div className="flex flex-col gap-5 px-4 py-4">
               {items.map((q) => (
-                <Field key={q.id} label={q.prompt} hint={q.promptBn}>
-                  {(p) => <Textarea {...p} name={`ans_${q.id}`} rows={2} maxLength={2000} />}
-                </Field>
+                <div key={q.id} className="flex flex-col gap-1">
+                  <label htmlFor={`ans_${q.id}`} className="flex flex-col gap-0.5">
+                    <span className="text-body-sm font-medium text-ink">{q.prompt}</span>
+                    <span className="text-body-sm text-ink-2">{q.promptBn}</span>
+                  </label>
+                  <Textarea
+                    id={`ans_${q.id}`}
+                    name={`ans_${q.id}`}
+                    rows={2}
+                    maxLength={2000}
+                    className="mt-1"
+                  />
+                </div>
               ))}
             </div>
           </details>
@@ -141,7 +151,7 @@ export function LogCallForm({
           disabled={pending}
           className="inline-flex min-h-[48px] items-center bg-accent px-6 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {pending ? "Saving…" : "Save call"}
+          {pending ? "Saving…" : "Save report"}
         </button>
         <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
           Next call auto-scheduled 15 days from the call date.
