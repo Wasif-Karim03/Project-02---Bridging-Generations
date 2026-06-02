@@ -2,7 +2,7 @@ import "server-only";
 import { and, desc, eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
 import type { WeeklyReport } from "@/db/schema";
-import { mentorStudentAssignments, mentors, weeklyReports } from "@/db/schema";
+import { mentorStudentAssignments, mentors, users, weeklyReports } from "@/db/schema";
 
 export type WeeklyReportInput = {
   mentorUserId: string;
@@ -88,6 +88,38 @@ export async function getAssignmentsForMentor(mentorUserId: string): Promise<str
     .from(mentorStudentAssignments)
     .where(and(eq(mentorStudentAssignments.mentorId, mentor.id)));
   return rows.map((r) => r.studentSlug);
+}
+
+export type StudentMentorAssignment = {
+  mentorName: string;
+  assignedAt: Date;
+  endedAt: Date | null;
+};
+
+// Admin-facing: which mentor(s) are (or were) assigned to a student, with the
+// mentor's display name. Active assignments (endedAt null) first.
+export async function listMentorsForStudent(
+  studentSlug: string,
+): Promise<StudentMentorAssignment[]> {
+  if (!isDbConfigured()) return [];
+  const db = getDb();
+  const rows = await db
+    .select({
+      assignedAt: mentorStudentAssignments.assignedAt,
+      endedAt: mentorStudentAssignments.endedAt,
+      displayName: users.displayName,
+      email: users.email,
+    })
+    .from(mentorStudentAssignments)
+    .leftJoin(mentors, eq(mentors.id, mentorStudentAssignments.mentorId))
+    .leftJoin(users, eq(users.id, mentors.userId))
+    .where(eq(mentorStudentAssignments.studentSlug, studentSlug))
+    .orderBy(desc(mentorStudentAssignments.assignedAt));
+  return rows.map((r) => ({
+    mentorName: r.displayName ?? r.email ?? "Unknown mentor",
+    assignedAt: r.assignedAt,
+    endedAt: r.endedAt,
+  }));
 }
 
 /**

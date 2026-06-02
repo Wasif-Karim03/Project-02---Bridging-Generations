@@ -124,6 +124,20 @@ export async function listVisibleCallsForDonor(args: {
     .orderBy(desc(mentorCalls.calledAt));
 }
 
+// Report count per student slug — drives the admin student-profiles list
+// without N+1 queries.
+export async function countReportsByStudent(studentSlugs: string[]): Promise<Map<string, number>> {
+  const out = new Map<string, number>();
+  if (!isDbConfigured() || studentSlugs.length === 0) return out;
+  const db = getDb();
+  const rows = await db
+    .select({ slug: mentorCalls.studentSlug })
+    .from(mentorCalls)
+    .where(inArray(mentorCalls.studentSlug, studentSlugs));
+  for (const r of rows) out.set(r.slug, (out.get(r.slug) ?? 0) + 1);
+  return out;
+}
+
 // Bulk helper for the donor dashboard — given the donor's full list of
 // supported students, return the most recent call per student (so we can
 // surface "last call for {student}" without N+1 queries).

@@ -5,6 +5,7 @@ import { isDbConfigured } from "@/db/client";
 import type { studentRegistrations } from "@/db/schema";
 import { getAllStudents } from "@/lib/content/students";
 import { getLatestStudentRegistrationForUser } from "@/lib/db/queries/applications";
+import { countReportsByStudent } from "@/lib/db/queries/mentorCalls";
 import { listAllStudentUsers } from "@/lib/db/queries/users";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
 import { StudentRejectControl } from "./_components/StudentRejectControl";
@@ -43,6 +44,10 @@ export default async function AdminStudentsPage() {
   const registrations = await Promise.all(
     studentUsers.map((u) => getLatestStudentRegistrationForUser(u.id)),
   );
+
+  // Report counts per student profile (Keystatic slug) so the admin can see at
+  // a glance which students have mentor reports on file.
+  const reportCounts = await countReportsByStudent(allKeystaticStudents.map((s) => s.id));
 
   return (
     <div className="flex flex-col gap-8">
@@ -142,6 +147,58 @@ export default async function AdminStudentsPage() {
           </table>
         </div>
       )}
+
+      <section aria-labelledby="student-profiles-title" className="flex flex-col gap-4">
+        <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
+          <h2 id="student-profiles-title" className="text-heading-3 text-ink">
+            Student profiles &amp; mentor reports
+          </h2>
+          <span className="text-meta uppercase tracking-[0.06em] text-ink-2">
+            {allKeystaticStudents.length} total
+          </span>
+        </header>
+        <p className="max-w-[65ch] text-body-sm text-ink-2">
+          Every student profile mentors work with — including those not tied to a signup account.
+          Click a student to see their full record and every report a mentor has collected on them.
+        </p>
+        {allKeystaticStudents.length === 0 ? (
+          <p className="text-body text-ink-2">
+            No student profiles yet. Add them in the content editor.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-body-sm">
+              <thead>
+                <tr className="border-b border-hairline text-meta uppercase tracking-[0.06em] text-ink-2">
+                  <th className="py-3 pr-4 text-left">Student</th>
+                  <th className="py-3 pr-4 text-left">Grade</th>
+                  <th className="py-3 pr-4 text-left">School</th>
+                  <th className="py-3 text-right">Reports</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allKeystaticStudents.map((s) => (
+                  <tr key={s.id} className="border-b border-hairline last:border-b-0">
+                    <td className="py-3 pr-4 text-ink">
+                      <Link
+                        href={`/dashboard/admin/students/${s.id}`}
+                        className="font-semibold text-accent underline underline-offset-[3px] hover:no-underline"
+                      >
+                        {s.displayName}
+                      </Link>
+                    </td>
+                    <td className="py-3 pr-4 text-ink-2">{s.grade ?? "—"}</td>
+                    <td className="py-3 pr-4 text-ink-2">{s.schoolId ?? "—"}</td>
+                    <td className="py-3 text-right tabular-nums text-ink-2">
+                      {reportCounts.get(s.id) ?? 0}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
