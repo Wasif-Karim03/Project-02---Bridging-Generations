@@ -4,7 +4,11 @@ import { Eyebrow } from "@/components/ui/Eyebrow";
 import { getCurrentDbUser, requireRole } from "@/lib/auth";
 import { getAllStudents } from "@/lib/content/students";
 import { getAssignmentsForMentor } from "@/lib/db/queries/weeklyReports";
-import { MENTOR_CALL_QUESTIONS } from "@/lib/mentor/callQuestions";
+import {
+  MENTOR_CALL_QUESTIONS,
+  MENTOR_CALL_SECTIONS,
+  MENTOR_GUIDANCE,
+} from "@/lib/mentor/callQuestions";
 import { LogCallForm } from "./_components/LogCallForm";
 
 export const metadata: Metadata = {
@@ -43,7 +47,12 @@ export default async function NewMentorCallPage() {
         </p>
       ) : (
         <div className="max-w-[720px]">
-          <LogCallForm studentOptions={studentOptions} questions={MENTOR_CALL_QUESTIONS} />
+          <LogCallForm
+            studentOptions={studentOptions}
+            questions={MENTOR_CALL_QUESTIONS}
+            sections={MENTOR_CALL_SECTIONS}
+            guidance={MENTOR_GUIDANCE}
+          />
         </div>
       )}
 
