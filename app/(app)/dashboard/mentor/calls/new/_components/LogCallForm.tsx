@@ -13,12 +13,19 @@ import { logMentorCallAction } from "../actions";
 
 type Props = {
   studentOptions: Array<{ slug: string; label: string }>;
+  lockedStudent?: { slug: string; label: string } | null;
   questions: MentorCallQuestion[];
   sections: MentorCallSection[];
   guidance: MentorGuidancePoint[];
 };
 
-export function LogCallForm({ studentOptions, questions, sections, guidance }: Props) {
+export function LogCallForm({
+  studentOptions,
+  lockedStudent,
+  questions,
+  sections,
+  guidance,
+}: Props) {
   const [state, formAction, pending] = useActionState(logMentorCallAction, null);
   const error = state && state.ok === false ? state.error : null;
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -52,26 +59,42 @@ export function LogCallForm({ studentOptions, questions, sections, guidance }: P
       </details>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Field label="Student">
-          {(p) => (
-            <select
-              {...p}
-              name="studentSlug"
-              required
-              defaultValue=""
-              className="border border-hairline bg-ground-2 px-4 py-3 text-body text-ink focus:border-accent focus:outline-none"
-            >
-              <option value="" disabled>
-                Pick a student
-              </option>
-              {studentOptions.map((s) => (
-                <option key={s.slug} value={s.slug}>
-                  {s.label}
+        {lockedStudent ? (
+          <Field label="Student">
+            {(p) => (
+              <>
+                <input type="hidden" name="studentSlug" value={lockedStudent.slug} />
+                <p
+                  {...p}
+                  className="border border-hairline bg-ground-3 px-4 py-3 text-body text-ink"
+                >
+                  {lockedStudent.label}
+                </p>
+              </>
+            )}
+          </Field>
+        ) : (
+          <Field label="Student">
+            {(p) => (
+              <select
+                {...p}
+                name="studentSlug"
+                required
+                defaultValue=""
+                className="border border-hairline bg-ground-2 px-4 py-3 text-body text-ink focus:border-accent focus:outline-none"
+              >
+                <option value="" disabled>
+                  Pick a student
                 </option>
-              ))}
-            </select>
-          )}
-        </Field>
+                {studentOptions.map((s) => (
+                  <option key={s.slug} value={s.slug}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Field>
+        )}
         <Field label="Call date">
           {(p) => <Input {...p} name="calledAt" type="date" required defaultValue={todayIso} />}
         </Field>

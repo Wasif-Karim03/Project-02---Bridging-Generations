@@ -108,10 +108,10 @@ export default async function MentorDashboard() {
                     </p>
                   ) : null}
                   <Link
-                    href={`/dashboard/mentor/report?student=${a.studentSlug}`}
+                    href={`/dashboard/mentor/student/${a.studentSlug}`}
                     className="mt-auto inline-flex min-h-[40px] items-center justify-center bg-accent px-3 text-nav-link uppercase text-white transition-colors hover:bg-accent-2-hover"
                   >
-                    File weekly report
+                    Open profile →
                   </Link>
                 </li>
               );
@@ -175,7 +175,7 @@ export default async function MentorDashboard() {
                       <td className="py-3 pr-4 align-top text-ink">
                         {mine ? (
                           <Link
-                            href={`/dashboard/mentor/report?student=${s.id}`}
+                            href={`/dashboard/mentor/student/${s.id}`}
                             className="font-semibold text-accent underline underline-offset-[3px] hover:no-underline"
                           >
                             {s.displayName}
