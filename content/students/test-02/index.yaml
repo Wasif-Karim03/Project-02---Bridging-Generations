@@ -1,0 +1,26 @@
+displayName: Test 02
+schoolId: test-school
+grade: 9
+community: marma
+quote: I want to become an engineer.
+bio: ""
+portrait:
+  src: null
+  alt: ""
+consent:
+  portraitReleaseStatus: pending
+  storyReleaseStatus: pending
+  signedDate: null
+  releaseFormId: ""
+  consentScope: []
+  revokable: true
+  revokedAt: null
+sponsorshipStatus: sponsored
+enrolledAt: null
+village: Test Village
+region: Bandarban
+area: Test Area
+hobby: Football, drawing
+gpa: 4.20 / 5.0
+lifeTarget: Become a civil engineer.
+registrationCode: BG-TEST-02

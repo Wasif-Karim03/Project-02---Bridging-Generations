@@ -1,0 +1,26 @@
+displayName: Test 01
+schoolId: test-school
+grade: 8
+community: chakma
+quote: I want to become a doctor.
+bio: ""
+portrait:
+  src: null
+  alt: ""
+consent:
+  portraitReleaseStatus: pending
+  storyReleaseStatus: pending
+  signedDate: null
+  releaseFormId: ""
+  consentScope: []
+  revokable: true
+  revokedAt: null
+sponsorshipStatus: waiting
+enrolledAt: null
+village: Test Village
+region: Rangamati
+area: Test Area
+hobby: Reading, cricket
+gpa: 4.50 / 5.0
+lifeTarget: Become a doctor and serve the Hill Tracts.
+registrationCode: BG-TEST-01
