@@ -48,8 +48,7 @@ export async function submitStudentApplicationAction(
 ): Promise<StudentApplicationState> {
   await requireUserId();
 
-  // Student details
-  const registrationNo = field(formData, "registrationNo", 60);
+  // Student details — registrationNo is system-generated below, never asked.
   const studentName = field(formData, "studentName", 120);
   const gender = field(formData, "gender", 20);
   const dateOfBirth = field(formData, "dateOfBirth", 40);
@@ -96,14 +95,56 @@ export async function submitStudentApplicationAction(
   const phone = field(formData, "phone", 40);
   const email = field(formData, "email", 255);
   const message = field(formData, "message", 4000);
-  const studentSignature = field(formData, "studentSignature", 160);
+  const declarationAccepted =
+    formData.get("declaration") === "yes" || formData.get("declaration") === "on";
 
-  if (!studentName) return { ok: false, error: "Full name is required." };
-  if (!grade) return { ok: false, error: "Class is required." };
-  if (!school) return { ok: false, error: "School / institute is required." };
+  // Strict validation — mirrors the form's required fields so an application
+  // can't be saved half-complete even if the client-side checks are bypassed.
+  // Former roll number and the comment are intentionally optional.
+  const requiredFields: Array<[string, string]> = [
+    ["Full name", studentName],
+    ["Gender", gender],
+    ["Date of birth", dateOfBirth],
+    ["Ethnicity", ethnicity],
+    ["Father's name", fatherName],
+    ["Mother's name", motherName],
+    ["Parents' contact", parentsContact],
+    ["Village / area", village],
+    ["Post office", postOffice],
+    ["Police station / upazila", policeStation],
+    ["District", district],
+    ["Class", grade],
+    ["Current roll no.", currentRollNo],
+    ["Total students in class", totalStudents],
+    ["School / institute", school],
+    ["Father's profession", fatherProfession],
+    ["Mother's profession", motherProfession],
+    ["Family monthly income", familyIncome],
+    ["Purpose", purpose],
+    ["Required amount", requiredAmount],
+    ["Payment type", amountNature],
+    ["Guardian's name", guardianName],
+    ["Guardian's contact", guardianPhone],
+    ["Guardian's address", guardianAddress],
+    ["Student contact", phone],
+    ["Email", email],
+  ];
+  const missing = requiredFields.find(([, value]) => !value);
+  if (missing) return { ok: false, error: `${missing[0]} is required.` };
+
+  // Per-installment + duration only apply when paying by installments.
+  if (amountNature === "installments") {
+    if (!perInstallment) return { ok: false, error: "Per installment is required." };
+    if (!durationValue) return { ok: false, error: "Duration is required." };
+  }
+
+  if (!declarationAccepted) {
+    return { ok: false, error: "Please confirm the declaration before submitting." };
+  }
 
   const photo = await readPhoto(formData);
   if (photo && "error" in photo) return { ok: false, error: photo.error };
+  if (!photo) return { ok: false, error: "A passport-style photo is required." };
 
   // The `address` column is NOT NULL and is what older views render; compose it
   // from the structured parts so both stay in sync.
@@ -121,11 +162,15 @@ export async function submitStudentApplicationAction(
     return { ok: false, error: "Account lookup failed. Please sign in again." };
   }
 
+  // Registration number is system-generated from the account id — never asked
+  // of the student. Stable + unique per account.
+  const studentCode = studentCodeForUuid(dbUser.id);
+
   const db = getDb();
   try {
     await db.insert(studentRegistrations).values({
       applicantUserId: dbUser.id,
-      registrationNo: registrationNo || null,
+      registrationNo: studentCode,
       studentName,
       gender: gender || null,
       dateOfBirth: dateOfBirth || null,
@@ -159,7 +204,7 @@ export async function submitStudentApplicationAction(
       phone: phone || null,
       email: email || dbUser.email,
       message: message || null,
-      studentSignature: studentSignature || null,
+      studentSignature: "Declaration accepted",
       photoData: photo?.data ?? null,
       photoMimeType: photo?.mime ?? null,
     });
@@ -179,7 +224,6 @@ export async function submitStudentApplicationAction(
   // Fire-and-forget confirmation emails — applicant + board notify. Failures
   // here don't block the signup flow.
   const applicantEmail = email || dbUser.email;
-  const studentCode = studentCodeForUuid(dbUser.id);
   const orgEmail = process.env.RESEND_FROM_EMAIL ?? "contact@bridginggenerations.org";
   await Promise.allSettled([
     sendEmail({

@@ -13,6 +13,7 @@ import {
   mobileNavGroups,
   type NavDropdownItem,
   primaryNav,
+  studentCta,
 } from "@/content/fixtures/navigation";
 
 // Resolve a nav item's display label: use the translated string when a
@@ -69,6 +70,7 @@ export function Nav({ contactEmail, phoneNumber, whatsappNumber }: NavProps = {}
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOnDonate =
     (pathname?.startsWith("/donate") ?? false) || (pathname?.startsWith("/be-a-donor") ?? false);
+  const isOnStudentSignup = pathname?.startsWith("/student-signup") ?? false;
 
   // Manage focus across drawer transitions. SheetDrawer owns the focus-trap
   // while open but doesn't know which element opened or should land focus.
@@ -237,6 +239,16 @@ export function Nav({ contactEmail, phoneNumber, whatsappNumber }: NavProps = {}
                   </li>
                 );
               })}
+              {!isOnStudentSignup && (
+                <li>
+                  <Link
+                    href={studentCta.href}
+                    className="inline-flex h-9 items-center border border-white/70 px-4 text-nav-link font-bold uppercase text-white transition-colors hover:border-accent-3 hover:text-accent-3 active:border-accent-3 active:text-accent-3"
+                  >
+                    {t("beAStudent")}
+                  </Link>
+                </li>
+              )}
               {!isOnDonate && (
                 <li>
                   <Link
@@ -327,6 +339,13 @@ export function Nav({ contactEmail, phoneNumber, whatsappNumber }: NavProps = {}
               className="menu-item-in flex min-h-[48px] items-center justify-center bg-accent-2 px-4 text-[19px] font-bold uppercase leading-none text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
             >
               {t("donate")}
+            </Link>
+            <Link
+              href={studentCta.href}
+              onClick={closeDrawer}
+              className="menu-item-in mt-3 flex min-h-[48px] items-center justify-center border border-accent px-4 text-[19px] font-bold uppercase leading-none text-accent transition-colors hover:bg-accent hover:text-white active:bg-accent active:text-white"
+            >
+              {t("beAStudent")}
             </Link>
             {mobileNavGroups.map((group, gIndex) => (
               <section key={group.eyebrow} className="mt-6 border-t border-hairline pt-6">

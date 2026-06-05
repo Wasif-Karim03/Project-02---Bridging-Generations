@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -36,16 +36,20 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
     submitStudentApplicationAction,
     null,
   );
+  // Per-installment + duration only apply when the student picks installments,
+  // so we toggle those fields on this selection. Defaults to installments to
+  // match the radio's defaultChecked below.
+  const [amountNature, setAmountNature] = useState<"installments" | "one_time">("installments");
 
   return (
-    <form action={formAction} className="flex flex-col gap-12" noValidate>
+    <form action={formAction} className="flex flex-col gap-12">
       <FormSection
         index="01"
         title="Student details"
         subtitle="The student's own information, and a recent passport-style photo."
       >
         <Field
-          label="Passport-style photo"
+          label="Passport-style photo *"
           hint="A clear head-and-shoulders photo. JPG, PNG, or WebP, up to 4MB. Kept private."
         >
           {(p) => (
@@ -54,45 +58,42 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
               name="photo"
               type="file"
               accept="image/jpeg,image/png,image/webp"
+              required
               className="block w-full text-body-sm text-ink file:mr-4 file:min-h-[44px] file:cursor-pointer file:border-0 file:bg-accent file:px-4 file:text-nav-link file:uppercase file:text-white"
             />
           )}
         </Field>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Registration No." hint="Leave blank if not assigned yet.">
-            {(p) => <Input {...p} name="registrationNo" maxLength={60} />}
-          </Field>
-          <Field label="Full name *">
-            {(p) => (
-              <Input {...p} name="studentName" autoComplete="name" required maxLength={120} />
-            )}
-          </Field>
-        </div>
+        <Field
+          label="Full name *"
+          hint="Your registration number is generated automatically once you submit."
+        >
+          {(p) => <Input {...p} name="studentName" autoComplete="name" required maxLength={120} />}
+        </Field>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <Field label="Gender">
+          <Field label="Gender *">
             {(p) => (
-              <NativeSelect {...p} name="gender" placeholder="Select…">
+              <NativeSelect {...p} name="gender" placeholder="Select…" required>
                 <option value="Female">Female</option>
                 <option value="Male">Male</option>
                 <option value="Other">Other</option>
               </NativeSelect>
             )}
           </Field>
-          <Field label="Date of birth">
-            {(p) => <Input {...p} name="dateOfBirth" type="date" />}
+          <Field label="Date of birth *">
+            {(p) => <Input {...p} name="dateOfBirth" type="date" required />}
           </Field>
-          <Field label="An orphan?">
+          <Field label="An orphan? *">
             {(p) => (
-              <NativeSelect {...p} name="isOrphan" defaultValue="no">
+              <NativeSelect {...p} name="isOrphan" defaultValue="no" required>
                 <option value="no">No</option>
                 <option value="yes">Yes</option>
               </NativeSelect>
             )}
           </Field>
         </div>
-        <Field label="Ethnicity">
+        <Field label="Ethnicity *">
           {(p) => (
-            <NativeSelect {...p} name="ethnicity" placeholder="Select…">
+            <NativeSelect {...p} name="ethnicity" placeholder="Select…" required>
               {ETHNICITY_OPTIONS.map((o) => (
                 <option key={o} value={o}>
                   {o}
@@ -105,32 +106,43 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
 
       <FormSection index="02" title="Parents" subtitle="The student's mother and father.">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Father's name">
-            {(p) => <Input {...p} name="fatherName" maxLength={120} />}
+          <Field label="Father's name *">
+            {(p) => <Input {...p} name="fatherName" required maxLength={120} />}
           </Field>
-          <Field label="Mother's name">
-            {(p) => <Input {...p} name="motherName" maxLength={120} />}
+          <Field label="Mother's name *">
+            {(p) => <Input {...p} name="motherName" required maxLength={120} />}
           </Field>
         </div>
-        <Field label="Contact" hint="A phone number to reach the parents.">
-          {(p) => <Input {...p} name="parentsContact" type="tel" inputMode="tel" maxLength={40} />}
+        <Field label="Contact *" hint="A phone number to reach the parents.">
+          {(p) => (
+            <Input
+              {...p}
+              name="parentsContact"
+              type="tel"
+              inputMode="tel"
+              required
+              maxLength={40}
+            />
+          )}
         </Field>
       </FormSection>
 
       <FormSection index="03" title="Address" subtitle="Where the student and family live.">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Village / area">
-            {(p) => <Input {...p} name="village" maxLength={200} />}
+          <Field label="Village / area *">
+            {(p) => <Input {...p} name="village" required maxLength={200} />}
           </Field>
-          <Field label="Post office">
-            {(p) => <Input {...p} name="postOffice" maxLength={160} />}
+          <Field label="Post office *">
+            {(p) => <Input {...p} name="postOffice" required maxLength={160} />}
           </Field>
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Police station / upazila">
-            {(p) => <Input {...p} name="policeStation" maxLength={160} />}
+          <Field label="Police station / upazila *">
+            {(p) => <Input {...p} name="policeStation" required maxLength={160} />}
           </Field>
-          <Field label="District">{(p) => <Input {...p} name="district" maxLength={120} />}</Field>
+          <Field label="District *">
+            {(p) => <Input {...p} name="district" required maxLength={120} />}
+          </Field>
         </div>
       </FormSection>
 
@@ -144,14 +156,14 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
           </Field>
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <Field label="Current roll no.">
-            {(p) => <Input {...p} name="currentRollNo" maxLength={60} />}
+          <Field label="Current roll no. *">
+            {(p) => <Input {...p} name="currentRollNo" required maxLength={60} />}
           </Field>
-          <Field label="Former roll no.">
+          <Field label="Former roll no." hint="Leave blank if you don't have one.">
             {(p) => <Input {...p} name="formerRollNo" maxLength={60} />}
           </Field>
-          <Field label="Total students in class">
-            {(p) => <Input {...p} name="totalStudents" maxLength={40} />}
+          <Field label="Total students in class *">
+            {(p) => <Input {...p} name="totalStudents" required maxLength={40} />}
           </Field>
         </div>
       </FormSection>
@@ -162,19 +174,19 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
         subtitle="The family's situation and what the student is asking for."
       >
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Father's profession" hint="e.g. Day laborer, Un-employed">
-            {(p) => <Input {...p} name="fatherProfession" maxLength={160} />}
+          <Field label="Father's profession *" hint="e.g. Day laborer, Un-employed">
+            {(p) => <Input {...p} name="fatherProfession" required maxLength={160} />}
           </Field>
-          <Field label="Mother's profession" hint="e.g. House-wife">
-            {(p) => <Input {...p} name="motherProfession" maxLength={160} />}
+          <Field label="Mother's profession *" hint="e.g. House-wife">
+            {(p) => <Input {...p} name="motherProfession" required maxLength={160} />}
           </Field>
         </div>
         <Field
-          label="Family monthly income"
+          label="Family monthly income *"
           hint="Pick a range, or type an amount below in Purpose."
         >
           {(p) => (
-            <NativeSelect {...p} name="familyIncome" placeholder="Select…">
+            <NativeSelect {...p} name="familyIncome" placeholder="Select…" required>
               {FAMILY_INCOME_OPTIONS.map((o) => (
                 <option key={o} value={o}>
                   {o}
@@ -184,13 +196,13 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
           )}
         </Field>
         <Field
-          label="Purpose"
+          label="Purpose *"
           hint="What the support is for, and any income detail (e.g. 'Day labour, 3000/= per month')."
         >
-          {(p) => <Textarea {...p} name="purpose" rows={2} maxLength={2000} />}
+          {(p) => <Textarea {...p} name="purpose" rows={2} required maxLength={2000} />}
         </Field>
-        <Field label="Required amount" hint="e.g. 2000/-">
-          {(p) => <Input {...p} name="requiredAmount" maxLength={60} />}
+        <Field label="Required amount *" hint="e.g. 2000/-">
+          {(p) => <Input {...p} name="requiredAmount" required maxLength={60} />}
         </Field>
       </FormSection>
 
@@ -199,7 +211,7 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
         title="Amount nature"
         subtitle="How the requested amount should be paid."
       >
-        <Field label="Payment type">
+        <Field label="Payment type *">
           {(p) => (
             <div
               id={p.id}
@@ -210,7 +222,8 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
                   type="radio"
                   name="amountNature"
                   value="installments"
-                  defaultChecked
+                  checked={amountNature === "installments"}
+                  onChange={() => setAmountNature("installments")}
                   className="size-4 accent-accent"
                 />
                 By installments
@@ -220,6 +233,8 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
                   type="radio"
                   name="amountNature"
                   value="one_time"
+                  checked={amountNature === "one_time"}
+                  onChange={() => setAmountNature("one_time")}
                   className="size-4 accent-accent"
                 />
                 One time
@@ -227,22 +242,24 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
             </div>
           )}
         </Field>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Per installment" hint="Amount per installment, if by installments.">
-            {(p) => <Input {...p} name="perInstallment" maxLength={60} />}
-          </Field>
-          <Field label="Duration">
-            {(p) => (
-              <div className="flex gap-3">
-                <Input {...p} name="durationValue" maxLength={40} placeholder="e.g. 2" />
-                <NativeSelect id={`${p.id}-unit`} name="durationUnit" defaultValue="years">
-                  <option value="years">years</option>
-                  <option value="months">months</option>
-                </NativeSelect>
-              </div>
-            )}
-          </Field>
-        </div>
+        {amountNature === "installments" ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <Field label="Per installment *" hint="Amount per installment.">
+              {(p) => <Input {...p} name="perInstallment" required maxLength={60} />}
+            </Field>
+            <Field label="Duration *">
+              {(p) => (
+                <div className="flex gap-3">
+                  <Input {...p} name="durationValue" required maxLength={40} placeholder="e.g. 2" />
+                  <NativeSelect id={`${p.id}-unit`} name="durationUnit" defaultValue="years">
+                    <option value="years">years</option>
+                    <option value="months">months</option>
+                  </NativeSelect>
+                </div>
+              )}
+            </Field>
+          </div>
+        ) : null}
       </FormSection>
 
       <FormSection
@@ -251,20 +268,29 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
         subtitle="The guardian responsible for the student (if different from a parent)."
       >
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Guardian's name">
-            {(p) => <Input {...p} name="guardianName" maxLength={120} />}
+          <Field label="Guardian's name *">
+            {(p) => <Input {...p} name="guardianName" required maxLength={120} />}
           </Field>
-          <Field label="Guardian's contact">
-            {(p) => <Input {...p} name="guardianPhone" type="tel" inputMode="tel" maxLength={40} />}
+          <Field label="Guardian's contact *">
+            {(p) => (
+              <Input
+                {...p}
+                name="guardianPhone"
+                type="tel"
+                inputMode="tel"
+                required
+                maxLength={40}
+              />
+            )}
           </Field>
         </div>
-        <Field label="Guardian's address">
-          {(p) => <Textarea {...p} name="guardianAddress" rows={2} maxLength={2000} />}
+        <Field label="Guardian's address *">
+          {(p) => <Textarea {...p} name="guardianAddress" rows={2} required maxLength={2000} />}
         </Field>
       </FormSection>
 
       <FormSection index="08" title="Other" subtitle="Anything else the board should know.">
-        <Field label="Comment" hint="A short note about the student's situation.">
+        <Field label="Comment" hint="Optional — a short note about the student's situation.">
           {(p) => (
             <Textarea
               {...p}
@@ -277,26 +303,41 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
           )}
         </Field>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Student signature" hint="Type the student's name to sign.">
-            {(p) => <Input {...p} name="studentSignature" maxLength={160} />}
+          <Field label="Student contact *" hint="A phone number to reach the student.">
+            {(p) => (
+              <Input {...p} name="phone" type="tel" inputMode="tel" required maxLength={40} />
+            )}
           </Field>
-          <Field label="Contact" hint="A phone number to reach the student.">
-            {(p) => <Input {...p} name="phone" type="tel" inputMode="tel" maxLength={40} />}
+          <Field label="Email *" hint="We'll use this to email your application status.">
+            {(p) => (
+              <Input
+                {...p}
+                name="email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                defaultValue={initialEmail}
+                required
+                maxLength={255}
+              />
+            )}
           </Field>
         </div>
-        <Field label="Email" hint="Defaults to your signup email if left blank.">
-          {(p) => (
-            <Input
-              {...p}
-              name="email"
-              type="email"
-              autoComplete="email"
-              inputMode="email"
-              defaultValue={initialEmail}
-              maxLength={255}
-            />
-          )}
-        </Field>
+        <label className="flex items-start gap-3 border border-hairline bg-ground-2 px-4 py-3 text-body-sm text-ink">
+          <input
+            type="checkbox"
+            name="declaration"
+            value="yes"
+            required
+            className="mt-0.5 size-4 shrink-0 accent-accent"
+          />
+          <span>
+            I confirm that the information above is true and correct.
+            <span className="mt-1 block text-ink-2">
+              আমি নিশ্চিত করছি যে উপরের তথ্যগুলো সত্য ও সঠিক।
+            </span>
+          </span>
+        </label>
       </FormSection>
 
       {state && !state.ok ? (
@@ -367,6 +408,7 @@ function NativeSelect({
   name: string;
   placeholder?: string;
   defaultValue?: string;
+  required?: boolean;
   children: React.ReactNode;
   "aria-describedby"?: string;
   "aria-invalid"?: boolean;

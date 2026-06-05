@@ -53,6 +53,12 @@ export const donateCta = {
   labelKey: "donate",
 };
 
+export const studentCta = {
+  href: "/student-signup",
+  label: "Be a Student",
+  labelKey: "beAStudent",
+};
+
 export type NavGroup = {
   eyebrow: string;
   eyebrowKey?: string;
