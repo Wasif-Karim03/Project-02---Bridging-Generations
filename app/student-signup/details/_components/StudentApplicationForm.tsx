@@ -6,31 +6,47 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { type StudentApplicationState, submitStudentApplicationAction } from "../actions";
 
+// Income + ethnicity options carry an English `value` (what we store, so the
+// admin views + exports stay stable) and a bilingual `label` shown to the
+// student. Keeping the value English means switching the visible language never
+// changes the saved data.
 const FAMILY_INCOME_OPTIONS = [
-  "Under 5,000 BDT / month",
-  "5,000 — 10,000 BDT / month",
-  "10,000 — 20,000 BDT / month",
-  "20,000 — 40,000 BDT / month",
-  "Over 40,000 BDT / month",
-  "Prefer not to say",
+  { value: "Under 5,000 BDT / month", label: "Under 5,000 BDT / month (৫,০০০ টাকার নিচে / মাস)" },
+  {
+    value: "5,000 — 10,000 BDT / month",
+    label: "5,000 — 10,000 BDT / month (৫,০০০ — ১০,০০০ টাকা / মাস)",
+  },
+  {
+    value: "10,000 — 20,000 BDT / month",
+    label: "10,000 — 20,000 BDT / month (১০,০০০ — ২০,০০০ টাকা / মাস)",
+  },
+  {
+    value: "20,000 — 40,000 BDT / month",
+    label: "20,000 — 40,000 BDT / month (২০,০০০ — ৪০,০০০ টাকা / মাস)",
+  },
+  { value: "Over 40,000 BDT / month", label: "Over 40,000 BDT / month (৪০,০০০ টাকার বেশি / মাস)" },
+  { value: "Prefer not to say", label: "Prefer not to say (বলতে চাই না)" },
 ] as const;
 
 const ETHNICITY_OPTIONS = [
-  "Chakma",
-  "Marma",
-  "Tripura",
-  "Tanchangya",
-  "Mro",
-  "Barua",
-  "Bengali",
-  "Other",
-  "Prefer not to say",
+  { value: "Chakma", label: "Chakma (চাকমা)" },
+  { value: "Marma", label: "Marma (মারমা)" },
+  { value: "Tripura", label: "Tripura (ত্রিপুরা)" },
+  { value: "Tanchangya", label: "Tanchangya (তঞ্চঙ্গ্যা)" },
+  { value: "Mro", label: "Mro (ম্রো)" },
+  { value: "Barua", label: "Barua (বড়ুয়া)" },
+  { value: "Bengali", label: "Bengali (বাঙালি)" },
+  { value: "Other", label: "Other (অন্যান্য)" },
+  { value: "Prefer not to say", label: "Prefer not to say (বলতে চাই না)" },
 ] as const;
+
+const SELECT_PLACEHOLDER = "Select… (নির্বাচন করুন…)";
 
 // Mirrors the org's paper scholarship application form, section by section.
 // Reuses the shared Field / Input / Textarea primitives so styling matches the
-// rest of the site. The passport photo is uploaded and stored privately in the
-// database (never the public repo).
+// rest of the site. Labels are shown in English with the Bangla in parentheses
+// so the bilingual paper form carries over to the web. The passport photo is
+// uploaded and stored privately in the database (never the public repo).
 export function StudentApplicationForm({ initialEmail }: { initialEmail?: string }) {
   const [state, formAction, pending] = useActionState<StudentApplicationState | null, FormData>(
     submitStudentApplicationAction,
@@ -45,11 +61,11 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
     <form action={formAction} className="flex flex-col gap-12">
       <FormSection
         index="01"
-        title="Student details"
+        title="Student details (শিক্ষার্থীর তথ্য)"
         subtitle="The student's own information, and a recent passport-style photo."
       >
         <Field
-          label="Passport-style photo *"
+          label="Passport-style photo (শিক্ষার্থীর ছবি) *"
           hint="A clear head-and-shoulders photo. JPG, PNG, or WebP, up to 4MB. Kept private."
         >
           {(p) => (
@@ -64,39 +80,39 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
           )}
         </Field>
         <Field
-          label="Full name *"
+          label="Full name (পূর্ণ নাম) *"
           hint="Your registration number is generated automatically once you submit."
         >
           {(p) => <Input {...p} name="studentName" autoComplete="name" required maxLength={120} />}
         </Field>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <Field label="Gender *">
+          <Field label="Gender (লিঙ্গ) *">
             {(p) => (
-              <NativeSelect {...p} name="gender" placeholder="Select…" required>
-                <option value="Female">Female</option>
-                <option value="Male">Male</option>
-                <option value="Other">Other</option>
+              <NativeSelect {...p} name="gender" placeholder={SELECT_PLACEHOLDER} required>
+                <option value="Female">Female (মহিলা)</option>
+                <option value="Male">Male (পুরুষ)</option>
+                <option value="Other">Other (অন্যান্য)</option>
               </NativeSelect>
             )}
           </Field>
-          <Field label="Date of birth *">
+          <Field label="Date of birth (জন্ম তারিখ) *">
             {(p) => <Input {...p} name="dateOfBirth" type="date" required />}
           </Field>
-          <Field label="An orphan? *">
+          <Field label="An orphan? (এতিম?) *">
             {(p) => (
               <NativeSelect {...p} name="isOrphan" defaultValue="no" required>
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
+                <option value="no">No (না)</option>
+                <option value="yes">Yes (হ্যাঁ)</option>
               </NativeSelect>
             )}
           </Field>
         </div>
-        <Field label="Ethnicity *">
+        <Field label="Ethnicity (নৃগোষ্ঠী) *">
           {(p) => (
-            <NativeSelect {...p} name="ethnicity" placeholder="Select…" required>
+            <NativeSelect {...p} name="ethnicity" placeholder={SELECT_PLACEHOLDER} required>
               {ETHNICITY_OPTIONS.map((o) => (
-                <option key={o} value={o}>
-                  {o}
+                <option key={o.value} value={o.value}>
+                  {o.label}
                 </option>
               ))}
             </NativeSelect>
@@ -104,16 +120,16 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
         </Field>
       </FormSection>
 
-      <FormSection index="02" title="Parents" subtitle="The student's mother and father.">
+      <FormSection index="02" title="Parents (পিতা-মাতা)" subtitle="The student's mother and father.">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Father's name *">
+          <Field label="Father's name (পিতার নাম) *">
             {(p) => <Input {...p} name="fatherName" required maxLength={120} />}
           </Field>
-          <Field label="Mother's name *">
+          <Field label="Mother's name (মাতার নাম) *">
             {(p) => <Input {...p} name="motherName" required maxLength={120} />}
           </Field>
         </div>
-        <Field label="Contact *" hint="A phone number to reach the parents.">
+        <Field label="Contact (যোগাযোগ নম্বর) *" hint="A phone number to reach the parents.">
           {(p) => (
             <Input
               {...p}
@@ -127,42 +143,49 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
         </Field>
       </FormSection>
 
-      <FormSection index="03" title="Address" subtitle="Where the student and family live.">
+      <FormSection index="03" title="Address (ঠিকানা)" subtitle="Where the student and family live.">
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Village / area *">
+          <Field label="Village / area (গ্রাম) *">
             {(p) => <Input {...p} name="village" required maxLength={200} />}
           </Field>
-          <Field label="Post office *">
+          <Field label="Post office (ডাকঘর) *">
             {(p) => <Input {...p} name="postOffice" required maxLength={160} />}
           </Field>
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Police station / upazila *">
+          <Field label="Police station / upazila (থানা) *">
             {(p) => <Input {...p} name="policeStation" required maxLength={160} />}
           </Field>
-          <Field label="District *">
+          <Field label="District (জেলা) *">
             {(p) => <Input {...p} name="district" required maxLength={120} />}
           </Field>
         </div>
       </FormSection>
 
-      <FormSection index="04" title="Academic info" subtitle="The student's class and school.">
+      <FormSection
+        index="04"
+        title="Academic info (শিক্ষাগত তথ্য)"
+        subtitle="The student's class and school."
+      >
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Class *" hint="e.g. 7, Class 8, HSC 1st year">
+          <Field label="Class (শ্রেণি) *" hint="e.g. 7, Class 8, HSC 1st year">
             {(p) => <Input {...p} name="grade" required maxLength={40} />}
           </Field>
-          <Field label="School / institute *">
+          <Field label="School / institute (বিদ্যালয় / প্রতিষ্ঠান) *">
             {(p) => <Input {...p} name="school" required maxLength={200} />}
           </Field>
         </div>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <Field label="Current roll no. *">
+          <Field label="Current roll no. (বর্তমান রোল নম্বর) *">
             {(p) => <Input {...p} name="currentRollNo" required maxLength={60} />}
           </Field>
-          <Field label="Former roll no." hint="Leave blank if you don't have one.">
+          <Field
+            label="Former roll no. (পূর্ববর্তী রোল নম্বর)"
+            hint="Leave blank if you don't have one."
+          >
             {(p) => <Input {...p} name="formerRollNo" maxLength={60} />}
           </Field>
-          <Field label="Total students in class *">
+          <Field label="Total students in class (মোট শিক্ষার্থী) *">
             {(p) => <Input {...p} name="totalStudents" required maxLength={40} />}
           </Field>
         </div>
@@ -170,48 +193,48 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
 
       <FormSection
         index="05"
-        title="Family & financial"
+        title="Family & financial (পরিবার ও আর্থিক)"
         subtitle="The family's situation and what the student is asking for."
       >
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Father's profession *" hint="e.g. Day laborer, Un-employed">
+          <Field label="Father's profession (পিতার পেশা) *" hint="e.g. Day laborer, Un-employed">
             {(p) => <Input {...p} name="fatherProfession" required maxLength={160} />}
           </Field>
-          <Field label="Mother's profession *" hint="e.g. House-wife">
+          <Field label="Mother's profession (মাতার পেশা) *" hint="e.g. House-wife">
             {(p) => <Input {...p} name="motherProfession" required maxLength={160} />}
           </Field>
         </div>
         <Field
-          label="Family monthly income *"
+          label="Family monthly income (পারিবারিক মাসিক আয়) *"
           hint="Pick a range, or type an amount below in Purpose."
         >
           {(p) => (
-            <NativeSelect {...p} name="familyIncome" placeholder="Select…" required>
+            <NativeSelect {...p} name="familyIncome" placeholder={SELECT_PLACEHOLDER} required>
               {FAMILY_INCOME_OPTIONS.map((o) => (
-                <option key={o} value={o}>
-                  {o}
+                <option key={o.value} value={o.value}>
+                  {o.label}
                 </option>
               ))}
             </NativeSelect>
           )}
         </Field>
         <Field
-          label="Purpose *"
+          label="Purpose (উদ্দেশ্য) *"
           hint="What the support is for, and any income detail (e.g. 'Day labour, 3000/= per month')."
         >
           {(p) => <Textarea {...p} name="purpose" rows={2} required maxLength={2000} />}
         </Field>
-        <Field label="Required amount *" hint="e.g. 2000/-">
+        <Field label="Required amount (প্রয়োজনীয় অর্থ) *" hint="e.g. 2000/-">
           {(p) => <Input {...p} name="requiredAmount" required maxLength={60} />}
         </Field>
       </FormSection>
 
       <FormSection
         index="06"
-        title="Amount nature"
+        title="Amount nature (অর্থের ধরন)"
         subtitle="How the requested amount should be paid."
       >
-        <Field label="Payment type *">
+        <Field label="Payment type (অর্থের ধরন) *">
           {(p) => (
             <div
               id={p.id}
@@ -226,7 +249,7 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
                   onChange={() => setAmountNature("installments")}
                   className="size-4 accent-accent"
                 />
-                By installments
+                By installments (কিস্তিতে)
               </label>
               <label className="inline-flex items-center gap-2">
                 <input
@@ -237,23 +260,23 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
                   onChange={() => setAmountNature("one_time")}
                   className="size-4 accent-accent"
                 />
-                One time
+                One time (এককালীন)
               </label>
             </div>
           )}
         </Field>
         {amountNature === "installments" ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Field label="Per installment *" hint="Amount per installment.">
+            <Field label="Per installment (প্রতি কিস্তির পরিমাণ) *" hint="Amount per installment.">
               {(p) => <Input {...p} name="perInstallment" required maxLength={60} />}
             </Field>
-            <Field label="Duration *">
+            <Field label="Duration (মেয়াদ) *">
               {(p) => (
                 <div className="flex gap-3">
                   <Input {...p} name="durationValue" required maxLength={40} placeholder="e.g. 2" />
                   <NativeSelect id={`${p.id}-unit`} name="durationUnit" defaultValue="years">
-                    <option value="years">years</option>
-                    <option value="months">months</option>
+                    <option value="years">years (বছর)</option>
+                    <option value="months">months (মাস)</option>
                   </NativeSelect>
                 </div>
               )}
@@ -264,14 +287,14 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
 
       <FormSection
         index="07"
-        title="Guardian"
+        title="Guardian (অভিভাবক)"
         subtitle="The guardian responsible for the student (if different from a parent)."
       >
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Guardian's name *">
+          <Field label="Guardian's name (অভিভাবকের নাম) *">
             {(p) => <Input {...p} name="guardianName" required maxLength={120} />}
           </Field>
-          <Field label="Guardian's contact *">
+          <Field label="Guardian's contact (অভিভাবকের যোগাযোগ নম্বর) *">
             {(p) => (
               <Input
                 {...p}
@@ -284,13 +307,16 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
             )}
           </Field>
         </div>
-        <Field label="Guardian's address *">
+        <Field label="Guardian's address (অভিভাবকের ঠিকানা) *">
           {(p) => <Textarea {...p} name="guardianAddress" rows={2} required maxLength={2000} />}
         </Field>
       </FormSection>
 
-      <FormSection index="08" title="Other" subtitle="Anything else the board should know.">
-        <Field label="Comment" hint="Optional — a short note about the student's situation.">
+      <FormSection index="08" title="Other (অন্যান্য)" subtitle="Anything else the board should know.">
+        <Field
+          label="Comment (মন্তব্য)"
+          hint="Optional — a short note about the student's situation."
+        >
           {(p) => (
             <Textarea
               {...p}
@@ -303,12 +329,15 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
           )}
         </Field>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field label="Student contact *" hint="A phone number to reach the student.">
+          <Field
+            label="Student contact (শিক্ষার্থীর যোগাযোগ নম্বর) *"
+            hint="A phone number to reach the student."
+          >
             {(p) => (
               <Input {...p} name="phone" type="tel" inputMode="tel" required maxLength={40} />
             )}
           </Field>
-          <Field label="Email *" hint="We'll use this to email your application status.">
+          <Field label="Email (ইমেইল) *" hint="We'll use this to email your application status.">
             {(p) => (
               <Input
                 {...p}
@@ -351,15 +380,16 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
       ) : null}
 
       <div className="flex flex-col gap-4 border-t border-hairline pt-8 sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-[44ch] text-meta uppercase tracking-[0.06em] text-ink-2">
-          Fields marked * are required. We'll redirect you to sign in once you submit.
+        <p className="max-w-[52ch] text-meta uppercase tracking-[0.06em] text-ink-2">
+          Fields marked * are required (★ চিহ্নিত ঘরগুলো আবশ্যক). We'll redirect you to sign in once
+          you submit.
         </p>
         <button
           type="submit"
           disabled={pending}
           className="inline-flex min-h-[48px] items-center justify-center bg-accent px-6 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Submitting…" : "Submit application →"}
+          {pending ? "Submitting…" : "Submit application (আবেদন জমা দিন) →"}
         </button>
       </div>
     </form>

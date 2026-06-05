@@ -31,13 +31,16 @@ export default async function StudentApplicationPage() {
       >
         <div className="mx-auto max-w-[1280px]">
           <Reveal stagger="up">
-            <Eyebrow>Step 2 of 2 · Your details</Eyebrow>
+            <Eyebrow>Step 2 of 2 · Your details (ধাপ ২/২ · আপনার তথ্য)</Eyebrow>
             <h1
               id="application-hero-title"
               className="mt-3 max-w-[28ch] text-balance text-display-2 text-ink"
             >
               Tell us a bit about yourself.
             </h1>
+            <p className="mt-2 max-w-[40ch] text-balance text-heading-5 text-ink-2">
+              আপনার সম্পর্কে কিছু তথ্য দিন।
+            </p>
             <p className="mt-4 max-w-[60ch] text-body-lg text-ink-2">
               Everything below goes only to our board for review — we never share it publicly. Once
               you're approved, you'll be able to{" "}
