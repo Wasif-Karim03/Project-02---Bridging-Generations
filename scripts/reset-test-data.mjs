@@ -96,16 +96,17 @@ try {
   // 2. Collect Clerk user IDs while we still can — split into "to delete"
   //    vs "preserved" (bootstrap admin).
   const allUsers = await sql`
-    SELECT clerk_user_id, email
+    SELECT clerk_user_id, email, role
     FROM users
     WHERE clerk_user_id IS NOT NULL
   `;
-  const preserved = allUsers.filter(
-    (r) => bootstrapEmail && (r.email ?? "").toLowerCase() === bootstrapEmail,
-  );
-  const toDelete = allUsers.filter(
-    (r) => !bootstrapEmail || (r.email ?? "").toLowerCase() !== bootstrapEmail,
-  );
+  // Preserve EVERY admin (by role), plus the bootstrap email as an extra
+  // safeguard. This guarantees no admin is ever deleted, regardless of how
+  // many admins exist or which email they use.
+  const isPreserved = (r) =>
+    r.role === "admin" || (bootstrapEmail && (r.email ?? "").toLowerCase() === bootstrapEmail);
+  const preserved = allUsers.filter(isPreserved);
+  const toDelete = allUsers.filter((r) => !isPreserved(r));
   console.log(`Preserved (bootstrap admin): ${preserved.length}`);
   for (const u of preserved) {
     console.log(`  KEEP ${u.clerk_user_id}  ${u.email}`);
@@ -163,10 +164,12 @@ try {
       console.log(`  ${table.padEnd(32)} (already empty)`);
       continue;
     }
-    if (table === "users" && bootstrapEmail) {
+    if (table === "users") {
+      // Keep every admin (by role) and the bootstrap email; delete the rest.
       const result = await sql`
         DELETE FROM users
-        WHERE LOWER(email) <> ${bootstrapEmail}
+        WHERE role <> 'admin'
+          AND (${bootstrapEmail} = '' OR LOWER(email) <> ${bootstrapEmail})
       `;
       console.log(`  ${table.padEnd(32)} ${result.count} deleted, ${preserved.length} kept`);
     } else {
