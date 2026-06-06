@@ -58,8 +58,8 @@
   },
   "about": {
     "heroEyebrow": "About us",
-    "heroHeadline": "Empowering the Hill Tracts.",
-    "heroBody": "Since 2019, Bridging Generations has sponsored students across the Chittagong Hill Tracts — covering tuition, books, daily meals, and the materials that keep a child in school instead of pulled into early labor.",
+    "heroHeadline": "We strive to bridge one generation to another",
+    "heroBody": "Bridging Generation (BG) is an education-focused organization whose goal is to connect one generation with another through knowledge, experience, and opportunities.\n\nThis organization works to support students’ development by promoting education, leadership growth, compassion, and the creation of opportunities for the future. BG believes that the experiences and learning of each generation can create a valuable bridge for the next generation.",
     "heroReadMission": "Read our mission"
   },
   "students": {
@@ -89,9 +89,9 @@
     "studentCount": "{filtered} of {total} students"
   },
   "missionVision": {
-    "eyebrow": "Our Mission and Our Vision",
-    "headline": "Education without the barrier of poverty.",
-    "intro": "Two statements that anchor everything we do — what we promise our students today, and the generation we are working toward tomorrow.",
+    "eyebrow": "Our Mission and Vision",
+    "headline": "BG’s goal is to connect one generation with another through knowledge, experience, and opportunities.\n",
+    "intro": "Bridging minds, Building generations",
     "missionEyebrow": "Mission",
     "missionHeading": "Our Mission",
     "missionBody": "Establishing an enlightened generation through sustainable education bridging — and extending the helping hands to ensure poverty may not be the hindrance to the education of the unprivileged and neglected people.",
