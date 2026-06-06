@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { StoryToc } from "@/components/content/StoryToc";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -40,6 +41,7 @@ export default async function PrivacyPage() {
   const [privacy, siteSettings] = await Promise.all([getPrivacyPage(), getSiteSettings()]);
   const body = await privacy.body();
   const headings = extractHeadings(body, [2]);
+  const t = await getTranslations("privacyPageExtra");
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -54,12 +56,12 @@ export default async function PrivacyPage() {
       >
         <Reveal>
           <div className="mx-auto flex max-w-[65ch] flex-col gap-4">
-            <Eyebrow>Legal</Eyebrow>
+            <Eyebrow>{t("eyebrow")}</Eyebrow>
             <h1
               id="privacy-hero-title"
               className="max-w-[22ch] text-balance text-display-2 text-ink"
             >
-              Privacy policy.
+              {t("title")}
             </h1>
             {privacy.lastUpdated ? (
               <p className="text-meta uppercase tracking-[0.1em] text-ink-2">
@@ -92,7 +94,7 @@ export default async function PrivacyPage() {
             id="privacy-contact-title"
             className="text-eyebrow uppercase tracking-[0.1em] text-accent"
           >
-            Privacy questions
+            {t("questions")}
           </h2>
           <p>
             For data access, deletion, or correction requests, email{" "}

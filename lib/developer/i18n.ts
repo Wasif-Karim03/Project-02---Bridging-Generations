@@ -74,6 +74,8 @@ const SECTION_LABELS: Record<string, string> = {
   contactPageExtra: "Contact page — sections",
   donorsPageExtra: "Donor profile page",
   applyPages: "Apply pages (mentor / scholarship)",
+  termsPageExtra: "Terms page — headings",
+  privacyPageExtra: "Privacy page — headings",
 };
 
 export function sectionLabel(section: string): string {

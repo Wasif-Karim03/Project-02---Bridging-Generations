@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
@@ -8,6 +9,7 @@ import { INITIAL_FORM_STATE } from "@/lib/forms";
 import { submitMentorApplication } from "../actions";
 
 export function MentorApplicationForm() {
+  const t = useTranslations("applyPages");
   const [state, formAction, pending] = useActionState(submitMentorApplication, INITIAL_FORM_STATE);
 
   if (state.status === "success") {
@@ -114,7 +116,7 @@ export function MentorApplicationForm() {
           disabled={pending}
           className="inline-flex min-h-[48px] items-center bg-accent px-6 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {pending ? "Sending…" : "Apply as mentor"}
+          {pending ? "Sending…" : t("applyAsMentor")}
         </button>
         <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
           Board reviews within 3 weeks

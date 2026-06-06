@@ -54,7 +54,9 @@
     },
     "form990": "Form 990",
     "candidProfile": "Candid profile",
-    "taxLine": "501(c)(3) · EIN {ein} · Tax-deductible"
+    "taxLine": "501(c)(3) · EIN {ein} · Tax-deductible",
+    "brandName": "Bridging Generations",
+    "copyrightNote": "Bridging Generations is a registered 501(c)(3) nonprofit."
   },
   "about": {
     "heroEyebrow": "About us",
@@ -106,7 +108,10 @@
     "eyebrow": "Impact",
     "headline": "Five years. Every student, still in school.",
     "intro": "Since 2021, Bridging Generations donors have funded tuition, daily meals, books, and materials for children across the Chittagong Hill Tracts. Here is how the programme has grown — year by year, gift by gift.",
-    "raisedToDate": "Raised to date"
+    "raisedToDate": "Raised to date",
+    "ctaHeadline": "Join the journey.",
+    "ctaBody": "Every gift keeps one more student in school. Start a recurring sponsorship or make a one-time contribution.",
+    "ctaLabel": "Become a donor"
   },
   "blog": {
     "eyebrow": "Notes from the field",
@@ -117,7 +122,11 @@
     "filterAll": "All",
     "filterSuccessStory": "Success story",
     "filterRecentActivity": "Recent activity",
-    "filterEventNews": "Event news"
+    "filterEventNews": "Event news",
+    "ctaHeadline": "Get the field updates before they land in the blog.",
+    "ctaBody": "Annual transparency reports, new projects, and student milestones — delivered to our supporters every quarter. Or keep scrolling here, it all lands on this page first.",
+    "ctaLabel": "Donate now",
+    "emptyCategory": "No posts in this category yet."
   },
   "gallery": {
     "title": "Gallery.",
@@ -134,7 +143,10 @@
     "groupPhotograph": "photograph",
     "groupPhotographs": "photographs",
     "groupUndated": "Undated",
-    "noPhotographs": "No photographs yet."
+    "noPhotographs": "No photographs yet.",
+    "ctaHeadline": "Walk with us in person.",
+    "ctaBody": "Photos only carry so much. Sponsor a student, visit with the board on a trip, or contribute a gift that funds the next school visit.",
+    "ctaLabel": "Donate"
   },
   "home": {
     "missionEyebrow": "Our mission",
@@ -367,7 +379,15 @@
     "emailLabel": "Email us",
     "mailingAddressLabel": "Mailing address",
     "responseTimeLabel": "Response time",
-    "privacyNotice": "We use your email only to reply. No list, no automation."
+    "privacyNotice": "We use your email only to reply. No list, no automation.",
+    "formName": "Name",
+    "formNamePlaceholder": "Your name",
+    "formEmail": "Email",
+    "formEmailPlaceholder": "Your email",
+    "formMessage": "Message",
+    "formSend": "Send",
+    "formSending": "Sending…",
+    "formThankYou": "Thank you."
   },
   "donorsPageExtra": {
     "backToDonors": "← Back to donors",
@@ -393,6 +413,18 @@
     "scholarshipRulesIntroAfter": "before applying.",
     "scholarshipCtaHeadline": "Not eligible — but want to support?",
     "scholarshipCtaBody": "If you can't apply but would like to sponsor a student, see how to give.",
-    "scholarshipCtaLabel": "Be a Donor"
+    "scholarshipCtaLabel": "Be a Donor",
+    "submitApplication": "Submit application",
+    "applyAsMentor": "Apply as mentor"
+  },
+  "termsPageExtra": {
+    "eyebrow": "Legal",
+    "title": "Terms & Conditions.",
+    "contact": "Get in touch"
+  },
+  "privacyPageExtra": {
+    "eyebrow": "Legal",
+    "title": "Privacy policy.",
+    "questions": "Privacy questions"
   }
 }

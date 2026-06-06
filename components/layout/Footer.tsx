@@ -36,7 +36,7 @@ export async function Footer({
   candidProfileUrl,
   socialLinks,
 }: FooterProps = {}) {
-  const { brand, about, others, copyrightNote } = footerContent;
+  const { about, others } = footerContent;
   const tFooter = await getTranslations("footer");
   const tLinks = await getTranslations("footer.links");
   const year = new Date().getFullYear();
@@ -56,7 +56,7 @@ export async function Footer({
       <div className="mx-auto grid max-w-[1280px] gap-12 px-4 py-12 sm:px-6 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-16 lg:px-[6%] lg:py-14">
         {/* Column 1 — Head Office */}
         <div>
-          <p className="text-heading-6 font-bold">{brand.name}</p>
+          <p className="text-heading-6 font-bold">{tFooter("brandName")}</p>
           {tagline ? <p className="mt-3 text-body-sm text-white">{tagline}</p> : null}
           <div className="mt-6 border-t border-white/15 pt-6">
             <p className="text-eyebrow uppercase text-accent-3">{tFooter("headOffice")}</p>
@@ -235,7 +235,7 @@ export async function Footer({
       <div className="border-t border-white/15">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-4 py-5 text-meta text-white sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6 lg:px-[6%]">
           <p>
-            © {year} {copyrightNote}{" "}
+            © {year} {tFooter("copyrightNote")}{" "}
             <span aria-hidden="true" className="mx-1 text-white/40">
               ·
             </span>

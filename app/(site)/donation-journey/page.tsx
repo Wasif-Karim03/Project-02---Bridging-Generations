@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getDonationJourney } from "@/lib/content/donationJourney";
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
 
 export default async function DonationJourneyPage() {
   const [journey, pageMedia] = await Promise.all([getDonationJourney(), getPageMedia()]);
+  const t = await getTranslations("donationJourney");
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -40,9 +42,9 @@ export default async function DonationJourneyPage() {
         totalDonorsAllTime={journey.totalDonorsAllTime ?? 0}
       />
       <CTAFooterPanel
-        headline="Join the journey."
-        body="Every gift keeps one more student in school. Start a recurring sponsorship or make a one-time contribution."
-        ctaLabel="Become a donor"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/be-a-donor"
         tone="teal"
         titleId="journey-cta-title"

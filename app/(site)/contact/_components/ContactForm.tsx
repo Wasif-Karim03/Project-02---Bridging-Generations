@@ -10,10 +10,18 @@ import { submitContactForm } from "../actions";
 import { type ContactActionState, initialContactState } from "../actions.types";
 import { AudienceTriage } from "./AudienceTriage";
 
-function SubmitButton({ pending }: { pending: boolean }) {
+function SubmitButton({
+  pending,
+  sendingLabel,
+  sendLabel,
+}: {
+  pending: boolean;
+  sendingLabel: string;
+  sendLabel: string;
+}) {
   return (
     <Button type="submit" variant="primary" disabled={pending} className="min-h-[48px]">
-      {pending ? "Sending…" : "Send"}
+      {pending ? sendingLabel : sendLabel}
     </Button>
   );
 }
@@ -28,7 +36,7 @@ export function ContactForm() {
   if (state.status === "success") {
     return (
       <div role="status" aria-live="polite" className="flex flex-col gap-3 bg-ground-2 p-8">
-        <h2 className="text-heading-4 text-ink">Thank you.</h2>
+        <h2 className="text-heading-4 text-ink">{tx("formThankYou")}</h2>
         <p className="text-body text-ink-2">{state.message}</p>
         {state.submittedEmail ? (
           <p className="text-meta text-ink-2">
@@ -64,12 +72,13 @@ export function ContactForm() {
 
       <AudienceTriage name="audience" error={fieldErrors.audience} />
 
-      <Field label="Your name" error={fieldErrors.name}>
+      <Field label={tx("formName")} error={fieldErrors.name}>
         {(fieldProps) => (
           <Input
             {...fieldProps}
             name="name"
             type="text"
+            placeholder={tx("formNamePlaceholder")}
             autoComplete="name"
             autoCapitalize="words"
             enterKeyHint="next"
@@ -79,12 +88,13 @@ export function ContactForm() {
         )}
       </Field>
 
-      <Field label="Your email" error={fieldErrors.email}>
+      <Field label={tx("formEmail")} error={fieldErrors.email}>
         {(fieldProps) => (
           <Input
             {...fieldProps}
             name="email"
             type="email"
+            placeholder={tx("formEmailPlaceholder")}
             autoComplete="email"
             inputMode="email"
             autoCorrect="off"
@@ -95,7 +105,7 @@ export function ContactForm() {
         )}
       </Field>
 
-      <Field label="Message" error={fieldErrors.message}>
+      <Field label={tx("formMessage")} error={fieldErrors.message}>
         {(fieldProps) => (
           <Textarea
             {...fieldProps}
@@ -128,7 +138,7 @@ export function ContactForm() {
 
       <p className="text-meta text-ink-2">{tx("privacyNotice")}</p>
 
-      <SubmitButton pending={pending} />
+      <SubmitButton pending={pending} sendingLabel={tx("formSending")} sendLabel={tx("formSend")} />
     </form>
   );
 }

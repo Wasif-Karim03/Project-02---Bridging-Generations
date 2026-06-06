@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Feature, Row } from "@/components/ui/editorial";
@@ -49,6 +49,7 @@ type SearchParams = {
 export default async function BlogPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
   const locale = await getLocale();
+  const t = await getTranslations("blog");
   const dateFmt = makeDateFmt(locale);
   const validCategoryValues = BLOG_CATEGORY_OPTIONS.map((c) => c.value);
   const rawCategory = sp.category ?? "";
@@ -180,7 +181,7 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
         <section className="bg-ground px-4 pb-20 sm:px-6 lg:px-[6%] lg:pb-28">
           <div className="mx-auto max-w-[1280px]">
             <p className="text-body text-ink-2">
-              No posts in this category yet.{" "}
+              {t("emptyCategory")}{" "}
               <a
                 href="/blog"
                 className="text-accent underline underline-offset-[3px] hover:no-underline"
@@ -194,9 +195,9 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
       )}
       <BlogPagination currentPage={1} pageCount={pageCount} />
       <CTAFooterPanel
-        headline="Get the field updates before they land in the blog."
-        body="Annual transparency reports, new projects, and student milestones — delivered to our supporters every quarter. Or keep scrolling here, it all lands on this page first."
-        ctaLabel="Donate now"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/donate"
         tone="cream"
         titleId="blog-cta-title"

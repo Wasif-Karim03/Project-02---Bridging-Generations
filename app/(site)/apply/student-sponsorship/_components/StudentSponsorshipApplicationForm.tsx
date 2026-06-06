@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 import { Field } from "@/components/ui/Field";
 import { Input } from "@/components/ui/Input";
@@ -8,6 +9,7 @@ import { INITIAL_FORM_STATE } from "@/lib/forms";
 import { submitStudentSponsorshipApplication } from "../actions";
 
 export function StudentSponsorshipApplicationForm() {
+  const t = useTranslations("applyPages");
   const [state, formAction, pending] = useActionState(
     submitStudentSponsorshipApplication,
     INITIAL_FORM_STATE,
@@ -145,7 +147,7 @@ export function StudentSponsorshipApplicationForm() {
           disabled={pending}
           className="inline-flex min-h-[48px] items-center bg-accent px-6 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {pending ? "Sending…" : "Submit application"}
+          {pending ? "Sending…" : t("submitApplication")}
         </button>
         <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
           Reviewed at the start of every term

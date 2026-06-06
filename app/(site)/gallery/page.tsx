@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getAllGalleryImages } from "@/lib/content/galleryImages";
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 
 export default async function GalleryPage() {
   const items = await getAllGalleryImages();
+  const t = await getTranslations("gallery");
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
@@ -41,9 +43,9 @@ export default async function GalleryPage() {
         </div>
       </section>
       <CTAFooterPanel
-        headline="Walk with us in person."
-        body="Photos only carry so much. Sponsor a student, visit with the board on a trip, or contribute a gift that funds the next school visit."
-        ctaLabel="Donate"
+        headline={t("ctaHeadline")}
+        body={t("ctaBody")}
+        ctaLabel={t("ctaLabel")}
         ctaHref="/donate"
         tone="cream"
         titleId="gallery-cta-title"
