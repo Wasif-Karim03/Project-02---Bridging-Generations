@@ -363,11 +363,23 @@ async function autoPromoteMentorIfPossible(applicationId: string): Promise<void>
   // Only promote from donor/anonymous. Admin/it/student stay where they are;
   // an existing mentor doesn't need re-promotion. The mentor application
   // record still gets approvedUserId linked below for everyone.
+  //
+  // Approving the mentor application also ACTIVATES the account: new signups
+  // start status=pending, and the role gate bounces pending users to
+  // /pending-approval — so without this the freshly-approved mentor would be
+  // role=mentor but stuck on the waiting screen, never reaching their dashboard.
   const promotable = user.role === "donor" || user.role === "anonymous";
   if (promotable) {
     await db
       .update(users)
-      .set({ role: "mentor", updatedAt: new Date() })
+      .set({ role: "mentor", status: "active", updatedAt: new Date() })
+      .where(eq(users.id, user.id));
+  } else if (user.role === "mentor" && user.status !== "active") {
+    // Already a mentor (e.g. an earlier approval flipped the role but not the
+    // status) — just activate so they can reach the dashboard.
+    await db
+      .update(users)
+      .set({ status: "active", updatedAt: new Date() })
       .where(eq(users.id, user.id));
   }
 
