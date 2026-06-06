@@ -47,9 +47,24 @@ const SELECT_PLACEHOLDER = "Select… (নির্বাচন করুন…)
 // rest of the site. Labels are shown in English with the Bangla in parentheses
 // so the bilingual paper form carries over to the web. The passport photo is
 // uploaded and stored privately in the database (never the public repo).
-export function StudentApplicationForm({ initialEmail }: { initialEmail?: string }) {
+type SubmitAction = (
+  prev: StudentApplicationState | null,
+  formData: FormData,
+) => Promise<StudentApplicationState>;
+
+export function StudentApplicationForm({
+  initialEmail,
+  action = submitStudentApplicationAction,
+  submitLabel = "Submit application (আবেদন জমা দিন)",
+}: {
+  initialEmail?: string;
+  // Defaults to the student self-signup action; the mentor "Register Student"
+  // flow passes its own action that creates a registration with no account.
+  action?: SubmitAction;
+  submitLabel?: string;
+}) {
   const [state, formAction, pending] = useActionState<StudentApplicationState | null, FormData>(
-    submitStudentApplicationAction,
+    action,
     null,
   );
   // Per-installment + duration only apply when the student picks installments,
@@ -389,7 +404,7 @@ export function StudentApplicationForm({ initialEmail }: { initialEmail?: string
           disabled={pending}
           className="inline-flex min-h-[48px] items-center justify-center bg-accent px-6 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {pending ? "Submitting…" : "Submit application (আবেদন জমা দিন) →"}
+          {pending ? "Submitting…" : `${submitLabel} →`}
         </button>
       </div>
     </form>

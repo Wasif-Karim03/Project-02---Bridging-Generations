@@ -50,14 +50,22 @@ export default async function MentorDashboard() {
 
   return (
     <div className="flex flex-col gap-10">
-      <header className="flex flex-col gap-2">
-        <Eyebrow>Mentor</Eyebrow>
-        <h1 className="text-balance text-heading-1 text-ink">Your students.</h1>
-        <p className="text-body text-ink-2">
-          Open a student to see their full record and collect a report after each call. The board
-          and future mentors read these — they're how we notice when a student is struggling before
-          the school does.
-        </p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-2">
+          <Eyebrow>Mentor</Eyebrow>
+          <h1 className="text-balance text-heading-1 text-ink">Your students.</h1>
+          <p className="max-w-[60ch] text-body text-ink-2">
+            Open a student to see their full record and collect a report after each call. The board
+            and future mentors read these — they're how we notice when a student is struggling
+            before the school does.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/mentor/register-student"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center bg-accent px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent/90"
+        >
+          + Register Student
+        </Link>
       </header>
 
       {!dbReady ? (
