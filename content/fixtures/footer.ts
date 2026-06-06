@@ -22,6 +22,7 @@ export const footerContent = {
     { label: "Projects", labelKey: "projects", href: "/projects" },
     { label: "Students", labelKey: "students", href: "/students" },
     { label: "Mentors", labelKey: "mentors", href: "/mentors" },
+    { label: "Become a Mentor", labelKey: "becomeMentor", href: "/mentor-signup" },
   ] satisfies FooterLink[],
   // "Others" column — legal / supporting.
   others: [
