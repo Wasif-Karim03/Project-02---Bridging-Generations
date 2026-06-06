@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { StudentPlaceholder } from "@/components/ui/StudentPlaceholder";
 import { canShowPortrait, canShowStory } from "@/lib/content/canShowPortrait";
 import { getSchoolById } from "@/lib/content/schools";
-import { getAllStudents, getStudentBySlug } from "@/lib/content/students";
+import { getStudentBySlug } from "@/lib/content/students";
 import { getStudentGrowthData } from "@/lib/db/queries/studentGrowth";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
@@ -14,10 +14,9 @@ import { StudentGrowthButton } from "./_components/StudentGrowthButton";
 
 type Params = { slug: string };
 
-export async function generateStaticParams(): Promise<Params[]> {
-  const students = await getAllStudents();
-  return students.map((s) => ({ slug: s.id }));
-}
+// Rendered on demand: profiles now include approved DB applicants (auto-
+// published) whose data is live, so we can't bake these pages at build time.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;

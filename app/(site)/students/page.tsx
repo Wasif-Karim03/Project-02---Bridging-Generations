@@ -7,7 +7,11 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { Reveal } from "@/components/ui/Reveal";
 import { isPlaceholder } from "@/lib/content/isPlaceholder";
 import { getAllSchools, toSchoolSummary } from "@/lib/content/schools";
-import { getAllStudents, getStudentsGroupedBySchool } from "@/lib/content/students";
+import {
+  getAllStudents,
+  getApprovedPublicStudents,
+  getStudentsGroupedBySchool,
+} from "@/lib/content/students";
 import { getStudentsPage } from "@/lib/content/studentsPage";
 import { getAllTestimonials } from "@/lib/content/testimonials";
 import { pageAlternates } from "@/lib/seo/alternates";
@@ -25,19 +29,25 @@ export const metadata: Metadata = {
   alternates: pageAlternates("/students"),
 };
 
+// Includes approved DB applicants (auto-published), so render on demand to
+// reflect new approvals immediately rather than at build time.
+export const dynamic = "force-dynamic";
+
 // HSC = Higher Secondary Certificate (grades 11–12)
 // SSC = Secondary School Certificate (grade 10)
 const HSC_SSC_GRADES = new Set([10, 11, 12]);
 
 export default async function StudentsPage() {
   const tx = await getTranslations("studentsPageExtra");
-  const [allSchools, grouped, allStudents, testimonials, studentsPage] = await Promise.all([
-    getAllSchools(),
-    getStudentsGroupedBySchool(),
-    getAllStudents(),
-    getAllTestimonials(),
-    getStudentsPage(),
-  ]);
+  const [allSchools, grouped, allStudents, testimonials, studentsPage, approvedDbStudents] =
+    await Promise.all([
+      getAllSchools(),
+      getStudentsGroupedBySchool(),
+      getAllStudents(),
+      getAllTestimonials(),
+      getStudentsPage(),
+      getApprovedPublicStudents(),
+    ]);
 
   const schools = allSchools.filter(
     (school) => !school.description || !isPlaceholder(school.description),
@@ -49,11 +59,15 @@ export default async function StudentsPage() {
     null;
 
   const knownSchoolIds = new Set(schools.map((s) => s.id));
-  const visibleStudents = grouped
+  const keystaticStudents = grouped
     .filter((g) => knownSchoolIds.has(g.schoolId))
     .flatMap((g) => g.students);
+  // Approved applicants from the DB are auto-published alongside curated
+  // Keystatic students. They have no Keystatic school record, so they live
+  // outside the school grouping but still appear in the directory + counts.
+  const visibleStudents = [...keystaticStudents, ...approvedDbStudents];
   const studentCount = visibleStudents.length;
-  const schoolCount = new Set(visibleStudents.map((s) => s.schoolId)).size;
+  const schoolCount = new Set(keystaticStudents.map((s) => s.schoolId)).size;
   const waitingCount = visibleStudents.filter((s) => s.sponsorshipStatus === "waiting").length;
 
   // Spotlight selection: explicit list if curated, else all HSC/SSC students in the visible set.
