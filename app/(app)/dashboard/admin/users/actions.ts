@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { getUserById, setUserRole } from "@/lib/db/queries/users";
+import { isNextControlFlowError } from "@/lib/nextControlFlow";
 import { sendMentorApprovalEmail } from "@/lib/notifications/mentorApproval";
 
 export type RoleChangeResult = {
@@ -31,8 +32,8 @@ export async function setUserRoleAction(
     | "pm"
     | "comm",
 ): Promise<RoleChangeResult> {
-  await requireRole("admin");
   try {
+    await requireRole("admin");
     const prev = await getUserById(userId);
     const wasMentor = prev?.role === "mentor";
     await setUserRole(userId, role);
@@ -47,7 +48,11 @@ export async function setUserRoleAction(
     }
     return { status: "success", message: `Role set to ${role}.` };
   } catch (err) {
+    if (isNextControlFlowError(err)) throw err;
     console.error("[admin/users/setRole] failed", err);
-    return { status: "error", message: "Could not update role. Try again." };
+    return {
+      status: "error",
+      message: `Could not update role: ${err instanceof Error ? err.message : "unknown error"}`,
+    };
   }
 }
