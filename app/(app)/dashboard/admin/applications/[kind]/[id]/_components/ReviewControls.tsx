@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { APPLICATION_STATUS_LABEL } from "@/lib/content/applicationsMock";
-import { INITIAL_REVIEW_STATE, submitApplicationReview } from "../actions";
+import { submitApplicationReview } from "../actions";
+import { INITIAL_REVIEW_STATE } from "../reviewState";
 
 const SELECTABLE_STATUSES: ApplicationStatus[] = [
   "submitted",

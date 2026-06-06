@@ -5,13 +5,13 @@ import { getCurrentDbUser, requireRole } from "@/lib/auth";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { setApplicationStatus } from "@/lib/db/queries/applications";
 import { notifyApplicantOfDecision } from "@/lib/notifications/applicationDecision";
+import type { ReviewActionState } from "./reviewState";
 
-export type ReviewActionState = {
-  status: "idle" | "success" | "error";
-  message: string;
-};
-
-export const INITIAL_REVIEW_STATE: ReviewActionState = { status: "idle", message: "" };
+// NOTE: a "use server" file may ONLY export async functions. The shared
+// ReviewActionState type lives in ./reviewState (a plain module) and the
+// INITIAL_REVIEW_STATE constant is defined in the client component — exporting
+// a non-function value from here throws "A 'use server' file can only export
+// async functions" at runtime when the action module loads.
 
 const VALID_KINDS: ReadonlyArray<ApplicationRow["kind"]> = [
   "scholarship",
