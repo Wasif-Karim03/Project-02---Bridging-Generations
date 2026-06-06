@@ -123,13 +123,26 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
                   Funding need
                 </p>
                 <p className="mt-1 text-heading-2 tabular-nums text-ink">
-                  {student.fundingNeed.amountLabel}
+                  <span className="text-accent-2-text">{student.fundingNeed.fundedLabel}</span> of{" "}
+                  {student.fundingNeed.requiredLabel} USD
                 </p>
-                <p className="text-body-sm text-ink-2">
+                <div
+                  className="mt-2 h-2 w-full overflow-hidden bg-ground-3"
+                  role="progressbar"
+                  aria-valuenow={student.fundingNeed.progressPct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div
+                    className="h-full bg-accent-2-text"
+                    style={{ width: `${Math.max(student.fundingNeed.progressPct, 2)}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-body-sm text-ink-2">
                   {student.fundingNeed.byInstallments
                     ? `By installments${
                         student.fundingNeed.perInstallmentLabel
-                          ? ` · ${student.fundingNeed.perInstallmentLabel} per installment`
+                          ? ` · ${student.fundingNeed.perInstallmentLabel} USD per installment`
                           : ""
                       }${student.fundingNeed.duration ? ` over ${student.fundingNeed.duration}` : ""}`
                     : "One-time support"}

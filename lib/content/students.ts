@@ -12,10 +12,11 @@ type RawStudent = Entry<typeof studentCollection>;
 // don't carry an amount (only sponsored/waiting), so this is only set for
 // approved DB students and is optional everywhere it's consumed.
 export type StudentFundingNeed = {
-  amountLabel: string; // formatted total, e.g. "৳2,000"
-  rawAmount: string;
+  requiredLabel: string; // total goal, formatted, e.g. "$120"
+  fundedLabel: string; // raised so far, e.g. "$0" (per-student gifts not tracked yet)
+  progressPct: number; // 0–100
   byInstallments: boolean;
-  perInstallmentLabel?: string;
+  perInstallmentLabel?: string; // e.g. "$10"
   duration?: string;
   purpose?: string;
 };
@@ -33,18 +34,15 @@ export type Student = Omit<RawStudent, "community"> & {
 // detail page consume. Only public-safe fields are surfaced; the photo is shown
 // (consent granted) and served via the public /api/student-photo route.
 
-function firstNameOf(full: string): string {
-  const trimmed = (full ?? "").trim();
-  return trimmed.split(/\s+/)[0] || trimmed;
-}
-
-// Format a free-text BDT amount ("2000", "2000/-") as "৳2,000". Non-numeric
-// input is shown as-is so we never drop what the applicant entered.
-function formatBdt(value?: string | null): string | null {
+// Format a free-text amount ("120", "120/-") as a USD label like "$120".
+// Returns null for empty / non-positive values.
+function formatUsd(value?: string | null): string | null {
   if (!value) return null;
-  const digits = value.replace(/[^0-9]/g, "");
-  if (!digits) return value.trim() || null;
-  return `৳${Number(digits).toLocaleString("en-US")}`;
+  const digits = value.replace(/[^0-9.]/g, "");
+  if (!digits) return null;
+  const n = Number(digits);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return `$${n.toLocaleString("en-US")}`;
 }
 
 type ApprovedRegRow = {
@@ -54,6 +52,7 @@ type ApprovedRegRow = {
   ethnicity: string | null;
   village: string | null;
   photoMimeType: string | null;
+  registrationNo: string | null;
   requiredAmount: string | null;
   amountNature: string | null;
   perInstallment: string | null;
@@ -63,18 +62,21 @@ type ApprovedRegRow = {
 };
 
 function buildFundingNeed(r: ApprovedRegRow): StudentFundingNeed | undefined {
-  const amountLabel = formatBdt(r.requiredAmount);
-  if (!amountLabel) return undefined;
+  const requiredLabel = formatUsd(r.requiredAmount);
+  if (!requiredLabel) return undefined;
   const byInstallments = r.amountNature === "installments";
   const duration =
     r.durationValue && r.durationValue.trim()
       ? `${r.durationValue.trim()} ${r.durationUnit ?? ""}`.trim()
       : undefined;
   return {
-    amountLabel,
-    rawAmount: r.requiredAmount ?? "",
+    requiredLabel,
+    // Per-student donations aren't tracked yet (Stripe not wired), so nothing
+    // is recorded as raised against an individual student.
+    fundedLabel: "$0",
+    progressPct: 0,
     byInstallments,
-    perInstallmentLabel: byInstallments ? (formatBdt(r.perInstallment) ?? undefined) : undefined,
+    perInstallmentLabel: byInstallments ? (formatUsd(r.perInstallment) ?? undefined) : undefined,
     duration,
     purpose: r.purpose?.trim() || undefined,
   };
@@ -84,13 +86,14 @@ function registrationToStudent(r: ApprovedRegRow): Student {
   const gradeNum = Number.parseInt(String(r.grade ?? "").replace(/[^0-9]/g, ""), 10);
   const community =
     r.ethnicity && r.ethnicity.toLowerCase() !== "unknown" ? r.ethnicity : undefined;
-  const name = firstNameOf(r.studentName);
+  const name = (r.studentName ?? "").trim();
   return {
     id: r.id,
     displayName: name,
     grade: Number.isFinite(gradeNum) ? gradeNum : 0,
     community,
     village: r.village ?? undefined,
+    registrationCode: r.registrationNo ?? undefined,
     sponsorshipStatus: "waiting",
     portrait: r.photoMimeType
       ? { src: `/api/student-photo/${r.id}`, alt: `${name} portrait` }
@@ -113,6 +116,7 @@ const APPROVED_REG_COLUMNS = {
   ethnicity: studentRegistrations.ethnicity,
   village: studentRegistrations.village,
   photoMimeType: studentRegistrations.photoMimeType,
+  registrationNo: studentRegistrations.registrationNo,
   requiredAmount: studentRegistrations.requiredAmount,
   amountNature: studentRegistrations.amountNature,
   perInstallment: studentRegistrations.perInstallment,
