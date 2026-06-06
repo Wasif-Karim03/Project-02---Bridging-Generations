@@ -47,6 +47,11 @@ const NAV_ITEMS: NavItem[] = [
     match: { kind: "prefix", activePrefix: "/dashboard/admin/mentors" },
   },
   {
+    href: "/dashboard/admin/map",
+    label: "Map",
+    match: { kind: "prefix", activePrefix: "/dashboard/admin/map" },
+  },
+  {
     href: "/dashboard/admin/users",
     label: "Users & roles",
     match: { kind: "prefix", activePrefix: "/dashboard/admin/users" },
