@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { isDbConfigured } from "@/db/client";
-import { getAllStudents } from "@/lib/content/students";
+import { getAllStudents, getApprovedPublicStudents } from "@/lib/content/students";
 import { getUserById } from "@/lib/db/queries/users";
 import { getAssignmentsForMentor, getRecentReportsForMentor } from "@/lib/db/queries/weeklyReports";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
@@ -47,13 +47,18 @@ export default async function AdminMentorDetailPage({
     );
   }
 
-  const [user, assignedSlugs, allStudents, recentReports] = await Promise.all([
+  const [user, assignedSlugs, keystaticStudents, dbStudents, recentReports] = await Promise.all([
     getUserById(id),
     getAssignmentsForMentor(id),
     getAllStudents(),
+    getApprovedPublicStudents(),
     getRecentReportsForMentor(id, 10),
   ]);
   if (!user) notFound();
+  // Approved DB applicants are assignable too — they have no Keystatic slug, so
+  // their registration id serves as the slug (the mentor dashboard resolves it
+  // via the same getStudentBySlug fallback).
+  const allStudents = [...keystaticStudents, ...dbStudents];
   const studentBySlug = new Map(allStudents.map((s) => [s.id, s]));
   const mentorCode = donorCodeForUuid(user.id).replace("BG-", "MEN-");
 
