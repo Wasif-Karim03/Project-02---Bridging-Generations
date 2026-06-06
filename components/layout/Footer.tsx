@@ -235,7 +235,16 @@ export async function Footer({
       <div className="border-t border-white/15">
         <div className="mx-auto flex max-w-[1280px] flex-col gap-4 px-4 py-5 text-meta text-white sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6 lg:px-[6%]">
           <p>
-            © {year} {copyrightNote}
+            © {year} {copyrightNote}{" "}
+            <span aria-hidden="true" className="mx-1 text-white/40">
+              ·
+            </span>
+            <Link
+              href="/admin-login"
+              className="underline underline-offset-[3px] transition-colors hover:text-accent-3 hover:no-underline"
+            >
+              {tFooter("adminLogin")}
+            </Link>
           </p>
           <div className="flex items-center gap-3">
             <span className="text-eyebrow uppercase tracking-[0.1em] text-white/70">
