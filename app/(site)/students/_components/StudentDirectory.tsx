@@ -1,11 +1,8 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "next-view-transitions";
 import { useMemo, useState } from "react";
 import { StudentCard } from "@/components/domain/StudentCard";
-import { MuseumWall, ScaleGrid } from "@/components/ui/editorial";
-import { canShowPortrait } from "@/lib/content/canShowPortrait";
 import type { SchoolSummary } from "@/lib/content/schools";
 import type { Student } from "@/lib/content/students";
 
@@ -115,31 +112,6 @@ export function StudentDirectory({ students, schools }: StudentDirectoryProps) {
   const activeCount = useMemo(() => {
     return Object.entries(filters).filter(([, v]) => Boolean(v)).length;
   }, [filters]);
-
-  const featured = useMemo(
-    () =>
-      filtered.filter((s) => canShowPortrait(s.consent) && Boolean(s.portrait?.src)).slice(0, 6),
-    [filtered],
-  );
-
-  const schoolById = useMemo(() => new Map(schools.map((s) => [s.id, s])), [schools]);
-
-  // Group filtered students by school then alphabetical.
-  const grouped = useMemo(() => {
-    const map = new Map<string, Student[]>();
-    for (const s of filtered) {
-      const bucket = map.get(s.schoolId) ?? [];
-      bucket.push(s);
-      map.set(s.schoolId, bucket);
-    }
-    return Array.from(map.entries())
-      .map(([schoolId, list]) => ({
-        school: schoolById.get(schoolId),
-        students: [...list].sort((a, b) => a.displayName.localeCompare(b.displayName)),
-      }))
-      .filter((g): g is { school: SchoolSummary; students: Student[] } => Boolean(g.school))
-      .sort((a, b) => a.school.name.localeCompare(b.school.name));
-  }, [filtered, schoolById]);
 
   return (
     <section
@@ -277,50 +249,22 @@ export function StudentDirectory({ students, schools }: StudentDirectoryProps) {
             </p>
           </header>
 
-          {featured.length > 0 ? (
-            <ScaleGrid>
-              {featured.map((student, index) => (
-                <ScaleGrid.Cell key={student.id} span={index === 0 ? 6 : 3}>
-                  <StudentCard student={student} />
-                </ScaleGrid.Cell>
-              ))}
-            </ScaleGrid>
-          ) : null}
-
-          {grouped.length === 0 ? (
+          {filtered.length === 0 ? (
             <p className="text-body text-ink-2">No students match the current filter.</p>
           ) : (
-            <MuseumWall ariaLabel="Student directory">
-              <MuseumWall.Caption>
+            <>
+              <p className="text-meta uppercase tracking-[0.12em] text-ink-2">
                 {filtered.length} {filtered.length === 1 ? "student" : "students"}
-              </MuseumWall.Caption>
-              {grouped.map(({ school, students: list }) => (
-                <div key={school.id} className="break-inside-avoid">
-                  <MuseumWall.Tier label={school.name} count={list.length} scale="lg" />
-                  <ul className="mt-3 flex flex-col gap-3">
-                    {list.map((student) => (
-                      <li key={student.id}>
-                        <Link
-                          href={`/students/${student.id}`}
-                          className="group/link inline-block text-heading-5 text-ink transition-colors hover:text-accent-2-text focus-visible:text-accent-2-text focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-accent"
-                        >
-                          <span className="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-left-bottom bg-no-repeat transition-[background-size] duration-[300ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/link:bg-[length:100%_1px] group-focus-visible/link:bg-[length:100%_1px]">
-                            {student.displayName}
-                          </span>
-                          <span className="ml-2 text-meta uppercase tracking-[0.04em] text-ink-2">
-                            Grade {student.grade}
-                            {" · "}
-                            {student.sponsorshipStatus === "sponsored"
-                              ? "sponsored"
-                              : "awaiting sponsor"}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </MuseumWall>
+              </p>
+              {/* Uniform grid — every student card is the same size. */}
+              <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filtered.map((student) => (
+                  <li key={student.id} className="h-full">
+                    <StudentCard student={student} />
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       </div>
