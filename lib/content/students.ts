@@ -7,9 +7,23 @@ import type { studentCollection } from "@/keystatic/collections/student";
 import { reader } from "./reader";
 
 type RawStudent = Entry<typeof studentCollection>;
+
+// The public funding ask for an auto-published applicant. Keystatic students
+// don't carry an amount (only sponsored/waiting), so this is only set for
+// approved DB students and is optional everywhere it's consumed.
+export type StudentFundingNeed = {
+  amountLabel: string; // formatted total, e.g. "৳2,000"
+  rawAmount: string;
+  byInstallments: boolean;
+  perInstallmentLabel?: string;
+  duration?: string;
+  purpose?: string;
+};
+
 export type Student = Omit<RawStudent, "community"> & {
   id: string;
   community?: Exclude<RawStudent["community"], "unknown">;
+  fundingNeed?: StudentFundingNeed;
 };
 
 // ---- Approved DB students (auto-published) -------------------------------
@@ -24,6 +38,15 @@ function firstNameOf(full: string): string {
   return trimmed.split(/\s+/)[0] || trimmed;
 }
 
+// Format a free-text BDT amount ("2000", "2000/-") as "৳2,000". Non-numeric
+// input is shown as-is so we never drop what the applicant entered.
+function formatBdt(value?: string | null): string | null {
+  if (!value) return null;
+  const digits = value.replace(/[^0-9]/g, "");
+  if (!digits) return value.trim() || null;
+  return `৳${Number(digits).toLocaleString("en-US")}`;
+}
+
 type ApprovedRegRow = {
   id: string;
   studentName: string;
@@ -31,7 +54,31 @@ type ApprovedRegRow = {
   ethnicity: string | null;
   village: string | null;
   photoMimeType: string | null;
+  requiredAmount: string | null;
+  amountNature: string | null;
+  perInstallment: string | null;
+  durationValue: string | null;
+  durationUnit: string | null;
+  purpose: string | null;
 };
+
+function buildFundingNeed(r: ApprovedRegRow): StudentFundingNeed | undefined {
+  const amountLabel = formatBdt(r.requiredAmount);
+  if (!amountLabel) return undefined;
+  const byInstallments = r.amountNature === "installments";
+  const duration =
+    r.durationValue && r.durationValue.trim()
+      ? `${r.durationValue.trim()} ${r.durationUnit ?? ""}`.trim()
+      : undefined;
+  return {
+    amountLabel,
+    rawAmount: r.requiredAmount ?? "",
+    byInstallments,
+    perInstallmentLabel: byInstallments ? (formatBdt(r.perInstallment) ?? undefined) : undefined,
+    duration,
+    purpose: r.purpose?.trim() || undefined,
+  };
+}
 
 function registrationToStudent(r: ApprovedRegRow): Student {
   const gradeNum = Number.parseInt(String(r.grade ?? "").replace(/[^0-9]/g, ""), 10);
@@ -53,6 +100,7 @@ function registrationToStudent(r: ApprovedRegRow): Student {
       storyReleaseStatus: "granted",
       consentScope: ["website"],
     },
+    fundingNeed: buildFundingNeed(r),
     // Remaining Keystatic-only fields are absent; the card + detail page guard
     // every one of them, so an unset value simply renders nothing.
   } as unknown as Student;
@@ -65,6 +113,12 @@ const APPROVED_REG_COLUMNS = {
   ethnicity: studentRegistrations.ethnicity,
   village: studentRegistrations.village,
   photoMimeType: studentRegistrations.photoMimeType,
+  requiredAmount: studentRegistrations.requiredAmount,
+  amountNature: studentRegistrations.amountNature,
+  perInstallment: studentRegistrations.perInstallment,
+  durationValue: studentRegistrations.durationValue,
+  durationUnit: studentRegistrations.durationUnit,
+  purpose: studentRegistrations.purpose,
 } as const;
 
 export async function getApprovedPublicStudents(): Promise<Student[]> {

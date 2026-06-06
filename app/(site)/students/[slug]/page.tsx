@@ -117,6 +117,28 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
                 />
               ) : null}
             </dl>
+            {student.fundingNeed ? (
+              <div className="mt-2 border border-accent-2-text/30 bg-accent-2-text/[0.06] p-4">
+                <p className="text-eyebrow uppercase tracking-[0.1em] text-accent-2-text">
+                  Funding need
+                </p>
+                <p className="mt-1 text-heading-2 tabular-nums text-ink">
+                  {student.fundingNeed.amountLabel}
+                </p>
+                <p className="text-body-sm text-ink-2">
+                  {student.fundingNeed.byInstallments
+                    ? `By installments${
+                        student.fundingNeed.perInstallmentLabel
+                          ? ` · ${student.fundingNeed.perInstallmentLabel} per installment`
+                          : ""
+                      }${student.fundingNeed.duration ? ` over ${student.fundingNeed.duration}` : ""}`
+                    : "One-time support"}
+                </p>
+                {student.fundingNeed.purpose ? (
+                  <p className="mt-1 text-body-sm text-ink-2">For: {student.fundingNeed.purpose}</p>
+                ) : null}
+              </div>
+            ) : null}
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
                 href="/be-a-donor"

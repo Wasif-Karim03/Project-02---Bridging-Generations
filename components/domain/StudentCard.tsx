@@ -11,8 +11,17 @@ type StudentCardProps = {
 };
 
 export function StudentCard({ student, variant = "default" }: StudentCardProps) {
-  const { id, displayName, community, grade, quote, portrait, consent, sponsorshipStatus } =
-    student;
+  const {
+    id,
+    displayName,
+    community,
+    grade,
+    quote,
+    portrait,
+    consent,
+    sponsorshipStatus,
+    fundingNeed,
+  } = student;
   const portraitSrc = portrait?.src ?? null;
   const allowPortrait = canShowPortrait(consent) && !!portraitSrc;
   const isSpotlight = variant === "spotlight";
@@ -59,6 +68,14 @@ export function StudentCard({ student, variant = "default" }: StudentCardProps) 
           {community ? ` · ${community}` : ""}
         </p>
         {quote ? <p className="text-body-sm text-ink-2">&ldquo;{quote}&rdquo;</p> : null}
+        {fundingNeed ? (
+          <p className="text-body-sm font-semibold text-accent-2-text">
+            Needs {fundingNeed.amountLabel}
+            {fundingNeed.byInstallments && fundingNeed.perInstallmentLabel
+              ? ` · ${fundingNeed.perInstallmentLabel}/installment`
+              : ""}
+          </p>
+        ) : null}
       </div>
     </article>
   );
