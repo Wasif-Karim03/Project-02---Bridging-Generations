@@ -33,6 +33,37 @@ export function TranslationsEditor({ groups }: { groups: Group[] }) {
   const [bn, setBn] = useState<Record<string, string>>(initialBn);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [query, setQuery] = useState("");
+
+  const totalCount = useMemo(() => groups.reduce((sum, g) => sum + g.items.length, 0), [groups]);
+
+  // Filter by key path, the humanized label, or the current English/Bengali
+  // text — so the editor can jump straight to the string they want to change.
+  const filteredGroups = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return groups;
+    return groups
+      .map((g) => ({
+        ...g,
+        items: g.items.filter((it) => {
+          const tail = it.path.split(".").slice(1).join(".");
+          const hay = [
+            it.path,
+            humanize(tail.split(".").pop() ?? tail),
+            en[it.path] ?? "",
+            bn[it.path] ?? "",
+          ]
+            .join(" ")
+            .toLowerCase();
+          return hay.includes(q);
+        }),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [groups, query, en, bn]);
+  const filteredCount = useMemo(
+    () => filteredGroups.reduce((sum, g) => sum + g.items.length, 0),
+    [filteredGroups],
+  );
 
   async function save() {
     setBusy(true);
@@ -70,7 +101,28 @@ export function TranslationsEditor({ groups }: { groups: Group[] }) {
         as they are — they get filled in automatically.
       </p>
 
-      {groups.map((group) => (
+      <div className="sticky top-14 z-30 -mx-1 bg-ground/95 px-1 py-2 backdrop-blur">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by text or key (e.g. “Be a Donor”, nav, slide1)…"
+          className="w-full rounded-lg border border-hairline bg-ground-2 px-4 py-2.5 text-sm outline-none focus:border-accent"
+        />
+        <p className="mt-1.5 text-ink-2 text-xs">
+          {query.trim()
+            ? `${filteredCount} of ${totalCount} matching`
+            : `${totalCount} text fields`}
+        </p>
+      </div>
+
+      {filteredGroups.length === 0 ? (
+        <p className="rounded-xl border border-hairline border-dashed bg-ground-2 px-4 py-10 text-center text-ink-2 text-sm">
+          No text matches “{query}”.
+        </p>
+      ) : null}
+
+      {filteredGroups.map((group) => (
         <section key={group.section}>
           <h2 className="font-medium text-ink-2 text-xs uppercase tracking-wide">{group.label}</h2>
           <div className="mt-3 space-y-5">
