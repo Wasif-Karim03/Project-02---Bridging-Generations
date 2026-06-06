@@ -148,6 +148,90 @@ async function getApprovedPublicStudentById(id: string): Promise<Student | null>
   return registrationToStudent(r);
 }
 
+// Full profile for an approved DB student — every public-safe field collected
+// during the application, labelled and ready for the profile page.
+export type ApprovedStudentDetail = {
+  id: string;
+  fullName: string;
+  firstName: string;
+  registrationNo?: string;
+  photoSrc?: string;
+  funding?: StudentFundingNeed;
+  details: Array<{ label: string; value: string }>;
+};
+
+export async function getApprovedStudentDetail(id: string): Promise<ApprovedStudentDetail | null> {
+  if (!isDbConfigured()) return null;
+  const db = getDb();
+  const rows = await db
+    .select()
+    .from(studentRegistrations)
+    .where(eq(studentRegistrations.id, id))
+    .limit(1);
+  const r = rows[0];
+  if (!r || r.status !== "approved") return null;
+
+  const fullName = (r.studentName ?? "").trim();
+  const firstName = fullName.split(/\s+/)[0] || fullName;
+  const requiredUsd = formatUsd(r.requiredAmount);
+  const perInstallmentUsd = formatUsd(r.perInstallment);
+  const targetYear =
+    r.durationValue && r.durationValue.trim()
+      ? `${r.durationValue.trim()} ${r.durationUnit ?? ""}`.trim()
+      : null;
+  const paymentType =
+    r.amountNature === "installments"
+      ? "By installments"
+      : r.amountNature === "one_time"
+        ? "One time"
+        : null;
+  const guardianName = r.guardianName && r.guardianName !== "—" ? r.guardianName : null;
+
+  const raw: Array<[string, string | null | undefined]> = [
+    ["Grade", r.grade],
+    ["Purpose", r.purpose],
+    ["Required Amount", requiredUsd ? `${requiredUsd} USD` : null],
+    ["Per Installment Amount", perInstallmentUsd ? `${perInstallmentUsd} USD` : null],
+    ["Payment Type", paymentType],
+    ["Target Year", targetYear],
+    ["Gender", r.gender],
+    ["Date of Birth", r.dateOfBirth],
+    ["Ethnicity", r.ethnicity],
+    ["Orphan", r.isOrphan ? "Yes" : "No"],
+    ["District", r.district],
+    ["Village", r.village],
+    ["Post Office", r.postOffice],
+    ["Police Station", r.policeStation],
+    ["School/Institute", r.school],
+    ["Current Roll Number", r.currentRollNo],
+    ["Former Roll Number", r.formerRollNo],
+    ["Total Students", r.totalStudents],
+    ["Father's Name", r.fatherName],
+    ["Father's Profession", r.fatherProfession],
+    ["Mother's Name", r.motherName],
+    ["Mother's Profession", r.motherProfession],
+    ["Parents' Contact", r.parentsContact],
+    ["Family Income", r.familyIncome],
+    ["Guardian Name", guardianName],
+    ["Guardian Contact", r.guardianPhone],
+    ["Guardian Address", r.guardianAddress],
+    ["Remark", r.message],
+  ];
+  const details = raw
+    .filter(([, v]) => v != null && String(v).trim() !== "")
+    .map(([label, value]) => ({ label, value: String(value) }));
+
+  return {
+    id: r.id,
+    fullName,
+    firstName,
+    registrationNo: r.registrationNo ?? undefined,
+    photoSrc: r.photoMimeType ? `/api/student-photo/${r.id}` : undefined,
+    funding: buildFundingNeed(r),
+    details,
+  };
+}
+
 function normalize(slug: string, entry: RawStudent): Student {
   const { community, ...rest } = entry;
   return {

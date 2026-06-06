@@ -6,7 +6,11 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { StudentPlaceholder } from "@/components/ui/StudentPlaceholder";
 import { canShowPortrait, canShowStory } from "@/lib/content/canShowPortrait";
 import { getSchoolById } from "@/lib/content/schools";
-import { getStudentBySlug } from "@/lib/content/students";
+import {
+  type ApprovedStudentDetail,
+  getApprovedStudentDetail,
+  getStudentBySlug,
+} from "@/lib/content/students";
 import { getStudentGrowthData } from "@/lib/db/queries/studentGrowth";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
@@ -31,6 +35,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function StudentProfilePage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
+  // Approved DB applicants get the full, data-rich profile built from their
+  // application. Keystatic students fall through to the curated layout below.
+  const approved = await getApprovedStudentDetail(slug);
+  if (approved) {
+    return <ApprovedStudentProfile detail={approved} />;
+  }
   const student = await getStudentBySlug(slug);
   if (!student) {
     notFound();
@@ -192,6 +202,122 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
         </section>
       </article>
       <JsonLd id="ld-student-breadcrumb" data={ldBreadcrumb} />
+    </main>
+  );
+}
+
+// Full data-rich profile for an approved DB student — shows everything we
+// collected on the application, plus a donations table.
+function ApprovedStudentProfile({ detail }: { detail: ApprovedStudentDetail }) {
+  const f = detail.funding;
+  return (
+    <main className="bg-ground">
+      <article className="mx-auto max-w-[1100px] px-4 py-14 sm:px-6 lg:px-[6%] lg:py-20">
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <Link
+            href="/students"
+            className="text-meta uppercase tracking-[0.08em] text-ink-2 transition-colors hover:text-accent-2-text"
+          >
+            ← Back to directory
+          </Link>
+        </nav>
+
+        <p className="text-meta uppercase tracking-[0.12em] text-ink-2">
+          You are going to support for
+        </p>
+        <h1 className="mt-1 text-balance text-display-2 text-ink">{detail.fullName}</h1>
+
+        <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[5fr_7fr] lg:gap-14">
+          <div className="relative aspect-[4/5] w-full overflow-hidden border border-hairline bg-ground-3">
+            {detail.photoSrc ? (
+              <Image
+                src={detail.photoSrc}
+                alt={`${detail.fullName} portrait`}
+                fill
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <StudentPlaceholder sizes="(min-width: 1024px) 40vw, 100vw" />
+            )}
+          </div>
+
+          <div className="flex flex-col gap-5">
+            <h2 className="text-heading-3 text-ink">
+              {detail.fullName}
+              {detail.registrationNo ? (
+                <span className="text-ink-2"> (REG NO: {detail.registrationNo})</span>
+              ) : null}
+            </h2>
+
+            {f ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-heading-2 tabular-nums text-ink">
+                  <span className="text-accent-2-text">{f.fundedLabel}</span> funded of{" "}
+                  {f.requiredLabel} USD
+                </p>
+                <div
+                  className="h-2 w-full overflow-hidden bg-ground-3"
+                  role="progressbar"
+                  aria-valuenow={f.progressPct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div
+                    className="h-full bg-accent-2-text"
+                    style={{ width: `${Math.max(f.progressPct, 2)}%` }}
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/be-a-donor"
+                className="inline-flex min-h-[48px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
+              >
+                Sponsor this student
+              </Link>
+              <Link
+                href="/students"
+                className="inline-flex min-h-[48px] items-center border border-accent px-5 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
+              >
+                Browse all students
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <section
+          aria-label="Student details"
+          className="mt-16 border-t border-hairline pt-10 lg:mt-20"
+        >
+          <h2 className="text-heading-3 text-ink">Student Details</h2>
+          <dl className="mt-6 grid grid-cols-1 gap-x-12 gap-y-0 sm:grid-cols-2">
+            {detail.details.map(({ label, value }) => (
+              <div
+                key={label}
+                className="flex flex-col gap-0.5 border-b border-hairline py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-6"
+              >
+                <dt className="shrink-0 text-meta uppercase tracking-[0.06em] text-ink-2">
+                  {label}
+                </dt>
+                <dd className="text-body text-ink sm:text-right">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        <section aria-label="Donations" className="mt-12 border-t border-hairline pt-10">
+          <h2 className="text-heading-3 text-ink">Donators for {detail.firstName}</h2>
+          <p className="mt-4 max-w-[60ch] text-body text-ink-2">
+            No donations have been recorded for {detail.firstName} yet. Be the first to sponsor —
+            once online giving is live, each gift will appear here with the donor's name, amount,
+            and year.
+          </p>
+        </section>
+      </article>
     </main>
   );
 }
