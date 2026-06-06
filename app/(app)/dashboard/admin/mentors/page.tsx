@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
 import { isDbConfigured } from "@/db/client";
+import { getAllStudents, getApprovedPublicStudents } from "@/lib/content/students";
 import { listAllMentors } from "@/lib/db/queries/users";
 import { getAssignmentsForMentor } from "@/lib/db/queries/weeklyReports";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
@@ -12,29 +13,39 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-});
-
 export default async function AdminMentorsPage() {
   // Role check enforced by the parent admin layout.
   const dbReady = isDbConfigured();
   const mentors = await listAllMentors();
-  // Hydrate each mentor with their current assignment count. Sequential
-  // per-mentor lookups are fine at this scale (org has under 50 mentors).
-  const assignmentCounts = await Promise.all(
-    mentors.map((m) => getAssignmentsForMentor(m.id).then((a) => a.length)),
-  );
+
+  // Resolve each mentor's assigned students to names so the admin sees the full
+  // mentor → students map at a glance. Student names come from Keystatic + the
+  // approved DB applicants (same set assignable on the mentor detail page).
+  const [assignmentsPerMentor, keystaticStudents, dbStudents] = await Promise.all([
+    Promise.all(mentors.map((m) => getAssignmentsForMentor(m.id))),
+    getAllStudents(),
+    getApprovedPublicStudents(),
+  ]);
+  const nameBySlug = new Map<string, string>();
+  for (const s of [...keystaticStudents, ...dbStudents]) {
+    nameBySlug.set(s.id, s.displayName ?? s.id);
+  }
+  const rows = mentors.map((m, i) => ({
+    mentor: m,
+    students: assignmentsPerMentor[i].map((slug) => ({
+      slug,
+      name: nameBySlug.get(slug) ?? slug,
+    })),
+  }));
+  const totalAssigned = rows.reduce((sum, r) => sum + r.students.length, 0);
 
   return (
     <div className="flex flex-col gap-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-balance text-heading-1 text-ink">Mentors.</h1>
-        <p className="max-w-[60ch] text-body text-ink-2">
-          Everyone currently holding the <code>mentor</code> role. Click a row to manage their
-          student assignments, view their weekly reports, or edit their bio.
+        <p className="max-w-[65ch] text-body text-ink-2">
+          Who mentors whom, at a glance. Each card shows a mentor and the students assigned to them.
+          Click a mentor to add or remove assignments, view their weekly reports, or edit their bio.
         </p>
       </header>
 
@@ -63,45 +74,61 @@ export default async function AdminMentorsPage() {
           )}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-body-sm">
-            <thead>
-              <tr className="border-b border-hairline text-meta uppercase tracking-[0.06em] text-ink-2">
-                <th className="py-3 pr-4 text-left">Mentor</th>
-                <th className="py-3 pr-4 text-left">Email</th>
-                <th className="py-3 pr-4 text-left">ID</th>
-                <th className="py-3 pr-4 text-left">Since</th>
-                <th className="py-3 text-right">Students</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mentors.map((m, i) => (
-                <tr key={m.id} className="border-b border-hairline last:border-b-0">
-                  <td className="py-3 pr-4 align-top text-ink">
+        <>
+          <p className="text-meta uppercase tracking-[0.08em] text-ink-2">
+            {mentors.length} {mentors.length === 1 ? "mentor" : "mentors"} · {totalAssigned}{" "}
+            {totalAssigned === 1 ? "assignment" : "assignments"}
+          </p>
+          <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {rows.map(({ mentor: m, students }) => (
+              <li
+                key={m.id}
+                className="flex flex-col gap-3 border border-hairline bg-ground-2 p-5"
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-hairline pb-3">
+                  <div className="flex flex-col">
+                    <Link
+                      href={`/dashboard/admin/mentors/${m.id}`}
+                      className="text-heading-5 text-accent underline underline-offset-[3px] hover:no-underline"
+                    >
+                      {m.displayName ?? m.email}
+                    </Link>
+                    <span className="font-mono text-meta uppercase tracking-[0.08em] text-ink-2">
+                      {donorCodeForUuid(m.id).replace("BG-", "MEN-")} · {m.email}
+                    </span>
+                  </div>
+                  <span className="text-meta uppercase tracking-[0.06em] text-ink-2">
+                    {students.length} {students.length === 1 ? "student" : "students"}
+                  </span>
+                </div>
+
+                {students.length === 0 ? (
+                  <p className="text-body-sm text-ink-2">
+                    No students assigned yet —{" "}
                     <Link
                       href={`/dashboard/admin/mentors/${m.id}`}
                       className="text-accent underline underline-offset-[3px] hover:no-underline"
                     >
-                      {m.displayName ?? m.email}
+                      assign some
                     </Link>
-                  </td>
-                  <td className="py-3 pr-4 align-top text-ink-2">{m.email}</td>
-                  <td className="py-3 pr-4 align-top font-mono text-meta uppercase tracking-[0.08em] text-ink-2">
-                    {donorCodeForUuid(m.id).replace("BG-", "MEN-")}
-                  </td>
-                  <td className="py-3 pr-4 align-top text-meta uppercase tracking-[0.06em] text-ink-2">
-                    <time dateTime={m.createdAt.toISOString()}>
-                      {dateFormatter.format(m.createdAt)}
-                    </time>
-                  </td>
-                  <td className="py-3 text-right align-top tabular-nums text-ink">
-                    {assignmentCounts[i]}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    .
+                  </p>
+                ) : (
+                  <ul className="flex flex-wrap gap-2">
+                    {students.map((s) => (
+                      <li
+                        key={s.slug}
+                        className="inline-flex items-center border border-hairline bg-ground px-3 py-1.5 text-body-sm text-ink"
+                      >
+                        {s.name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );
