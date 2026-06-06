@@ -218,6 +218,26 @@ export async function setApplicationStatus(
         reviewedBy: args.reviewedBy,
       })
       .where(eq(studentRegistrations.id, id));
+    // On approval, activate the applicant's account (if they self-registered)
+    // so they can sign in to their student dashboard. New signups start
+    // status=pending and the role gate bounces pending users to
+    // /pending-approval — without this an approved student would be stuck on
+    // the waiting screen. Mentor approval does the same. (Mentor-registered
+    // students have applicantUserId = null and simply skip this.)
+    if (status === "approved") {
+      const reg = await db
+        .select({ uid: studentRegistrations.applicantUserId })
+        .from(studentRegistrations)
+        .where(eq(studentRegistrations.id, id))
+        .limit(1);
+      const uid = reg[0]?.uid;
+      if (uid) {
+        await db
+          .update(users)
+          .set({ status: "active", updatedAt: new Date() })
+          .where(eq(users.id, uid));
+      }
+    }
   }
 }
 
