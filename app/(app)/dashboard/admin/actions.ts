@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentDbUser, requireRole } from "@/lib/auth";
 import type { ApplicationRow, ApplicationStatus } from "@/lib/content/applicationsMock";
 import { setApplicationStatus } from "@/lib/db/queries/applications";
+import { isNextControlFlowError } from "@/lib/nextControlFlow";
 import { notifyApplicantOfDecision } from "@/lib/notifications/applicationDecision";
 
 export type ApprovalResult = {
@@ -20,15 +21,15 @@ export async function setApplicationStatusAction(
   status: ApplicationStatus,
   reviewerNotes?: string,
 ): Promise<ApprovalResult> {
-  await requireRole("admin");
-  const dbUser = await getCurrentDbUser();
-  if (!dbUser) {
-    return {
-      status: "error",
-      message: "Could not identify the reviewer. Sign out and back in, then retry.",
-    };
-  }
   try {
+    await requireRole("admin");
+    const dbUser = await getCurrentDbUser();
+    if (!dbUser) {
+      return {
+        status: "error",
+        message: "Could not identify the reviewer. Sign out and back in, then retry.",
+      };
+    }
     await setApplicationStatus(kind, id, status, {
       reviewedBy: dbUser.id,
       reviewerNotes,
@@ -41,10 +42,11 @@ export async function setApplicationStatusAction(
       message: `Application marked ${status.replace(/_/g, " ")}.`,
     };
   } catch (err) {
+    if (isNextControlFlowError(err)) throw err;
     console.error("[admin/setApplicationStatus] failed", err);
     return {
       status: "error",
-      message: "Could not update the application. Try again.",
+      message: `Could not update the application: ${err instanceof Error ? err.message : "unknown error"}`,
     };
   }
 }

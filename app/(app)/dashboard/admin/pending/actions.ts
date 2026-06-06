@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { isDbConfigured } from "@/db/client";
 import { requireRole } from "@/lib/auth";
 import { getUserById, setUserStatus } from "@/lib/db/queries/users";
+import { isNextControlFlowError } from "@/lib/nextControlFlow";
 import { sendSignupApprovedEmail } from "@/lib/notifications/signupApproved";
 import { sendSignupRejectedEmail } from "@/lib/notifications/signupRejected";
 
@@ -16,9 +17,9 @@ export type PendingActionResult = { ok: true } | { ok: false; error: string };
 // The status flip is the actual approval; the notification email is best-effort
 // (Resend's free tier only delivers to the account address) and never blocks it.
 export async function approvePendingSignupAction(userId: string): Promise<PendingActionResult> {
-  await requireRole("admin");
-  if (!isDbConfigured()) return { ok: true };
   try {
+    await requireRole("admin");
+    if (!isDbConfigured()) return { ok: true };
     const user = await getUserById(userId);
     if (!user) return { ok: false, error: "That user no longer exists." };
     await setUserStatus(userId, "active");
@@ -36,6 +37,7 @@ export async function approvePendingSignupAction(userId: string): Promise<Pendin
     }
     return { ok: true };
   } catch (err) {
+    if (isNextControlFlowError(err)) throw err;
     console.error("[admin/pending] approve failed", err);
     return { ok: false, error: err instanceof Error ? err.message : "Could not approve." };
   }
@@ -46,9 +48,9 @@ export async function rejectPendingSignupAction(
   userId: string,
   formData: FormData,
 ): Promise<PendingActionResult> {
-  await requireRole("admin");
-  if (!isDbConfigured()) return { ok: true };
   try {
+    await requireRole("admin");
+    if (!isDbConfigured()) return { ok: true };
     const user = await getUserById(userId);
     if (!user) return { ok: false, error: "That user no longer exists." };
     const reason = String(formData.get("reason") ?? "").trim();
@@ -67,6 +69,7 @@ export async function rejectPendingSignupAction(
     }
     return { ok: true };
   } catch (err) {
+    if (isNextControlFlowError(err)) throw err;
     console.error("[admin/pending] reject failed", err);
     return { ok: false, error: err instanceof Error ? err.message : "Could not reject." };
   }

@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/queries/applications";
 import { getUserById, setUserStudentSlug } from "@/lib/db/queries/users";
 import { sendEmail } from "@/lib/forms/server";
+import { isNextControlFlowError } from "@/lib/nextControlFlow";
 import { sendStudentRejectionEmail } from "@/lib/notifications/studentRejection";
 import { studentCodeForUuid } from "@/lib/student/studentCode";
 
@@ -15,11 +16,11 @@ export async function adminLinkStudentSlugAction(
   userId: string,
   formData: FormData,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  await requireRole("admin");
-  const slug = String(formData.get("studentSlug") ?? "")
-    .trim()
-    .slice(0, 80);
   try {
+    await requireRole("admin");
+    const slug = String(formData.get("studentSlug") ?? "")
+      .trim()
+      .slice(0, 80);
     // Capture the previous state so we only fire the approval email when
     // this is a fresh link (transition from unlinked → linked), not on
     // every save of an already-linked student.
@@ -63,8 +64,9 @@ export async function adminLinkStudentSlugAction(
     }
     return { ok: true };
   } catch (err) {
+    if (isNextControlFlowError(err)) throw err;
     console.error("[admin/students/link] failed", err);
-    return { ok: false, error: "Could not update the link." };
+    return { ok: false, error: err instanceof Error ? err.message : "Could not update the link." };
   }
 }
 
@@ -76,12 +78,12 @@ export async function adminRejectStudentAction(
   userId: string,
   formData: FormData,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  await requireRole("admin");
-  if (!userId) return { ok: false, error: "Invalid student id." };
-  const reason = String(formData.get("reason") ?? "")
-    .trim()
-    .slice(0, 1000);
   try {
+    await requireRole("admin");
+    if (!userId) return { ok: false, error: "Invalid student id." };
+    const reason = String(formData.get("reason") ?? "")
+      .trim()
+      .slice(0, 1000);
     const [target, reviewer, registration] = await Promise.all([
       getUserById(userId),
       getCurrentDbUser(),
@@ -122,7 +124,11 @@ export async function adminRejectStudentAction(
     revalidatePath("/dashboard/student");
     return { ok: true };
   } catch (err) {
+    if (isNextControlFlowError(err)) throw err;
     console.error("[admin/students/reject] failed", err);
-    return { ok: false, error: "Could not save the decision. Please try again." };
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Could not save the decision. Please try again.",
+    };
   }
 }
