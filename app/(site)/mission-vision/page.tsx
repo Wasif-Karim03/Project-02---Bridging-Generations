@@ -101,7 +101,7 @@ export default async function MissionVisionPage() {
         headline={t("ctaHeadline")}
         body={t("ctaBody")}
         ctaLabel={t("ctaLabel")}
-        ctaHref="/donate-us"
+        ctaHref="/donate"
         tone="cream"
         titleId="mission-vision-cta-title"
         id="join"
