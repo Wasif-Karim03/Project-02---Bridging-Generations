@@ -3,6 +3,7 @@ import Link from "next/link";
 import { pagesByGroup } from "@/lib/developer/pages";
 import { isAuthenticated } from "@/lib/developer/session";
 import { DeveloperSidebar } from "./developer/_components/DeveloperSidebar";
+import { type IconName, pageIcon } from "./developer/_components/icons";
 import { LogoutButton } from "./developer/_components/LogoutButton";
 
 export const metadata: Metadata = {
@@ -10,10 +11,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const GLOBAL_NAV = [
-  { href: "/developer", label: "Dashboard" },
-  { href: "/developer/media", label: "Media library" },
-  { href: "/developer/translations", label: "All page text (advanced)" },
+const GLOBAL_NAV: Array<{ href: string; label: string; icon: IconName }> = [
+  { href: "/developer", label: "Dashboard", icon: "dashboard" },
+  { href: "/developer/media", label: "Media library", icon: "media" },
+  { href: "/developer/translations", label: "All page text", icon: "language" },
 ];
 
 // Standalone surface for the password-gated content editor. Overrides the
@@ -23,7 +24,11 @@ export default async function DeveloperLayout({ children }: { children: React.Re
   const authed = await isAuthenticated();
   const groups = pagesByGroup().map((g) => ({
     group: g.group,
-    items: g.pages.map((p) => ({ href: `/developer/pages/${p.key}`, label: p.label })),
+    items: g.pages.map((p) => ({
+      href: `/developer/pages/${p.key}`,
+      label: p.label,
+      icon: pageIcon(p.key),
+    })),
   }));
 
   return (

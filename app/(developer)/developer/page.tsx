@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getDeveloperPassword, getStorageMode } from "@/lib/developer/config";
 import { pagesByGroup } from "@/lib/developer/pages";
 import { isAuthenticated } from "@/lib/developer/session";
+import { Icon, type IconName, pageIcon } from "./_components/icons";
 import { LoginForm } from "./_components/LoginForm";
 
 export const dynamic = "force-dynamic";
@@ -46,12 +47,19 @@ export default async function DeveloperHome() {
             href="/developer/pages/site-settings"
             title="Site settings"
             blurb="Name, contact, social links, SEO."
+            icon="settings"
           />
-          <Tool href="/developer/media" title="Media library" blurb="Browse uploaded photos." />
+          <Tool
+            href="/developer/media"
+            title="Media library"
+            blurb="Browse uploaded photos."
+            icon="media"
+          />
           <Tool
             href="/developer/translations"
             title="All page text"
             blurb="Every string, English & Bangla (advanced)."
+            icon="language"
           />
         </div>
       </section>
@@ -66,6 +74,7 @@ export default async function DeveloperHome() {
                 href={`/developer/pages/${p.key}`}
                 title={p.label}
                 blurb={p.blurb ?? p.livePath ?? ""}
+                icon={pageIcon(p.key)}
               />
             ))}
           </div>
@@ -75,14 +84,29 @@ export default async function DeveloperHome() {
   );
 }
 
-function Tool({ href, title, blurb }: { href: string; title: string; blurb: string }) {
+function Tool({
+  href,
+  title,
+  blurb,
+  icon,
+}: {
+  href: string;
+  title: string;
+  blurb: string;
+  icon: IconName;
+}) {
   return (
     <Link
       href={href}
-      className="flex flex-col gap-1 rounded-xl border border-hairline bg-ground-2 px-4 py-3 transition-colors hover:border-accent hover:bg-ground-3"
+      className="group flex items-start gap-3 rounded-xl border border-hairline bg-ground-2/50 px-4 py-3 shadow-sm transition-colors hover:border-accent hover:bg-ground-3"
     >
-      <span className="font-medium text-sm">{title}</span>
-      <span className="line-clamp-2 text-ink-2 text-xs">{blurb}</span>
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+        <Icon name={icon} className="size-[18px]" />
+      </span>
+      <span className="min-w-0">
+        <span className="block font-medium text-sm">{title}</span>
+        <span className="line-clamp-2 text-ink-2 text-xs">{blurb}</span>
+      </span>
     </Link>
   );
 }

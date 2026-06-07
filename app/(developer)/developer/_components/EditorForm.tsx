@@ -28,7 +28,7 @@ type Props = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-hairline bg-ground-2 px-3 py-2 text-sm outline-none focus:border-accent";
+  "w-full rounded-lg border border-hairline bg-ground px-3 py-2.5 text-sm outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20";
 
 export function EditorForm(props: Props) {
   const router = useRouter();
@@ -231,18 +231,29 @@ function FieldControl({
         </div>
       );
 
-    case "boolean":
+    case "boolean": {
+      const on = value === true;
       return (
-        <label className="flex items-center gap-2.5">
-          <input
-            type="checkbox"
-            checked={value === true}
-            onChange={(e) => onChange(e.target.checked)}
-            className="size-4"
-          />
+        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-hairline bg-ground px-3 py-2.5">
           <Label field={field} />
+          <button
+            type="button"
+            role="switch"
+            aria-checked={on}
+            onClick={() => onChange(!on)}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+              on ? "bg-accent" : "bg-ground-3"
+            }`}
+          >
+            <span
+              className={`inline-block size-5 transform rounded-full bg-white shadow transition-transform ${
+                on ? "translate-x-[22px]" : "translate-x-0.5"
+              }`}
+            />
+          </button>
         </label>
       );
+    }
 
     case "date":
       return (
@@ -354,33 +365,84 @@ function FieldControl({
       return (
         <div className="space-y-3">
           <Label field={field} />
-          {items.map((item, i) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: array items have no stable id
-            <div key={i} className="rounded-xl border border-hairline bg-ground-2 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-ink-2 text-xs">
-                  {field.item.label} {i + 1}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onChange(items.filter((_, j) => j !== i))}
-                  className="text-accent-2-text text-xs underline"
-                >
-                  Remove
-                </button>
+          {items.map((item, i) => {
+            const move = (to: number) => {
+              if (to < 0 || to >= items.length) return;
+              const next = [...items];
+              const [m] = next.splice(i, 1);
+              next.splice(to, 0, m);
+              onChange(next);
+            };
+            return (
+              // biome-ignore lint/suspicious/noArrayIndexKey: array items have no stable id
+              <div key={i} className="rounded-xl border border-hairline bg-ground-2 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="font-medium text-ink-2 text-xs">
+                    {field.item.label} {i + 1}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => move(i - 1)}
+                      disabled={i === 0}
+                      title="Move up"
+                      className="rounded p-1 text-ink-2 hover:bg-ground-3 hover:text-ink disabled:opacity-30"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="size-3.5"
+                        aria-hidden="true"
+                      >
+                        <path d="m18 15-6-6-6 6" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => move(i + 1)}
+                      disabled={i === items.length - 1}
+                      title="Move down"
+                      className="rounded p-1 text-ink-2 hover:bg-ground-3 hover:text-ink disabled:opacity-30"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="size-3.5"
+                        aria-hidden="true"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onChange(items.filter((_, j) => j !== i))}
+                      className="ml-1 text-accent-2-text text-xs underline"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+                <FieldControl
+                  field={{ ...field.item, label: `${field.item.label} ${i + 1}` }}
+                  value={item}
+                  onChange={(v) => onChange(items.map((it, j) => (j === i ? v : it)))}
+                  rel={rel}
+                />
               </div>
-              <FieldControl
-                field={{ ...field.item, label: `${field.item.label} ${i + 1}` }}
-                value={item}
-                onChange={(v) => onChange(items.map((it, j) => (j === i ? v : it)))}
-                rel={rel}
-              />
-            </div>
-          ))}
+            );
+          })}
           <button
             type="button"
             onClick={() => onChange([...items, blank])}
-            className="rounded-lg border border-accent border-dashed px-3 py-2 text-accent text-sm"
+            className="rounded-lg border border-accent border-dashed px-3 py-2 text-accent text-sm transition-colors hover:bg-accent/5"
           >
             + Add {field.item.label.toLowerCase()}
           </button>
@@ -405,8 +467,13 @@ function ImageControl({
   const id = useId();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   async function upload(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setError("That doesn't look like an image file.");
+      return;
+    }
     setUploading(true);
     setError(null);
     try {
@@ -427,59 +494,93 @@ function ImageControl({
     }
   }
 
+  const fileName = value ? value.split("/").pop() : null;
+
   return (
     <div className="space-y-2">
       <Label field={field} />
-      {value ? (
-        // biome-ignore lint/performance/noImgElement: preview of an arbitrary uploaded path; next/image needs configured domains
-        <img
-          src={value}
-          alt=""
-          className="max-h-44 rounded-lg border border-hairline object-contain"
-        />
-      ) : (
-        <div className="flex h-28 items-center justify-center rounded-lg border border-hairline border-dashed bg-ground-2 text-ink-2 text-xs">
-          No image yet
-        </div>
-      )}
 
-      <div className="flex flex-wrap items-center gap-3">
-        {/* The native file input is hidden; the label is the visible button so
-            the owner just clicks "Upload" and picks a file from their device. */}
+      {value ? (
+        <div className="flex items-start gap-3 rounded-xl border border-hairline bg-ground p-3">
+          {/* biome-ignore lint/performance/noImgElement: arbitrary uploaded path; next/image needs configured domains */}
+          <img
+            src={value}
+            alt=""
+            className="size-24 shrink-0 rounded-lg border border-hairline bg-ground-3 object-cover"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium text-sm">{fileName}</p>
+            <p className="mt-0.5 break-all text-ink-2 text-xs">{value}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <label
+                htmlFor={id}
+                className="cursor-pointer rounded-lg border border-hairline px-3 py-1.5 font-medium text-sm transition-colors hover:border-accent hover:text-accent"
+              >
+                {uploading ? "Uploading…" : "Replace"}
+              </label>
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                className="text-ink-2 text-sm underline underline-offset-4 hover:text-ink"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
         <label
           htmlFor={id}
-          className={`inline-flex cursor-pointer items-center rounded-lg px-4 py-2 font-medium text-sm ${
-            uploading
-              ? "cursor-not-allowed bg-ground-3 text-ink-2"
-              : "bg-accent text-white hover:opacity-90"
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const file = e.dataTransfer.files?.[0];
+            if (file) upload(file);
+          }}
+          className={`flex h-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed text-center transition-colors ${
+            dragOver
+              ? "border-accent bg-accent/5 text-accent"
+              : "border-hairline bg-ground text-ink-2 hover:border-accent hover:text-ink"
           }`}
         >
-          {uploading ? "Uploading…" : value ? "Replace image" : "Upload image"}
-        </label>
-        <input
-          id={id}
-          type="file"
-          accept="image/*"
-          disabled={uploading}
-          className="sr-only"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) upload(file);
-            e.target.value = "";
-          }}
-        />
-        {value && !uploading ? (
-          <button
-            type="button"
-            onClick={() => onChange("")}
-            className="text-ink-2 text-sm underline underline-offset-4 hover:text-ink"
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-6"
+            aria-hidden="true"
           >
-            Remove
-          </button>
-        ) : null}
-      </div>
+            <path d="M12 3v12" />
+            <path d="m7 8 5-5 5 5" />
+            <path d="M5 21h14" />
+          </svg>
+          <span className="font-medium text-sm">
+            {uploading ? "Uploading…" : "Click or drag an image here"}
+          </span>
+          <span className="text-xs">JPG, PNG, or WebP · max 8MB</span>
+        </label>
+      )}
 
-      <p className="text-ink-2 text-xs">Pick a JPG, PNG, or WebP from your device (max 8MB).</p>
+      <input
+        id={id}
+        type="file"
+        accept="image/*"
+        disabled={uploading}
+        className="sr-only"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) upload(file);
+          e.target.value = "";
+        }}
+      />
       {error ? <p className="text-accent-2-text text-xs">{error}</p> : null}
     </div>
   );
