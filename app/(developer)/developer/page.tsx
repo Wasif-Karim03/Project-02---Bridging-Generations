@@ -1,29 +1,10 @@
 import Link from "next/link";
 import { getDeveloperPassword, getStorageMode } from "@/lib/developer/config";
-import { ENTITIES, ENTITY_GROUP_ORDER, type Entity } from "@/lib/developer/schema";
+import { pagesByGroup } from "@/lib/developer/pages";
 import { isAuthenticated } from "@/lib/developer/session";
 import { LoginForm } from "./_components/LoginForm";
-import { LogoutButton } from "./_components/LogoutButton";
 
 export const dynamic = "force-dynamic";
-
-function groupEntities(): Array<{ group: string; items: Entity[] }> {
-  const byGroup = new Map<string, Entity[]>();
-  for (const e of ENTITIES) {
-    const list = byGroup.get(e.group) ?? [];
-    list.push(e);
-    byGroup.set(e.group, list);
-  }
-  const order = [...ENTITY_GROUP_ORDER, ...byGroup.keys()];
-  const seen = new Set<string>();
-  const groups: Array<{ group: string; items: Entity[] }> = [];
-  for (const g of order) {
-    if (seen.has(g) || !byGroup.has(g)) continue;
-    seen.add(g);
-    groups.push({ group: g, items: byGroup.get(g) as Entity[] });
-  }
-  return groups;
-}
 
 export default async function DeveloperHome() {
   if (!getDeveloperPassword()) {
@@ -41,71 +22,67 @@ export default async function DeveloperHome() {
 
   if (!(await isAuthenticated())) return <LoginForm />;
 
-  const groups = groupEntities();
+  const groups = pagesByGroup();
   const mode = getStorageMode();
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="font-semibold text-2xl">Site editor</h1>
-          <p className="mt-1 text-ink-2 text-sm">Update the website's text and images.</p>
-        </div>
-        <LogoutButton />
-      </header>
+    <main className="mx-auto max-w-4xl px-6 py-10">
+      <h1 className="font-semibold text-2xl">Welcome to your site editor</h1>
+      <p className="mt-1 text-ink-2 text-sm">
+        Pick a page from the left to update it — its photos, text (English & Bangla), and the items
+        it shows are all in one place.
+      </p>
 
-      <p className="mt-4 rounded-lg border border-hairline bg-ground-2 px-4 py-3 text-ink-2 text-sm">
+      <p className="mt-5 rounded-lg border border-hairline bg-ground-2 px-4 py-3 text-ink-2 text-sm">
         {mode === "github"
           ? "Saves publish to the live site automatically. A change takes about a minute to appear."
           : "Local mode: saves write to your computer's project files (development only)."}
       </p>
 
-      <div className="mt-8 space-y-10">
-        <section>
-          <h2 className="font-medium text-ink-2 text-xs uppercase tracking-wide">Page text</h2>
-          <ul className="mt-3 divide-y divide-hairline rounded-xl border border-hairline bg-ground-2">
-            <li>
-              <Link
-                href="/developer/translations"
-                className="flex items-center justify-between px-4 py-3 hover:bg-ground-3"
-              >
-                <span>
-                  <span className="font-medium">Page text (English & বাংলা)</span>
-                  <span className="block text-ink-2 text-xs">
-                    Headings, buttons, nav, and hero copy across the site — in both languages.
-                  </span>
-                </span>
-                <span className="text-ink-2 text-xs">Edit →</span>
-              </Link>
-            </li>
-          </ul>
+      <section className="mt-8">
+        <h2 className="font-medium text-ink-2 text-xs uppercase tracking-wide">Quick tools</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <Tool
+            href="/developer/siteSettings"
+            title="Site settings"
+            blurb="Name, contact, social links, logo."
+          />
+          <Tool
+            href="/developer/translations"
+            title="All page text"
+            blurb="Every string, English & Bangla."
+          />
+          <Tool href="/developer/media" title="Media library" blurb="Browse uploaded photos." />
+        </div>
+      </section>
+
+      {groups.map(({ group, pages }) => (
+        <section key={group} className="mt-8">
+          <h2 className="font-medium text-ink-2 text-xs uppercase tracking-wide">{group}</h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {pages.map((p) => (
+              <Tool
+                key={p.key}
+                href={`/developer/pages/${p.key}`}
+                title={p.label}
+                blurb={p.blurb ?? p.livePath}
+              />
+            ))}
+          </div>
         </section>
-        {groups.map(({ group, items }) => (
-          <section key={group}>
-            <h2 className="font-medium text-ink-2 text-xs uppercase tracking-wide">{group}</h2>
-            <ul className="mt-3 divide-y divide-hairline rounded-xl border border-hairline bg-ground-2">
-              {items.map((entity) => (
-                <li key={entity.key}>
-                  <Link
-                    href={`/developer/${entity.key}`}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-ground-3"
-                  >
-                    <span>
-                      <span className="font-medium">{entity.label}</span>
-                      {entity.blurb ? (
-                        <span className="block text-ink-2 text-xs">{entity.blurb}</span>
-                      ) : null}
-                    </span>
-                    <span className="text-ink-2 text-xs">
-                      {entity.type === "collection" ? "List →" : "Edit →"}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
+      ))}
     </main>
+  );
+}
+
+function Tool({ href, title, blurb }: { href: string; title: string; blurb: string }) {
+  return (
+    <Link
+      href={href}
+      className="flex flex-col gap-1 rounded-xl border border-hairline bg-ground-2 px-4 py-3 transition-colors hover:border-accent hover:bg-ground-3"
+    >
+      <span className="font-medium text-sm">{title}</span>
+      <span className="line-clamp-2 text-ink-2 text-xs">{blurb}</span>
+    </Link>
   );
 }

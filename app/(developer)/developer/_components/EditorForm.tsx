@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { Field } from "@/lib/developer/schema";
 
 type RelMap = Record<string, Array<{ slug: string; label: string }>>;
@@ -16,6 +16,15 @@ type Props = {
   slug: string | null;
   isNew: boolean;
   storageMode: "github" | "local";
+  /**
+   * When set, only these top-level fields are rendered. The full `initialValues`
+   * are still held in state and posted on save, so fields that aren't shown are
+   * preserved in the file rather than wiped. Used by the page-centric editor to
+   * surface just the fields relevant to one website page.
+   */
+  visibleKeys?: string[];
+  /** Embedded-in-a-page mode: inline (non-sticky) save bar, "Save" label. */
+  embedded?: boolean;
 };
 
 const inputClass =
@@ -25,10 +34,23 @@ export function EditorForm(props: Props) {
   const router = useRouter();
   const [values, setValues] = useState<Record<string, unknown>>(props.initialValues);
   const [busy, setBusy] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  // Warn before a tab close / refresh when there are unsaved edits.
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
 
   function update(key: string, value: unknown) {
     setValues((prev) => ({ ...prev, [key]: value }));
+    setDirty(true);
   }
 
   async function save() {
@@ -54,6 +76,7 @@ export function EditorForm(props: Props) {
           ? "Saved. The live site will update in about a minute."
           : "Saved to your local project files.";
       setMessage({ kind: "ok", text: published });
+      setDirty(false);
       if (props.isNew && props.entityType === "collection" && data.slug) {
         router.replace(`/developer/${props.entityKey}/${data.slug}`);
         router.refresh();
@@ -65,9 +88,13 @@ export function EditorForm(props: Props) {
     }
   }
 
+  const shownFields = props.visibleKeys
+    ? props.fields.filter((f) => props.visibleKeys?.includes(f.key))
+    : props.fields;
+
   return (
     <div className="space-y-6">
-      {props.fields.map((field) => (
+      {shownFields.map((field) => (
         <FieldControl
           key={field.key}
           field={field}
@@ -87,15 +114,24 @@ export function EditorForm(props: Props) {
         </p>
       ) : null}
 
-      <div className="sticky bottom-0 flex gap-3 border-hairline border-t bg-ground py-4">
+      <div
+        className={
+          props.embedded
+            ? "flex gap-3"
+            : "sticky bottom-0 flex gap-3 border-hairline border-t bg-ground py-4"
+        }
+      >
         <button
           type="button"
           onClick={save}
           disabled={busy}
           className="rounded-lg bg-accent px-5 py-2.5 font-medium text-sm text-white disabled:opacity-50"
         >
-          {busy ? "Saving…" : props.isNew ? "Create" : "Save changes"}
+          {busy ? "Saving…" : props.isNew ? "Create" : props.embedded ? "Save" : "Save changes"}
         </button>
+        {dirty && !busy ? (
+          <span className="self-center text-accent-2-text text-xs">● Unsaved changes</span>
+        ) : null}
       </div>
     </div>
   );
