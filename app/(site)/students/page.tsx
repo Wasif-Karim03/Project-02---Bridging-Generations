@@ -156,7 +156,7 @@ export default async function StudentsPage() {
               {tx("signInCta")}
             </Link>
             <Link
-              href="/mentor-login"
+              href="/mentor-signup"
               className="inline-flex min-h-[48px] items-center border border-hairline px-5 text-nav-link uppercase text-ink hover:border-accent hover:text-accent"
             >
               {tx("applyMentorCta")}

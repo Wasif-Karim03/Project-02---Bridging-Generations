@@ -54,7 +54,7 @@ export default async function MentorsPage() {
               <p className="max-w-[44ch] text-body-lg text-ink-2">{t("heroBody")}</p>
               <div className="flex flex-wrap gap-3">
                 <Link
-                  href="/contact?audience=mentor"
+                  href="/mentor-signup"
                   className="inline-flex min-h-[48px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
                 >
                   {t("applyCta")}
@@ -157,7 +157,7 @@ export default async function MentorsPage() {
         headline={t("ctaHeadline")}
         body={t("ctaBody")}
         ctaLabel={t("ctaLabel")}
-        ctaHref="/contact?audience=mentor"
+        ctaHref="/mentor-signup"
         tone="cream"
         titleId="mentors-cta-title"
       />
