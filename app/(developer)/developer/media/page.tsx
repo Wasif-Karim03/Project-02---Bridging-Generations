@@ -17,7 +17,8 @@ export default async function MediaPage() {
       </Link>
       <h1 className="mt-3 font-semibold text-2xl">Media library</h1>
       <p className="mt-1 text-ink-2 text-sm">
-        Every photo you've uploaded, grouped by where it's used. Click an image to copy its path.
+        Every photo you've uploaded, grouped by where it's used. Click an image to copy its path, or
+        use the trash icon to delete it.
       </p>
       <div className="mt-8">
         <MediaGrid groups={groups} />
