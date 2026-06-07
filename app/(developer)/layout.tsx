@@ -12,9 +12,8 @@ export const metadata: Metadata = {
 
 const GLOBAL_NAV = [
   { href: "/developer", label: "Dashboard" },
-  { href: "/developer/siteSettings", label: "Site settings" },
-  { href: "/developer/translations", label: "All page text" },
   { href: "/developer/media", label: "Media library" },
+  { href: "/developer/translations", label: "All page text (advanced)" },
 ];
 
 // Standalone surface for the password-gated content editor. Overrides the

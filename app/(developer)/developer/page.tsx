@@ -43,16 +43,16 @@ export default async function DeveloperHome() {
         <h2 className="font-medium text-ink-2 text-xs uppercase tracking-wide">Quick tools</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <Tool
-            href="/developer/siteSettings"
+            href="/developer/pages/site-settings"
             title="Site settings"
-            blurb="Name, contact, social links, logo."
+            blurb="Name, contact, social links, SEO."
           />
+          <Tool href="/developer/media" title="Media library" blurb="Browse uploaded photos." />
           <Tool
             href="/developer/translations"
             title="All page text"
-            blurb="Every string, English & Bangla."
+            blurb="Every string, English & Bangla (advanced)."
           />
-          <Tool href="/developer/media" title="Media library" blurb="Browse uploaded photos." />
         </div>
       </section>
 
@@ -65,7 +65,7 @@ export default async function DeveloperHome() {
                 key={p.key}
                 href={`/developer/pages/${p.key}`}
                 title={p.label}
-                blurb={p.blurb ?? p.livePath}
+                blurb={p.blurb ?? p.livePath ?? ""}
               />
             ))}
           </div>

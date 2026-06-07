@@ -32,14 +32,16 @@ export default async function PageEditor({ params }: { params: Promise<{ pageKey
       </Link>
       <div className="mt-3 flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-semibold text-2xl">{page.label}</h1>
-        <Link
-          href={page.livePath}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-accent text-sm hover:text-accent-2-text"
-        >
-          View this page ↗
-        </Link>
+        {page.livePath ? (
+          <Link
+            href={page.livePath}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent text-sm hover:text-accent-2-text"
+          >
+            View this page ↗
+          </Link>
+        ) : null}
       </div>
       {page.blurb ? <p className="mt-1 text-ink-2 text-sm">{page.blurb}</p> : null}
 

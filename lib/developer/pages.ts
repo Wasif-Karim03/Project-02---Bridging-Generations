@@ -1,22 +1,28 @@
-// Page-centric manifest for the site editor. The owner thinks in terms of "the
-// pages of my website" — Home, About, Students, etc. — not Keystatic entity
-// types. This file maps each public page to the REAL content sources that feed
-// it, so editing a page in the editor actually changes that page on the live
-// site.
+// Page-centric manifest for the site editor — the single map of "what the owner
+// can edit, organized the way the live website is organized."
+//
+// The owner thinks in pages (Home, About, Students…), not in Keystatic entity
+// types. This file lists every public page and binds it to the REAL content
+// sources the frontend reads, so editing a page here changes that page on the
+// live site. Every translation section, singleton, hero image, and collection
+// is surfaced under exactly one page (with a couple deliberately shared where
+// the site reuses them).
 //
 // Each page is a stack of blocks:
-//   - entity        → a singleton's fields (optionally a subset), edited inline
-//                     (the full record is loaded + saved so hidden fields are
-//                     preserved; only `fieldKeys` are shown).
+//   - entity        → a singleton's fields (optionally a subset via fieldKeys).
+//                     The whole record is loaded + saved, so fields that aren't
+//                     shown are preserved — only the listed ones are editable.
 //   - translations  → bilingual UI copy for one or more message sections.
 //   - collection    → the list of items the page renders (add / edit / delete),
-//                     linking to the existing per-entry editors.
+//                     linking to the per-entry editors.
 //
-// Deliberately bound to what the frontend ACTUALLY reads. Examples:
-//   - Home hero copy lives in next-intl messages ("home"/"homeExtra"), not the
-//     orphaned statsSnapshot singleton — so the Home page binds to translations.
+// Intentionally bound to what the frontend ACTUALLY reads. Notably:
+//   - Home hero copy is in next-intl messages ("home"/"homeExtra"), not the
+//     orphaned statsSnapshot singleton.
 //   - /donors renders from the donationJourney singleton, not the orphaned
-//     donorsPage singleton — so the Donors page binds to donationJourney.
+//     donorsPage singleton.
+//   - /mission-vision renders from the missionVision messages, not siteSettings.
+// Those dead singletons (statsSnapshot, donorsPage) are deliberately NOT shown.
 
 export type PageBlock =
   | {
@@ -52,8 +58,8 @@ export type PageDef = {
   label: string;
   /** Sidebar grouping. */
   group: string;
-  /** Path on the live site this page edits. */
-  livePath: string;
+  /** Path on the live site this page edits (omit for site-wide settings). */
+  livePath?: string;
   /** One-line description shown at the top of the page editor. */
   blurb?: string;
   blocks: PageBlock[];
@@ -65,11 +71,14 @@ export const PAGE_GROUP_ORDER = [
   "Programs",
   "Stories",
   "Giving",
+  "Help & legal",
   "Site-wide",
 ] as const;
 
 export const PAGES: PageDef[] = [
-  // ---- MAIN ----
+  // =====================================================================
+  // MAIN
+  // =====================================================================
   {
     key: "home",
     label: "Home",
@@ -82,50 +91,43 @@ export const PAGES: PageDef[] = [
         entityKey: "pageMedia",
         fieldKeys: ["homeSlide1Image", "homeSlide2Image", "homeSlide3Image"],
         title: "Hero carousel images",
-        description: "The three rotating banner photos at the top of the home page.",
+        description: "The three rotating banner photos at the very top of the home page.",
       },
       {
         kind: "translations",
-        sections: ["home", "homeExtra"],
-        title: "Hero & section text",
-        description: "Headlines, eyebrows, and button labels for the home page — English & Bangla.",
+        sections: ["home"],
+        title: "Hero carousel text",
+        description:
+          "The rotating headlines, eyebrows, and buttons in the hero — English & Bangla.",
+      },
+      {
+        kind: "translations",
+        sections: ["homeExtra"],
+        title: "Sections & calls-to-action",
+        description: "The mission band, section headings, and bottom call-to-action.",
       },
       {
         kind: "collection",
         entityKey: "project",
-        title: "Featured projects",
-        description: "The programs grid pulls from your projects. Edit or add them here.",
+        title: "Programs grid",
+        description: "The home page features your projects. Edit or add them here.",
       },
-      {
-        kind: "collection",
-        entityKey: "successStory",
-        title: "Featured success stories",
-      },
-      {
-        kind: "collection",
-        entityKey: "activity",
-        title: "Recent activities",
-      },
-      {
-        kind: "collection",
-        entityKey: "testimonial",
-        title: "Testimonials",
-      },
-      {
-        kind: "collection",
-        entityKey: "galleryImage",
-        title: "Gallery strip",
-      },
+      { kind: "collection", entityKey: "successStory", title: "Featured success stories" },
+      { kind: "collection", entityKey: "activity", title: "Recent activities feed" },
+      { kind: "collection", entityKey: "testimonial", title: "Testimonial" },
+      { kind: "collection", entityKey: "galleryImage", title: "Gallery strip" },
     ],
   },
 
-  // ---- ABOUT ----
+  // =====================================================================
+  // ABOUT
+  // =====================================================================
   {
     key: "about",
     label: "About",
     group: "About",
     livePath: "/about",
-    blurb: "Organization overview, mission/vision statements, transparency, and your team.",
+    blurb: "Organization overview, mission & vision statements, transparency, and your team.",
     blocks: [
       {
         kind: "entity",
@@ -150,22 +152,15 @@ export const PAGES: PageDef[] = [
         title: "Organization details",
         description: "Mission, vision, and transparency info shown on the About page.",
       },
-      {
-        kind: "translations",
-        sections: ["about", "aboutExtra"],
-        title: "Section & team labels",
-      },
+      { kind: "translations", sections: ["about"], title: "Hero & intro text" },
+      { kind: "translations", sections: ["aboutExtra"], title: "Section & team labels" },
       {
         kind: "collection",
         entityKey: "boardMember",
         title: "Leadership & team",
         description: "Board, moderators, R&D, accounting, coordinators, and mentors.",
       },
-      {
-        kind: "collection",
-        entityKey: "testimonial",
-        title: "Partner testimonial",
-      },
+      { kind: "collection", entityKey: "testimonial", title: "Partner testimonial" },
     ],
   },
   {
@@ -190,7 +185,9 @@ export const PAGES: PageDef[] = [
     ],
   },
 
-  // ---- PROGRAMS ----
+  // =====================================================================
+  // PROGRAMS
+  // =====================================================================
   {
     key: "students",
     label: "Students",
@@ -204,11 +201,8 @@ export const PAGES: PageDef[] = [
         title: "Spotlight band & rules",
         description: "The featured-students band and the scholarship rules section.",
       },
-      {
-        kind: "translations",
-        sections: ["students", "studentsPageExtra"],
-        title: "Page & filter text",
-      },
+      { kind: "translations", sections: ["students"], title: "Directory & filter text" },
+      { kind: "translations", sections: ["studentsPageExtra"], title: "Sections & CTA text" },
       {
         kind: "collection",
         entityKey: "student",
@@ -235,22 +229,14 @@ export const PAGES: PageDef[] = [
         entityKey: "projectsPage",
         title: "Rules & teachers section text",
       },
-      {
-        kind: "translations",
-        sections: ["projectsPageExtra"],
-        title: "Section & CTA text",
-      },
+      { kind: "translations", sections: ["projectsPageExtra"], title: "Sections & CTA text" },
       {
         kind: "collection",
         entityKey: "project",
         title: "Projects",
         description: "Active, paused, and funded programs with their funding goals.",
       },
-      {
-        kind: "collection",
-        entityKey: "teacher",
-        title: "Teachers",
-      },
+      { kind: "collection", entityKey: "teacher", title: "Teachers" },
     ],
   },
   {
@@ -272,11 +258,7 @@ export const PAGES: PageDef[] = [
         title: "Program content",
         description: "Hero, overview, eligibility, and the apply call-to-action.",
       },
-      {
-        kind: "translations",
-        sections: ["scholarshipsPageExtra"],
-        title: "Section text",
-      },
+      { kind: "translations", sections: ["scholarshipsPageExtra"], title: "Section text" },
     ],
   },
   {
@@ -292,11 +274,7 @@ export const PAGES: PageDef[] = [
         fieldKeys: ["mentorsHeroImage"],
         title: "Page hero image",
       },
-      {
-        kind: "translations",
-        sections: ["mentorsPage"],
-        title: "Page text",
-      },
+      { kind: "translations", sections: ["mentorsPage"], title: "Page text" },
       {
         kind: "collection",
         entityKey: "boardMember",
@@ -306,7 +284,9 @@ export const PAGES: PageDef[] = [
     ],
   },
 
-  // ---- STORIES ----
+  // =====================================================================
+  // STORIES
+  // =====================================================================
   {
     key: "activities",
     label: "Activities",
@@ -314,16 +294,8 @@ export const PAGES: PageDef[] = [
     livePath: "/activities",
     blurb: "Recent field updates and announcements.",
     blocks: [
-      {
-        kind: "translations",
-        sections: ["activitiesPage"],
-        title: "Page text",
-      },
-      {
-        kind: "collection",
-        entityKey: "activity",
-        title: "Activities",
-      },
+      { kind: "translations", sections: ["activitiesPage"], title: "Page text" },
+      { kind: "collection", entityKey: "activity", title: "Activities" },
     ],
   },
   {
@@ -333,16 +305,8 @@ export const PAGES: PageDef[] = [
     livePath: "/success-stories",
     blurb: "Student and alumni case studies.",
     blocks: [
-      {
-        kind: "translations",
-        sections: ["successStoriesPage"],
-        title: "Page text",
-      },
-      {
-        kind: "collection",
-        entityKey: "successStory",
-        title: "Success stories",
-      },
+      { kind: "translations", sections: ["successStoriesPage"], title: "Page text" },
+      { kind: "collection", entityKey: "successStory", title: "Success stories" },
     ],
   },
   {
@@ -352,16 +316,8 @@ export const PAGES: PageDef[] = [
     livePath: "/blog",
     blurb: "News and articles.",
     blocks: [
-      {
-        kind: "translations",
-        sections: ["blog"],
-        title: "Page text",
-      },
-      {
-        kind: "collection",
-        entityKey: "blogPost",
-        title: "Blog posts",
-      },
+      { kind: "translations", sections: ["blog"], title: "Page text" },
+      { kind: "collection", entityKey: "blogPost", title: "Blog posts" },
     ],
   },
   {
@@ -371,16 +327,8 @@ export const PAGES: PageDef[] = [
     livePath: "/gallery",
     blurb: "The photo gallery.",
     blocks: [
-      {
-        kind: "translations",
-        sections: ["gallery"],
-        title: "Page text",
-      },
-      {
-        kind: "collection",
-        entityKey: "galleryImage",
-        title: "Gallery images",
-      },
+      { kind: "translations", sections: ["gallery"], title: "Page text" },
+      { kind: "collection", entityKey: "galleryImage", title: "Gallery images" },
     ],
   },
   {
@@ -390,26 +338,20 @@ export const PAGES: PageDef[] = [
     livePath: "/testimonials",
     blurb: "Quotes from your community.",
     blocks: [
-      {
-        kind: "translations",
-        sections: ["testimonialsPage"],
-        title: "Page text",
-      },
-      {
-        kind: "collection",
-        entityKey: "testimonial",
-        title: "Testimonials",
-      },
+      { kind: "translations", sections: ["testimonialsPage"], title: "Page text" },
+      { kind: "collection", entityKey: "testimonial", title: "Testimonials" },
     ],
   },
 
-  // ---- GIVING ----
+  // =====================================================================
+  // GIVING
+  // =====================================================================
   {
     key: "donate",
     label: "Donate",
     group: "Giving",
     livePath: "/donate",
-    blurb: "The main donation page — amounts, FAQ, and thank-you messages.",
+    blurb: "The main donation page — amounts, payment source, FAQ, and thank-you messages.",
     blocks: [
       {
         kind: "entity",
@@ -417,11 +359,7 @@ export const PAGES: PageDef[] = [
         title: "Donation page content",
         description: "Headline, suggested amounts, payment source, FAQ, and thank-you copy.",
       },
-      {
-        kind: "translations",
-        sections: ["donatePageExtra"],
-        title: "Section text",
-      },
+      { kind: "translations", sections: ["donatePageExtra"], title: "Section text" },
     ],
   },
   {
@@ -430,7 +368,7 @@ export const PAGES: PageDef[] = [
     group: "Giving",
     livePath: "/donors",
     blurb:
-      "The donor recognition page and 5-year impact timeline (this content powers both /donors and /donation-journey).",
+      "Donor recognition and the 5-year impact timeline — this content powers both /donors and /donation-journey.",
     blocks: [
       {
         kind: "entity",
@@ -444,67 +382,113 @@ export const PAGES: PageDef[] = [
         title: "Impact timeline & totals",
         description: "Lifetime totals and the year-by-year milestones shown on the donors page.",
       },
-      {
-        kind: "translations",
-        sections: ["donationJourney", "donorsPageExtra"],
-        title: "Section & donor-profile text",
-      },
-      {
-        kind: "collection",
-        entityKey: "donorProfile",
-        title: "Donor profiles",
-      },
+      { kind: "translations", sections: ["donationJourney"], title: "Section text" },
+      { kind: "translations", sections: ["donorsPageExtra"], title: "Donor profile page text" },
+      { kind: "collection", entityKey: "donorProfile", title: "Donor profiles" },
     ],
   },
 
-  // ---- SITE-WIDE ----
+  // =====================================================================
+  // HELP & LEGAL
+  // =====================================================================
   {
     key: "contact",
     label: "Contact",
-    group: "Site-wide",
+    group: "Help & legal",
     livePath: "/contact",
     blurb: "The contact page and form.",
     blocks: [
-      {
-        kind: "entity",
-        entityKey: "contactPage",
-        title: "Contact page content",
-      },
+      { kind: "entity", entityKey: "contactPage", title: "Contact page content" },
+      { kind: "translations", sections: ["contactPageExtra"], title: "Form & section text" },
+    ],
+  },
+  {
+    key: "apply",
+    label: "Apply & sign-up",
+    group: "Help & legal",
+    livePath: "/apply/mentor",
+    blurb: "Text on the “Apply as a mentor” and scholarship application pages.",
+    blocks: [
       {
         kind: "translations",
-        sections: ["contactPageExtra"],
-        title: "Form & section text",
+        sections: ["applyPages"],
+        title: "Application page text",
+        description: "Headlines, labels, and buttons on the mentor & scholarship apply forms.",
       },
     ],
   },
   {
     key: "legal",
     label: "Privacy & Terms",
-    group: "Site-wide",
+    group: "Help & legal",
     livePath: "/privacy",
     blurb: "Your privacy policy and terms of service pages.",
     blocks: [
+      { kind: "entity", entityKey: "privacyPage", title: "Privacy policy body" },
+      { kind: "translations", sections: ["privacyPageExtra"], title: "Privacy page headings" },
+      { kind: "entity", entityKey: "termsPage", title: "Terms of service body" },
+      { kind: "translations", sections: ["termsPageExtra"], title: "Terms page headings" },
+    ],
+  },
+
+  // =====================================================================
+  // SITE-WIDE (shared across every page)
+  // =====================================================================
+  {
+    key: "site-settings",
+    label: "Site settings",
+    group: "Site-wide",
+    blurb: "Organization name, contact details, social links, SEO defaults, and shared microcopy.",
+    blocks: [
       {
         kind: "entity",
-        entityKey: "privacyPage",
-        title: "Privacy policy",
-      },
-      {
-        kind: "translations",
-        sections: ["privacyPageExtra"],
-        title: "Privacy page headings",
-      },
-      {
-        kind: "entity",
-        entityKey: "termsPage",
-        title: "Terms of service",
-      },
-      {
-        kind: "translations",
-        sections: ["termsPageExtra"],
-        title: "Terms page headings",
+        entityKey: "siteSettings",
+        title: "Site settings",
+        description: "Used across the whole website — header, footer, contact, and search results.",
       },
     ],
+  },
+  {
+    key: "header-nav",
+    label: "Header & navigation",
+    group: "Site-wide",
+    livePath: "/",
+    blurb: "The top navigation bar links and buttons shown on every page.",
+    blocks: [{ kind: "translations", sections: ["nav"], title: "Navigation bar text" }],
+  },
+  {
+    key: "footer",
+    label: "Footer",
+    group: "Site-wide",
+    livePath: "/",
+    blurb: "The footer shown at the bottom of every page.",
+    blocks: [
+      {
+        kind: "entity",
+        entityKey: "siteSettings",
+        fieldKeys: [
+          "contactEmail",
+          "secondaryEmail",
+          "phoneNumber",
+          "whatsappNumber",
+          "mailingAddress",
+          "ein",
+          "form990Url",
+          "candidProfileUrl",
+          "socialLinks",
+        ],
+        title: "Contact & social (footer)",
+        description: "Phone, email, address, registration info, and social links in the footer.",
+      },
+      { kind: "translations", sections: ["footer"], title: "Footer text & links" },
+    ],
+  },
+  {
+    key: "shared-labels",
+    label: "Buttons & shared labels",
+    group: "Site-wide",
+    blurb: "Common buttons and labels reused across many pages (e.g. “Donate”, “Read more”).",
+    blocks: [{ kind: "translations", sections: ["common"], title: "Shared buttons & labels" }],
   },
 ];
 
