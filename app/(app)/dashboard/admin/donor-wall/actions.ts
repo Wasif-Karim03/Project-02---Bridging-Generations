@@ -40,15 +40,26 @@ export async function saveDonorAction(formData: FormData): Promise<void> {
   const id = str(formData, "id");
   if (!id) return;
   const name = str(formData, "name");
+  // Photo is managed separately by the upload endpoint, so it's intentionally
+  // not touched here — saving details must never wipe an uploaded photo.
   await updateFeaturedDonor(id, {
     ...(name ? { name } : {}),
-    photoUrl: str(formData, "photoUrl") || null,
     blurb: str(formData, "blurb") || null,
     published: formData.get("published") != null,
     displayOrder: intOrNull(formData, "displayOrder") ?? 0,
   });
   revalidatePath(LIST);
   revalidatePath(`${LIST}/${id}`);
+  revalidatePath("/donors");
+}
+
+export async function removeDonorPhotoAction(formData: FormData): Promise<void> {
+  await requireRole("admin");
+  const id = str(formData, "id");
+  if (!id) return;
+  await updateFeaturedDonor(id, { photoUrl: null });
+  revalidatePath(`${LIST}/${id}`);
+  revalidatePath(LIST);
   revalidatePath("/donors");
 }
 
@@ -68,13 +79,21 @@ export async function addContributionAction(formData: FormData): Promise<void> {
   const studentName = str(formData, "studentName");
   const amountCents = centsFromDollarsInput(str(formData, "amount"));
   if (!donorId || !studentName || amountCents == null) return;
+  // "when" is an <input type="month"> value like "2024-12".
+  let year: number | null = null;
+  let month: number | null = null;
+  const when = /^(\d{4})-(\d{2})$/.exec(str(formData, "when"));
+  if (when) {
+    year = Number(when[1]);
+    month = Number(when[2]);
+  }
   await addContribution({
     donorId,
     studentName,
     studentRef: str(formData, "studentRef") || null,
     amountCents,
-    year: intOrNull(formData, "year"),
-    month: intOrNull(formData, "month"),
+    year,
+    month,
   });
   revalidatePath(`${LIST}/${donorId}`);
   revalidatePath(LIST);

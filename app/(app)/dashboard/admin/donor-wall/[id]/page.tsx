@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
-import { DonorAvatar } from "@/components/domain/DonorAvatar";
+import { getApprovedPublicStudents, getAllStudents } from "@/lib/content/students";
 import { getFeaturedDonorById } from "@/lib/db/queries/featuredDonors";
 import { formatDollars, formatUsd, formatYearMonth } from "@/lib/donor/featured";
 import { PageHeader } from "../../_components/SectionScaffold";
+import { PhotoUploader } from "../_components/PhotoUploader";
 import {
   addContributionAction,
   deleteContributionAction,
   deleteDonorAction,
+  removeDonorPhotoAction,
   saveDonorAction,
 } from "../actions";
 
@@ -28,6 +30,17 @@ export default async function EditDonorPage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const donor = await getFeaturedDonorById(id);
   if (!donor) notFound();
+
+  // Student directory for the gift picker — Keystatic students plus approved
+  // registrations, deduped by id. Admins pick a student; the datalist also
+  // allows typing a name that isn't in the system yet.
+  const [ksStudents, dbStudents] = await Promise.all([
+    getAllStudents(),
+    getApprovedPublicStudents(),
+  ]);
+  const directory = [...new Map(
+    [...ksStudents, ...dbStudents].map((s) => [s.id, s.displayName]),
+  )].map(([sid, displayName]) => ({ id: sid, displayName }));
 
   return (
     <div className="flex flex-col gap-8">
@@ -63,30 +76,23 @@ export default async function EditDonorPage({ params }: { params: Promise<{ id: 
           <input type="hidden" name="id" value={donor.id} />
           <h2 className="text-heading-5 text-ink">Details</h2>
 
-          <div className="flex items-center gap-4">
-            <DonorAvatar
-              name={donor.name}
-              photoUrl={donor.photoUrl}
-              className="size-16"
-              monogramClassName="text-heading-5"
-            />
-            <p className="text-body-sm text-ink-2">Photo preview</p>
+          <div className="flex flex-col gap-2">
+            <span className={labelText}>Photo</span>
+            <PhotoUploader donorId={donor.id} name={donor.name} photoUrl={donor.photoUrl} />
+            {donor.photoUrl ? (
+              <button
+                type="submit"
+                formAction={removeDonorPhotoAction}
+                className="self-start text-meta uppercase tracking-[0.06em] text-red-700 hover:underline"
+              >
+                Remove photo
+              </button>
+            ) : null}
           </div>
 
           <label className={labelCls}>
             <span className={labelText}>Name</span>
             <input name="name" defaultValue={donor.name} required className={inputCls} />
-          </label>
-
-          <label className={labelCls}>
-            <span className={labelText}>Photo URL</span>
-            <input
-              name="photoUrl"
-              defaultValue={donor.photoUrl ?? ""}
-              placeholder="https://…/photo.jpg"
-              className={inputCls}
-            />
-            <span className="text-meta text-ink-2">Paste a direct image link (square works best).</span>
           </label>
 
           <label className={labelCls}>
@@ -186,26 +192,58 @@ export default async function EditDonorPage({ params }: { params: Promise<{ id: 
           {/* Add a gift */}
           <form
             action={addContributionAction}
-            className="grid grid-cols-2 gap-3 rounded-lg border border-dashed border-hairline p-4 sm:grid-cols-[1fr_90px_80px_70px_60px_auto]"
+            className="flex flex-col gap-3 rounded-lg border border-dashed border-hairline p-4"
           >
             <input type="hidden" name="donorId" value={donor.id} />
-            <input name="studentName" required placeholder="Student name" className={inputCls} />
-            <input name="studentRef" placeholder="ID" className={inputCls} />
-            <input name="amount" required inputMode="decimal" placeholder="USD" className={inputCls} />
-            <input
-              name="year"
-              type="number"
-              placeholder="Year"
-              min={1990}
-              max={2100}
-              className={inputCls}
-            />
-            <input name="month" type="number" placeholder="Mo" min={1} max={12} className={inputCls} />
+            <p className="text-meta uppercase tracking-[0.06em] text-ink-2">Add a gift</p>
+
+            <label className={labelCls}>
+              <span className={labelText}>Student</span>
+              <input
+                name="studentName"
+                required
+                list="student-directory"
+                placeholder={directory.length ? "Choose or type a student" : "Type a student name"}
+                className={inputCls}
+              />
+              <datalist id="student-directory">
+                {directory.map((s) => (
+                  <option key={s.id} value={s.displayName} />
+                ))}
+              </datalist>
+              <span className="text-meta text-ink-2">
+                {directory.length
+                  ? `Pick from ${directory.length} student${directory.length === 1 ? "" : "s"} in the directory, or type a name.`
+                  : "No students in the directory yet — type the name for now."}
+              </span>
+            </label>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <label className={labelCls}>
+                <span className={labelText}>Student ID (optional)</span>
+                <input name="studentRef" placeholder="265" className={inputCls} />
+              </label>
+              <label className={labelCls}>
+                <span className={labelText}>Amount (USD)</span>
+                <input
+                  name="amount"
+                  required
+                  inputMode="decimal"
+                  placeholder="60"
+                  className={inputCls}
+                />
+              </label>
+              <label className={labelCls}>
+                <span className={labelText}>When</span>
+                <input name="when" type="month" className={inputCls} />
+              </label>
+            </div>
+
             <button
               type="submit"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-ink px-4 text-nav-link uppercase text-white transition-colors hover:bg-ink/90"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-ink px-5 text-nav-link uppercase text-white transition-colors hover:bg-ink/90"
             >
-              Add
+              Add gift
             </button>
           </form>
         </div>
