@@ -669,6 +669,28 @@ export const blogPostLinks = pgTable(
   }),
 );
 
+// ---------- Gallery (admin-uploaded photos) ----------
+// Dedicated gallery uploads. The public gallery page also pulls in project and
+// blog images by aggregating at query time, so those stay in sync without being
+// copied here.
+
+export const galleryImages = pgTable(
+  "gallery_images",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    url: varchar("url", { length: 1024 }).notNull(),
+    caption: varchar("caption", { length: 280 }),
+    // One of GALLERY_TAGS (lib/gallery/tags.ts): Humanity / Activities /
+    // Projects / Students / Publication. Used for the public filter.
+    tag: varchar("tag", { length: 40 }).notNull().default("Activities"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byCreated: index("gallery_images_created_idx").on(t.createdAt),
+  }),
+);
+
 // ---------- Type exports ----------
 
 export type User = typeof users.$inferSelect;
@@ -708,6 +730,8 @@ export type BlogPost = typeof blogPosts.$inferSelect;
 export type NewBlogPost = typeof blogPosts.$inferInsert;
 export type BlogPostLink = typeof blogPostLinks.$inferSelect;
 export type NewBlogPostLink = typeof blogPostLinks.$inferInsert;
+export type GalleryImage = typeof galleryImages.$inferSelect;
+export type NewGalleryImage = typeof galleryImages.$inferInsert;
 
 // Re-export sql for callers who need raw expressions.
 export { sql };

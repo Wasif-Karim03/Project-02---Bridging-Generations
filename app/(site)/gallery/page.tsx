@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getAllGalleryImages } from "@/lib/content/galleryImages";
+import { listGalleryItems } from "@/lib/db/queries/gallery";
 import { pageAlternates } from "@/lib/seo/alternates";
-import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
+import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
-import { FilterableGallery } from "./_components/FilterableGallery";
+import { GalleryGrid } from "./_components/GalleryGrid";
 import { GalleryHero } from "./_components/GalleryHero";
 
 export const metadata: Metadata = {
@@ -16,20 +16,16 @@ export const metadata: Metadata = {
   alternates: pageAlternates("/gallery"),
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function GalleryPage() {
-  const items = await getAllGalleryImages();
+  const items = await listGalleryItems();
   const t = await getTranslations("gallery");
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
     { name: "Home", url: "/" },
     { name: "Gallery", url: "/gallery" },
   ]);
-  const ldCollection = collectionPage({
-    siteUrl: SITE_URL,
-    url: "/gallery",
-    name: "Gallery",
-    description: "Photographs from partner schools and field visits in the Chittagong Hill Tracts.",
-  });
 
   return (
     <>
@@ -39,7 +35,11 @@ export default async function GalleryPage() {
         className="bg-ground px-4 pb-20 sm:px-6 lg:px-[6%] lg:pb-28"
       >
         <div className="mx-auto max-w-[1280px]">
-          <FilterableGallery images={items} />
+          {items.length === 0 ? (
+            <p className="text-body text-ink-2">No photos yet — check back soon.</p>
+          ) : (
+            <GalleryGrid items={items} />
+          )}
         </div>
       </section>
       <CTAFooterPanel
@@ -51,7 +51,6 @@ export default async function GalleryPage() {
         titleId="gallery-cta-title"
       />
       <JsonLd id="ld-gallery-breadcrumb" data={ldBreadcrumb} />
-      <JsonLd id="ld-gallery-collection" data={ldCollection} />
     </>
   );
 }
