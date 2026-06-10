@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
+import { DonorAvatar } from "@/components/domain/DonorAvatar";
 import { getFeaturedDonorById } from "@/lib/db/queries/featuredDonors";
-import { formatDollars, formatUsd, formatYearMonth, initialsFromName } from "@/lib/donor/featured";
+import { formatDollars, formatUsd, formatYearMonth } from "@/lib/donor/featured";
 import { PageHeader } from "../../_components/SectionScaffold";
 import {
   addContributionAction,
@@ -63,18 +64,12 @@ export default async function EditDonorPage({ params }: { params: Promise<{ id: 
           <h2 className="text-heading-5 text-ink">Details</h2>
 
           <div className="flex items-center gap-4">
-            {donor.photoUrl ? (
-              // biome-ignore lint/performance/noImgElement: arbitrary external donor photo URL
-              <img
-                src={donor.photoUrl}
-                alt=""
-                className="size-16 shrink-0 rounded-full object-cover"
-              />
-            ) : (
-              <span className="grid size-16 shrink-0 place-items-center rounded-full bg-accent/15 text-heading-5 font-semibold text-accent">
-                {initialsFromName(donor.name)}
-              </span>
-            )}
+            <DonorAvatar
+              name={donor.name}
+              photoUrl={donor.photoUrl}
+              className="size-16"
+              monogramClassName="text-heading-5"
+            />
             <p className="text-body-sm text-ink-2">Photo preview</p>
           </div>
 

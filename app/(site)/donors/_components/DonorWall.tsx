@@ -1,7 +1,8 @@
 import { Link } from "next-view-transitions";
+import { DonorAvatar } from "@/components/domain/DonorAvatar";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import type { DonorSummary } from "@/lib/db/queries/featuredDonors";
-import { formatUsd, initialsFromName } from "@/lib/donor/featured";
+import { formatUsd } from "@/lib/donor/featured";
 
 // Public "Our Donors" grid shown on /donors. Admin-curated featured donors,
 // each linking to their breakdown page at /donors/featured/<slug>.
@@ -29,7 +30,11 @@ export function DonorWall({ donors }: { donors: DonorSummary[] }) {
                 href={`/donors/featured/${d.slug}`}
                 className="group flex h-full flex-col items-center gap-4 rounded-2xl border border-hairline bg-ground-2 p-7 text-center transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
-                <DonorAvatar name={d.name} photoUrl={d.photoUrl} />
+                <DonorAvatar
+                  name={d.name}
+                  photoUrl={d.photoUrl}
+                  className="size-24 shadow-[var(--shadow-card)]"
+                />
                 <div className="flex flex-col gap-1">
                   <p className="text-heading-5 text-ink group-hover:text-accent-2-text">{d.name}</p>
                   {d.blurb ? <p className="text-body-sm text-ink-2">{d.blurb}</p> : null}
@@ -57,20 +62,3 @@ export function DonorWall({ donors }: { donors: DonorSummary[] }) {
   );
 }
 
-function DonorAvatar({ name, photoUrl }: { name: string; photoUrl: string | null }) {
-  if (photoUrl) {
-    return (
-      // biome-ignore lint/performance/noImgElement: arbitrary external donor photo URL
-      <img
-        src={photoUrl}
-        alt={name}
-        className="size-24 rounded-full object-cover shadow-[var(--shadow-card)]"
-      />
-    );
-  }
-  return (
-    <span className="grid size-24 place-items-center rounded-full bg-accent/15 text-heading-3 font-semibold text-accent">
-      {initialsFromName(name)}
-    </span>
-  );
-}

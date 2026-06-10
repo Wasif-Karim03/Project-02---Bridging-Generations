@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
+import { DonorAvatar } from "@/components/domain/DonorAvatar";
 import { getFeaturedDonorBySlug } from "@/lib/db/queries/featuredDonors";
-import { formatDollars, formatUsd, formatYearMonth, initialsFromName } from "@/lib/donor/featured";
+import { formatDollars, formatUsd, formatYearMonth } from "@/lib/donor/featured";
 
 type Params = { slug: string };
 
@@ -38,18 +39,12 @@ export default async function FeaturedDonorPage({ params }: { params: Promise<Pa
 
           {/* Header — photo, name, total */}
           <header className="flex flex-col items-center gap-4 text-center">
-            {donor.photoUrl ? (
-              // biome-ignore lint/performance/noImgElement: arbitrary external donor photo URL
-              <img
-                src={donor.photoUrl}
-                alt={donor.name}
-                className="size-28 rounded-full object-cover shadow-[var(--shadow-card)]"
-              />
-            ) : (
-              <span className="grid size-28 place-items-center rounded-full bg-accent/15 text-heading-2 font-semibold text-accent">
-                {initialsFromName(donor.name)}
-              </span>
-            )}
+            <DonorAvatar
+              name={donor.name}
+              photoUrl={donor.photoUrl}
+              className="size-28 shadow-[var(--shadow-card)]"
+              monogramClassName="text-heading-2"
+            />
             <h1 className="text-heading-2 uppercase tracking-[0.02em] text-ink">{donor.name}</h1>
             {donor.blurb ? <p className="max-w-[48ch] text-body text-ink-2">{donor.blurb}</p> : null}
             <p className="text-heading-4 text-ink">

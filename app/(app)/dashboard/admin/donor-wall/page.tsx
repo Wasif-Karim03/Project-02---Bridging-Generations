@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
+import { DonorAvatar } from "@/components/domain/DonorAvatar";
 import { listFeaturedDonors } from "@/lib/db/queries/featuredDonors";
-import { formatUsd, initialsFromName } from "@/lib/donor/featured";
+import { formatUsd } from "@/lib/donor/featured";
 import { PageHeader } from "../_components/SectionScaffold";
 import { createDonorAction } from "./actions";
 
@@ -80,7 +81,12 @@ export default async function DonorWallAdminPage() {
                       href={`/dashboard/admin/donor-wall/${d.id}`}
                       className="flex items-center gap-3"
                     >
-                      <DonorThumb name={d.name} photoUrl={d.photoUrl} />
+                      <DonorAvatar
+                        name={d.name}
+                        photoUrl={d.photoUrl}
+                        className="size-9"
+                        monogramClassName="text-[0.6rem]"
+                      />
                       <span className="font-medium text-accent underline underline-offset-[3px] hover:no-underline">
                         {d.name}
                       </span>
@@ -101,24 +107,6 @@ export default async function DonorWallAdminPage() {
         </div>
       )}
     </div>
-  );
-}
-
-function DonorThumb({ name, photoUrl }: { name: string; photoUrl: string | null }) {
-  if (photoUrl) {
-    return (
-      // biome-ignore lint/performance/noImgElement: arbitrary external donor photo URL
-      <img
-        src={photoUrl}
-        alt=""
-        className="size-9 shrink-0 rounded-full object-cover"
-      />
-    );
-  }
-  return (
-    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-accent/15 text-meta font-semibold text-accent">
-      {initialsFromName(name)}
-    </span>
   );
 }
 
