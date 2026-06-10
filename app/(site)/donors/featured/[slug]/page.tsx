@@ -61,7 +61,7 @@ export default async function FeaturedDonorPage({ params }: { params: Promise<Pa
               <table className="w-full border-collapse text-body-sm">
                 <thead>
                   <tr className="border-b border-hairline bg-ground-2 text-meta uppercase tracking-[0.06em] text-ink-2">
-                    <th className="px-5 py-3 text-left font-semibold">Name</th>
+                    <th className="px-5 py-3 text-left font-semibold">Student ID</th>
                     <th className="px-5 py-3 text-right font-semibold">Amount (USD)</th>
                     <th className="px-5 py-3 text-right font-semibold">Year</th>
                   </tr>
@@ -69,12 +69,7 @@ export default async function FeaturedDonorPage({ params }: { params: Promise<Pa
                 <tbody>
                   {donor.contributions.map((c) => (
                     <tr key={c.id} className="border-b border-hairline last:border-b-0">
-                      <td className="px-5 py-3 text-ink">
-                        {c.studentName}
-                        {c.studentRef ? (
-                          <span className="text-ink-2"> (ID: {c.studentRef})</span>
-                        ) : null}
-                      </td>
+                      <td className="px-5 py-3 tabular-nums text-ink">{c.studentRef || "—"}</td>
                       <td className="px-5 py-3 text-right tabular-nums text-ink">
                         {formatDollars(c.amountCents)}
                       </td>

@@ -6,6 +6,7 @@ import { getFeaturedDonorById } from "@/lib/db/queries/featuredDonors";
 import { formatDollars, formatUsd, formatYearMonth } from "@/lib/donor/featured";
 import { PageHeader } from "../../_components/SectionScaffold";
 import { PhotoUploader } from "../_components/PhotoUploader";
+import { StudentPicker } from "../_components/StudentPicker";
 import {
   addContributionAction,
   deleteContributionAction,
@@ -197,32 +198,9 @@ export default async function EditDonorPage({ params }: { params: Promise<{ id: 
             <input type="hidden" name="donorId" value={donor.id} />
             <p className="text-meta uppercase tracking-[0.06em] text-ink-2">Add a gift</p>
 
-            <label className={labelCls}>
-              <span className={labelText}>Student</span>
-              <input
-                name="studentName"
-                required
-                list="student-directory"
-                placeholder={directory.length ? "Choose or type a student" : "Type a student name"}
-                className={inputCls}
-              />
-              <datalist id="student-directory">
-                {directory.map((s) => (
-                  <option key={s.id} value={s.displayName} />
-                ))}
-              </datalist>
-              <span className="text-meta text-ink-2">
-                {directory.length
-                  ? `Pick from ${directory.length} student${directory.length === 1 ? "" : "s"} in the directory, or type a name.`
-                  : "No students in the directory yet — type the name for now."}
-              </span>
-            </label>
+            <StudentPicker students={directory} />
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <label className={labelCls}>
-                <span className={labelText}>Student ID (optional)</span>
-                <input name="studentRef" placeholder="265" className={inputCls} />
-              </label>
+            <div className="grid grid-cols-2 gap-3">
               <label className={labelCls}>
                 <span className={labelText}>Amount (USD)</span>
                 <input
