@@ -2,17 +2,16 @@ import type { Metadata } from "next";
 import { isDbConfigured } from "@/db/client";
 import { getCurrentDbUser, isClerkConfigured, requireRole } from "@/lib/auth";
 import { donorCodeForUuid } from "@/lib/donor/donorCode";
-import { AdminNav } from "./_components/AdminNav";
-import { AdminSignOutButton } from "./_components/AdminSignOutButton";
+import { AdminSidebar } from "./_components/AdminSidebar";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
 // Admin-only sub-shell. Wraps every page under /dashboard/admin/* with a
-// polished header (admin badge + section nav + sign-out) and asserts the
-// admin role on every render. requireRole() lives in the layout — not in
-// each page — so a new admin sub-page can never accidentally skip the gate.
+// persistent left sidebar (nav + view-site + sign-out) and asserts the admin
+// role on every render. requireRole() lives in the layout — not in each page —
+// so a new admin sub-page can never accidentally skip the gate.
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireRole("admin");
 
@@ -23,32 +22,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const adminBadge = dbUser ? donorCodeForUuid(dbUser.id).replace("BG-", "ADM-") : null;
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-4 border-2 border-ink bg-ink px-5 py-5 text-white sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <p className="text-eyebrow uppercase tracking-[0.12em] text-accent-3">
-            Staff portal · Restricted
-          </p>
-          <h2 className="text-heading-4 text-white">
-            Signed in as <span className="font-semibold">{adminName}</span>
-          </h2>
-          {adminBadge ? (
-            <p className="font-mono text-meta uppercase tracking-[0.08em] text-white/60">
-              {adminBadge}
-            </p>
-          ) : null}
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="inline-block bg-accent-3 px-2.5 py-1 text-meta uppercase tracking-[0.08em] text-ink">
-            Role · Admin
-          </span>
-          {clerkOn ? <AdminSignOutButton /> : null}
-        </div>
-      </header>
-
-      <AdminNav />
-
-      <div>{children}</div>
+    <div className="grid gap-6 lg:grid-cols-[248px_1fr]">
+      <AdminSidebar adminName={adminName} adminBadge={adminBadge} clerkOn={clerkOn} />
+      <main className="min-w-0">{children}</main>
     </div>
   );
 }

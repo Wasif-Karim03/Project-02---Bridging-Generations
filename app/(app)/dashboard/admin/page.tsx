@@ -2,9 +2,19 @@ import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
 import { isDbConfigured } from "@/db/client";
 import { getAllApplications } from "@/lib/db/queries/applications";
-import { thisMonthTotalCents } from "@/lib/db/queries/donations";
+import {
+  getRecentDonations,
+  getRecurringBreakdown,
+  getTopRecipientStudents,
+  lastMonthTotalCents,
+  lifetimeTotalCents,
+  thisMonthTotalCents,
+  thisYearTotalCents,
+} from "@/lib/db/queries/donations";
 import { listAllDonors } from "@/lib/db/queries/donorProfiles";
-import { ApplicationStatusControl } from "./_components/ApplicationStatusControl";
+import { listAllMentors, listAllStudentUsers } from "@/lib/db/queries/users";
+import { AdminIcon, type AdminIconName } from "./_components/icons";
+import { PageHeader } from "./_components/SectionScaffold";
 import { APPLICATION_KIND_LABEL, APPLICATION_STATUS_LABEL, formatDonationAmount } from "./_data";
 
 export const metadata: Metadata = {
@@ -15,7 +25,6 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  year: "numeric",
   month: "short",
   day: "numeric",
 });
@@ -23,161 +32,278 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 export default async function AdminDashboard() {
   // Role check is enforced by the parent admin layout — no need to repeat.
   const usingMockData = !isDbConfigured();
-  const [applications, totalMonthCents, donorList] = await Promise.all([
+  const [
+    applications,
+    thisMonth,
+    lastMonth,
+    thisYear,
+    lifetime,
+    donorList,
+    studentUsers,
+    mentors,
+    recurring,
+    topRecipients,
+    recentDonations,
+  ] = await Promise.all([
     getAllApplications(),
     thisMonthTotalCents(),
+    lastMonthTotalCents(),
+    thisYearTotalCents(),
+    lifetimeTotalCents(),
     listAllDonors(),
+    listAllStudentUsers(),
+    listAllMentors(),
+    getRecurringBreakdown(),
+    getTopRecipientStudents(5),
+    getRecentDonations(6),
   ]);
-  const newApps = applications.filter((a) => a.status === "submitted");
-  const inReviewApps = applications.filter((a) => a.status === "under_review");
+
+  const needsAttention = applications.filter(
+    (a) => a.status === "submitted" || a.status === "under_review",
+  );
+
+  // Month-over-month change, guarding against divide-by-zero.
+  const monthDelta =
+    lastMonth > 0
+      ? Math.round(((thisMonth - lastMonth) / lastMonth) * 100)
+      : thisMonth > 0
+        ? 100
+        : 0;
+
+  const recurringTotal = recurring.recurringCents + recurring.oneTimeCents;
+  const recurringPct =
+    recurringTotal > 0 ? Math.round((recurring.recurringCents / recurringTotal) * 100) : 0;
+  const maxRecipient = topRecipients.reduce((m, r) => Math.max(m, r.totalCents), 0);
 
   return (
-    <div className="flex flex-col gap-10">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-balance text-heading-1 text-ink">Org overview.</h1>
-        <p className="max-w-[60ch] text-body text-ink-2">
-          Review applications, manage donor visibility, assign mentors, and export rosters. Anything
-          you change here takes effect immediately for the affected donor or applicant.
-        </p>
-      </header>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        eyebrow="Overview"
+        title="Welcome back."
+        description="A snapshot of applications, students, mentors, and giving. Use the menu on the left to manage each part of the site."
+      />
 
       {usingMockData ? (
-        <p className="border border-accent-3 bg-accent-3/10 px-4 py-3 text-meta uppercase tracking-[0.06em] text-ink-2">
-          Preview mode — real data appears once DATABASE_URL is set. Numbers below are mock.
+        <p className="rounded-lg border border-accent-3 bg-accent-3/10 px-4 py-3 text-meta uppercase tracking-[0.06em] text-ink-2">
+          Preview mode — real data appears once DATABASE_URL is set. Numbers below are sample data.
         </p>
       ) : null}
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <Stat label="New apps" value={String(newApps.length)} sub="Awaiting review" />
-        <Stat label="In review" value={String(inReviewApps.length)} sub="With a reviewer" />
-        <Stat
-          label="This month"
-          value={formatDonationAmount(totalMonthCents)}
-          sub="Donations received"
+      {/* Headline numbers */}
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard
+          icon="inbox"
+          tone="coral"
+          label="Needs review"
+          value={String(needsAttention.length)}
+          sub="Applications waiting"
+          href="/dashboard/admin/applications"
         />
-        <Stat label="Donors total" value={String(donorList.length)} sub="Active accounts" />
+        <StatCard
+          icon="students"
+          tone="teal"
+          label="Students"
+          value={String(studentUsers.length)}
+          sub="Registered accounts"
+          href="/dashboard/admin/students"
+        />
+        <StatCard
+          icon="users"
+          tone="teal"
+          label="Mentors"
+          value={String(mentors.length)}
+          sub="Active mentors"
+          href="/dashboard/admin/users"
+        />
+        <StatCard
+          icon="donators"
+          tone="amber"
+          label="Donators"
+          value={String(donorList.length)}
+          sub="Active accounts"
+          href="/dashboard/admin/donors"
+        />
       </section>
 
-      <section aria-labelledby="applications-title" className="flex flex-col gap-4">
-        <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
-          <h2 id="applications-title" className="text-heading-3 text-ink">
-            Application queue
-          </h2>
-          <span className="text-meta uppercase tracking-[0.06em] text-ink-2">
-            {applications.length} total
-          </span>
-        </header>
+      {/* Giving visualizations */}
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* This month vs last month */}
+        <div className="flex flex-col gap-4 rounded-2xl border border-hairline bg-ground-2 p-5 lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-heading-6 text-ink">Donations this month</h2>
+            <DeltaBadge delta={monthDelta} />
+          </div>
+          <p className="text-heading-2 tabular-nums text-ink">{formatDonationAmount(thisMonth)}</p>
+          <div className="flex flex-col gap-3">
+            <CompareBar
+              label="This month"
+              value={thisMonth}
+              max={Math.max(thisMonth, lastMonth, 1)}
+              tone="teal"
+            />
+            <CompareBar
+              label="Last month"
+              value={lastMonth}
+              max={Math.max(thisMonth, lastMonth, 1)}
+              tone="muted"
+            />
+          </div>
+          <div className="mt-1 grid grid-cols-2 gap-4 border-t border-hairline pt-4">
+            <MiniStat label="This year" value={formatDonationAmount(thisYear)} />
+            <MiniStat label="Lifetime" value={formatDonationAmount(lifetime)} />
+          </div>
+        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-body-sm">
-            <thead>
-              <tr className="border-b border-hairline text-meta uppercase tracking-[0.06em] text-ink-2">
-                <th className="py-3 pr-4 text-left">Kind</th>
-                <th className="py-3 pr-4 text-left">Applicant</th>
-                <th className="py-3 pr-4 text-left">Summary</th>
-                <th className="py-3 pr-4 text-left">Submitted</th>
-                <th className="py-3 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.map((a) => (
-                <tr key={a.id} className="border-b border-hairline last:border-b-0">
-                  <td className="py-3 pr-4 align-top text-meta uppercase tracking-[0.06em] text-accent">
-                    {APPLICATION_KIND_LABEL[a.kind]}
-                  </td>
-                  <td className="py-3 pr-4 align-top text-ink">
+        {/* Recurring vs one-time donut */}
+        <div className="flex flex-col gap-4 rounded-2xl border border-hairline bg-ground-2 p-5">
+          <h2 className="text-heading-6 text-ink">Recurring vs one-time</h2>
+          <div className="flex items-center gap-5">
+            <div
+              className="relative size-28 shrink-0 rounded-full"
+              style={{
+                background: `conic-gradient(var(--color-accent) 0% ${recurringPct}%, var(--color-accent-3) ${recurringPct}% 100%)`,
+              }}
+            >
+              <div className="absolute inset-[14px] grid place-items-center rounded-full bg-ground-2">
+                <span className="text-heading-5 tabular-nums text-ink">{recurringPct}%</span>
+              </div>
+            </div>
+            <ul className="flex flex-col gap-3 text-body-sm">
+              <LegendRow
+                swatch="bg-accent"
+                label="Recurring"
+                value={`${recurring.recurringCount} gifts`}
+              />
+              <LegendRow
+                swatch="bg-accent-3"
+                label="One-time"
+                value={`${recurring.oneTimeCount} gifts`}
+              />
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Top recipients + recent activity */}
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Top students by funds raised */}
+        <div className="flex flex-col gap-4 rounded-2xl border border-hairline bg-ground-2 p-5">
+          <h2 className="text-heading-6 text-ink">Top students by funds raised</h2>
+          {topRecipients.length === 0 ? (
+            <EmptyNote>No student-directed donations yet.</EmptyNote>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {topRecipients.map((r) => (
+                <li key={r.studentSlug} className="flex flex-col gap-1.5">
+                  <div className="flex items-baseline justify-between gap-3">
                     <Link
-                      href={`/dashboard/admin/applications/${a.kind}/${a.id}`}
-                      className="font-semibold text-accent underline underline-offset-[3px] hover:no-underline"
+                      href={`/dashboard/admin/students/${r.studentSlug}`}
+                      className="truncate text-body-sm text-accent hover:underline"
                     >
-                      {a.applicantName}
+                      {r.studentSlug}
                     </Link>
-                    <div className="text-meta text-ink-2">{a.email}</div>
-                  </td>
-                  <td className="py-3 pr-4 align-top text-ink-2">{a.summary}</td>
-                  <td className="py-3 pr-4 align-top text-meta uppercase tracking-[0.06em] text-ink-2">
-                    <time dateTime={a.submittedAt.toISOString()}>
-                      {dateFormatter.format(a.submittedAt)}
-                    </time>
-                  </td>
-                  <td className="py-3 text-right align-top">
-                    <div className="flex flex-col items-end gap-2">
+                    <span className="shrink-0 tabular-nums text-body-sm text-ink">
+                      {formatDonationAmount(r.totalCents)}
+                    </span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-ground-3">
+                    <div
+                      className="h-full rounded-full bg-accent"
+                      style={{
+                        width: `${maxRecipient > 0 ? (r.totalCents / maxRecipient) * 100 : 0}%`,
+                      }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Recent donations */}
+        <div className="flex flex-col gap-4 rounded-2xl border border-hairline bg-ground-2 p-5">
+          <h2 className="text-heading-6 text-ink">Recent donations</h2>
+          {recentDonations.length === 0 ? (
+            <EmptyNote>No donations recorded yet.</EmptyNote>
+          ) : (
+            <ul className="flex flex-col divide-y divide-hairline">
+              {recentDonations.map((d) => (
+                <li key={d.id} className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-body-sm text-ink">
+                      {d.donorDisplayName || d.donorEmail || "Anonymous"}
+                    </p>
+                    <p className="text-meta text-ink-2">
+                      {d.recurring ? "Recurring · " : "One-time · "}
+                      {dateFormatter.format(d.occurredAt)}
+                    </p>
+                  </div>
+                  <span className="shrink-0 tabular-nums text-body-sm font-medium text-ink">
+                    {formatDonationAmount(d.amountCents)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      {/* Applications needing attention */}
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2 className="text-heading-5 text-ink">Applications needing attention</h2>
+          <Link
+            href="/dashboard/admin/applications"
+            className="text-meta uppercase tracking-[0.06em] text-accent hover:underline"
+          >
+            View all →
+          </Link>
+        </div>
+        {needsAttention.length === 0 ? (
+          <p className="rounded-xl border border-hairline bg-ground-2 px-5 py-8 text-center text-body-sm text-ink-2">
+            All caught up — no applications are waiting for review.
+          </p>
+        ) : (
+          <div className="overflow-x-auto rounded-xl border border-hairline bg-ground-2">
+            <table className="w-full border-collapse text-body-sm">
+              <thead>
+                <tr className="border-b border-hairline text-meta uppercase tracking-[0.06em] text-ink-2">
+                  <th className="px-4 py-3 text-left">Kind</th>
+                  <th className="px-4 py-3 text-left">Applicant</th>
+                  <th className="px-4 py-3 text-left">Submitted</th>
+                  <th className="px-4 py-3 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {needsAttention.map((a) => (
+                  <tr key={a.id} className="border-b border-hairline last:border-b-0">
+                    <td className="px-4 py-3 align-top text-meta uppercase tracking-[0.06em] text-accent">
+                      {APPLICATION_KIND_LABEL[a.kind]}
+                    </td>
+                    <td className="px-4 py-3 align-top text-ink">
+                      <Link
+                        href={`/dashboard/admin/applications/${a.kind}/${a.id}`}
+                        className="font-medium text-accent underline underline-offset-[3px] hover:no-underline"
+                      >
+                        {a.applicantName}
+                      </Link>
+                      <div className="text-meta text-ink-2">{a.email}</div>
+                    </td>
+                    <td className="px-4 py-3 align-top text-meta uppercase tracking-[0.06em] text-ink-2">
+                      <time dateTime={a.submittedAt.toISOString()}>
+                        {dateFormatter.format(a.submittedAt)}
+                      </time>
+                    </td>
+                    <td className="px-4 py-3 text-right align-top">
                       <span
-                        className={`inline-block px-2 py-0.5 text-meta uppercase tracking-[0.06em] ${
-                          a.status === "approved"
-                            ? "bg-accent text-white"
-                            : a.status === "rejected"
-                              ? "bg-accent-2-text text-white"
-                              : a.status === "under_review"
-                                ? "bg-accent-3 text-ink"
-                                : a.status === "submitted"
-                                  ? "bg-accent-2 text-white"
-                                  : "border border-hairline text-ink-2"
+                        className={`inline-block rounded px-2 py-0.5 text-meta uppercase tracking-[0.06em] ${
+                          a.status === "under_review"
+                            ? "bg-accent-3 text-ink"
+                            : "bg-accent-2 text-white"
                         }`}
                       >
                         {APPLICATION_STATUS_LABEL[a.status]}
                       </span>
-                      <ApplicationStatusControl kind={a.kind} id={a.id} current={a.status} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section aria-labelledby="donors-title" className="flex flex-col gap-4">
-        <header className="flex flex-wrap items-baseline justify-between gap-3 border-b border-hairline pb-3">
-          <h2 id="donors-title" className="text-heading-3 text-ink">
-            Donors
-          </h2>
-          <div className="flex gap-2">
-            <Link
-              href="/api/export/donors.xlsx"
-              className="inline-flex min-h-[36px] items-center border border-accent px-3 text-nav-link uppercase text-accent hover:bg-accent hover:text-white"
-            >
-              Export XLSX
-            </Link>
-          </div>
-        </header>
-        {donorList.length === 0 ? (
-          <p className="text-body text-ink-2">
-            No donor accounts yet. As donors sign up at <code>/sign-up</code>, the Clerk webhook
-            syncs them here automatically with role <code>donor</code>.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-body-sm">
-              <thead>
-                <tr className="border-b border-hairline text-meta uppercase tracking-[0.06em] text-ink-2">
-                  <th className="py-3 pr-4 text-left">Legal name</th>
-                  <th className="py-3 pr-4 text-left">Public</th>
-                  <th className="py-3 pr-4 text-right">Lifetime</th>
-                  <th className="py-3 pr-4 text-right">Gifts</th>
-                  <th className="py-3 text-right">Visibility</th>
-                </tr>
-              </thead>
-              <tbody>
-                {donorList.map((d) => (
-                  <tr key={d.id} className="border-b border-hairline last:border-b-0">
-                    <td className="py-3 pr-4 text-ink">
-                      <Link
-                        href={`/dashboard/admin/donors/${d.id}`}
-                        className="text-accent underline underline-offset-[3px] hover:no-underline"
-                      >
-                        {d.legalName}
-                      </Link>
-                    </td>
-                    <td className="py-3 pr-4 text-ink-2">{d.publicInitials || "—"}</td>
-                    <td className="py-3 pr-4 text-right tabular-nums text-ink">
-                      {formatDonationAmount(d.lifetimeCents)}
-                    </td>
-                    <td className="py-3 pr-4 text-right tabular-nums text-ink-2">
-                      {d.donationCount}
-                    </td>
-                    <td className="py-3 text-right text-meta uppercase tracking-[0.06em] text-ink-2">
-                      {d.anonymous ? "Anon · initials only" : "Public · name shown"}
                     </td>
                   </tr>
                 ))}
@@ -186,115 +312,119 @@ export default async function AdminDashboard() {
           </div>
         )}
       </section>
-
-      <section aria-labelledby="management-title" className="flex flex-col gap-4">
-        <header className="flex items-baseline justify-between border-b border-hairline pb-3">
-          <h2 id="management-title" className="text-heading-3 text-ink">
-            Management
-          </h2>
-        </header>
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <li>
-            <Link
-              href="/dashboard/admin/users"
-              className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
-            >
-              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">
-                Users & roles
-              </span>
-              <span className="text-heading-5 text-ink group-hover:text-accent">Manage roles</span>
-              <span className="text-body-sm text-ink-2">
-                Promote approved mentor applicants to the mentor role; grant admin / IT access.
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/dashboard/admin/students"
-              className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
-            >
-              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">Students</span>
-              <span className="text-heading-5 text-ink group-hover:text-accent">
-                Link applicants
-              </span>
-              <span className="text-body-sm text-ink-2">
-                Review student applications and link approved accounts to their Keystatic record.
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/dashboard/admin/mentors"
-              className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
-            >
-              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">Mentors</span>
-              <span className="text-heading-5 text-ink group-hover:text-accent">
-                Assign students
-              </span>
-              <span className="text-body-sm text-ink-2">
-                See every mentor, pair them with students, and review their weekly reports.
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/keystatic"
-              className="group flex flex-col gap-2 border border-hairline bg-ground-2 p-4 transition-colors hover:border-accent"
-            >
-              <span className="text-eyebrow uppercase tracking-[0.1em] text-accent">
-                Site content
-              </span>
-              <span className="text-heading-5 text-ink group-hover:text-accent">
-                Edit pages, students, projects
-              </span>
-              <span className="text-body-sm text-ink-2">
-                Opens the Keystatic CMS where board members edit site copy, student records,
-                projects, testimonials, and home-page numbers. Sign in with GitHub.
-              </span>
-            </Link>
-          </li>
-        </ul>
-      </section>
-
-      <section aria-labelledby="exports-title" className="flex flex-col gap-4">
-        <header className="flex items-baseline justify-between border-b border-hairline pb-3">
-          <h2 id="exports-title" className="text-heading-3 text-ink">
-            Exports
-          </h2>
-        </header>
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <ExportLink href="/api/export/students.xlsx" label="Students (XLSX)" />
-          <ExportLink href="/api/export/teachers.xlsx" label="Teachers (XLSX)" />
-          <ExportLink href="/api/export/donors.xlsx" label="Donors (XLSX)" />
-        </ul>
-        <p className="text-meta uppercase tracking-[0.06em] text-ink-2">
-          Exports respect the consent gate — students whose photoReleaseStatus is not "granted"
-          appear by name + grade only, never with portrait or full address.
-        </p>
-      </section>
     </div>
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
+const TONES: Record<string, { tint: string; fg: string }> = {
+  teal: { tint: "bg-accent/10", fg: "text-accent" },
+  coral: { tint: "bg-accent-2/10", fg: "text-accent-2-text" },
+  amber: { tint: "bg-accent-3/20", fg: "text-ink" },
+};
+
+function StatCard({
+  icon,
+  tone,
+  label,
+  value,
+  sub,
+  href,
+}: {
+  icon: AdminIconName;
+  tone: keyof typeof TONES;
+  label: string;
+  value: string;
+  sub: string;
+  href: string;
+}) {
+  const t = TONES[tone];
   return (
-    <div className="border border-hairline bg-ground-2 p-5">
-      <p className="text-eyebrow uppercase tracking-[0.1em] text-accent">{label}</p>
-      <p className="mt-2 text-heading-2 tabular-nums text-ink">{value}</p>
-      <p className="mt-1 text-meta uppercase tracking-[0.06em] text-ink-2">{sub}</p>
-    </div>
+    <Link
+      href={href}
+      className="group flex flex-col gap-3 rounded-2xl border border-hairline bg-ground-2 p-5 transition-colors hover:border-accent"
+    >
+      <span className={`grid size-10 place-items-center rounded-xl ${t.tint} ${t.fg}`}>
+        <AdminIcon name={icon} className="size-5" />
+      </span>
+      <div>
+        <p className="text-heading-3 tabular-nums text-ink group-hover:text-accent">{value}</p>
+        <p className="mt-0.5 text-body-sm font-medium text-ink">{label}</p>
+        <p className="text-meta uppercase tracking-[0.06em] text-ink-2">{sub}</p>
+      </div>
+    </Link>
   );
 }
 
-function ExportLink({ href, label }: { href: string; label: string }) {
+function DeltaBadge({ delta }: { delta: number }) {
+  if (delta === 0) {
+    return (
+      <span className="rounded-full bg-ground-3 px-2.5 py-1 text-meta uppercase tracking-[0.06em] text-ink-2">
+        No change
+      </span>
+    );
+  }
+  const up = delta > 0;
   return (
-    <li>
-      <Link
-        href={href}
-        className="inline-flex min-h-[44px] w-full items-center justify-center border border-accent px-4 text-nav-link uppercase text-accent transition-colors hover:bg-accent hover:text-white"
-      >
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-meta uppercase tracking-[0.06em] ${
+        up ? "bg-accent/10 text-accent" : "bg-accent-2/10 text-accent-2-text"
+      }`}
+    >
+      <AdminIcon name={up ? "trendUp" : "trendDown"} className="size-3.5" />
+      {up ? "+" : ""}
+      {delta}% vs last month
+    </span>
+  );
+}
+
+function CompareBar({
+  label,
+  value,
+  max,
+  tone,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  tone: "teal" | "muted";
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="w-20 shrink-0 text-meta uppercase tracking-[0.06em] text-ink-2">
         {label}
-      </Link>
+      </span>
+      <div className="h-3 flex-1 overflow-hidden rounded-full bg-ground-3">
+        <div
+          className={`h-full rounded-full ${tone === "teal" ? "bg-accent" : "bg-ink-2/40"}`}
+          style={{ width: `${max > 0 ? (value / max) * 100 : 0}%` }}
+        />
+      </div>
+      <span className="w-20 shrink-0 text-right tabular-nums text-body-sm text-ink">
+        {formatDonationAmount(value)}
+      </span>
+    </div>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-meta uppercase tracking-[0.06em] text-ink-2">{label}</p>
+      <p className="mt-0.5 text-heading-6 tabular-nums text-ink">{value}</p>
+    </div>
+  );
+}
+
+function LegendRow({ swatch, label, value }: { swatch: string; label: string; value: string }) {
+  return (
+    <li className="flex items-center gap-2.5">
+      <span className={`size-3 shrink-0 rounded-sm ${swatch}`} />
+      <span className="text-ink">{label}</span>
+      <span className="text-ink-2">· {value}</span>
     </li>
   );
+}
+
+function EmptyNote({ children }: { children: React.ReactNode }) {
+  return <p className="py-6 text-center text-body-sm text-ink-2">{children}</p>;
 }
