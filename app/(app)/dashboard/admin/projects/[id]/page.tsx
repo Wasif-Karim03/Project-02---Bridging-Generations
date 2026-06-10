@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { getProjectById } from "@/lib/db/queries/projects";
 import { formatMoney, fundingPercent, remainingCents } from "@/lib/projects/format";
-import { isR2Configured } from "@/lib/storage/r2";
 import { PageHeader } from "../../_components/SectionScaffold";
 import { ImageUploader } from "../_components/ImageUploader";
 import {
@@ -59,12 +58,6 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         title={project.name}
         description={`${formatMoney(project.raisedCents)} of ${formatMoney(project.targetCents)} raised · ${pct}% · ${formatMoney(remainingCents(project.raisedCents, project.targetCents))} to go.`}
       />
-
-      {!isR2Configured() ? (
-        <p className="rounded-lg border border-accent-3 bg-accent-3/10 px-4 py-3 text-meta uppercase tracking-[0.06em] text-ink-2">
-          Photo uploads are disabled until Cloudflare R2 keys are set (R2_* env vars).
-        </p>
-      ) : null}
 
       {/* Cover */}
       <section className="flex flex-col gap-3 rounded-xl border border-hairline bg-ground-2 p-5">

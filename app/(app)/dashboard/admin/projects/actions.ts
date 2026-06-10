@@ -9,11 +9,9 @@ import {
   deleteProject,
   deleteProjectImage,
   deleteProjectLink,
-  getProjectImage,
   updateProject,
 } from "@/lib/db/queries/projects";
 import { centsFromDollarsInput } from "@/lib/projects/format";
-import { deleteFromR2ByUrl } from "@/lib/storage/r2";
 
 const LIST = "/dashboard/admin/projects";
 
@@ -93,8 +91,6 @@ export async function deleteImageAction(formData: FormData): Promise<void> {
   const id = str(formData, "id");
   const projectId = str(formData, "projectId");
   if (!id) return;
-  const image = await getProjectImage(id);
-  if (image) await deleteFromR2ByUrl(image.url);
   await deleteProjectImage(id);
   if (projectId) revalidateProject(projectId);
 }
@@ -102,9 +98,7 @@ export async function deleteImageAction(formData: FormData): Promise<void> {
 export async function removeCoverAction(formData: FormData): Promise<void> {
   await requireRole("admin");
   const id = str(formData, "id");
-  const coverUrl = str(formData, "coverUrl");
   if (!id) return;
-  if (coverUrl) await deleteFromR2ByUrl(coverUrl);
   await updateProject(id, { coverUrl: null });
   revalidateProject(id);
 }

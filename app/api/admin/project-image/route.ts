@@ -2,23 +2,23 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { requireRole } from "@/lib/auth";
 import { addProjectImage, updateProject } from "@/lib/db/queries/projects";
-import { extForType, isR2Configured, uploadToR2 } from "@/lib/storage/r2";
+import { commitImageToRepo, extForImage, isRepoImageConfigured } from "@/lib/storage/repoImage";
 
 export const runtime = "nodejs";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
-// Upload a project image to Cloudflare R2. `kind=cover` sets the project's
-// cover; `kind=gallery` appends to the gallery. Admin-only.
+// Upload a project image (free CDN-backed storage). `kind=cover` sets the
+// project's cover; `kind=gallery` appends to the gallery. Admin-only.
 export async function POST(request: Request) {
   try {
     await requireRole("admin");
   } catch {
     return NextResponse.json({ error: "Not authorized." }, { status: 403 });
   }
-  if (!isR2Configured()) {
+  if (!isRepoImageConfigured()) {
     return NextResponse.json(
-      { error: "Cloudflare R2 isn't configured yet (R2_* env vars missing)." },
+      { error: "Image uploads aren't configured (DEVELOPER_GITHUB_TOKEN missing)." },
       { status: 500 },
     );
   }
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   if (!projectId || !(file instanceof File)) {
     return NextResponse.json({ error: "Missing project or file." }, { status: 400 });
   }
-  const ext = extForType(file.type);
+  const ext = extForImage(file.type);
   if (!ext) {
     return NextResponse.json({ error: "Use a JPG, PNG, WebP, GIF or AVIF image." }, { status: 400 });
   }
@@ -42,10 +42,10 @@ export async function POST(request: Request) {
   }
 
   const safeId = projectId.replace(/[^a-zA-Z0-9-]/g, "").slice(0, 36);
-  const key = `projects/${safeId}/${kind}-${crypto.randomUUID()}.${ext}`;
+  const filePath = `public/images/projects/${safeId}/${kind}-${crypto.randomUUID()}.${ext}`;
 
   try {
-    const url = await uploadToR2(key, bytes, file.type);
+    const url = await commitImageToRepo(filePath, bytes, `project: ${kind} image ${safeId}`);
     if (kind === "cover") {
       await updateProject(projectId, { coverUrl: url });
     } else {
