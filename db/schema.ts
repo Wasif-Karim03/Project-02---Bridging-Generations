@@ -564,6 +564,70 @@ export const donorContributions = pgTable(
   }),
 );
 
+// ---------- Projects (admin-curated, fundraising) ----------
+// Admin-managed project showcase with a cover image, a gallery, external
+// links, and a fundraising goal. Images live in Cloudflare R2; we store the
+// public URLs. Progress (% funded, amount remaining) is computed from
+// raised/target, never stored.
+
+export const projects = pgTable(
+  "projects",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: varchar("slug", { length: 140 }).notNull().unique(),
+    name: varchar("name", { length: 200 }).notNull(),
+    tagline: varchar("tagline", { length: 280 }),
+    description: text("description"),
+    coverUrl: varchar("cover_url", { length: 1024 }),
+    raisedCents: integer("raised_cents").notNull().default(0),
+    targetCents: integer("target_cents").notNull().default(0),
+    currency: varchar("currency", { length: 3 }).notNull().default("usd"),
+    displayOrder: integer("display_order").notNull().default(0),
+    published: boolean("published").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byOrder: index("projects_order_idx").on(t.displayOrder),
+  }),
+);
+
+// Gallery photos for a project (beyond the cover). R2 public URLs.
+export const projectImages = pgTable(
+  "project_images",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    url: varchar("url", { length: 1024 }).notNull(),
+    caption: varchar("caption", { length: 280 }),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byProject: index("project_images_project_idx").on(t.projectId),
+  }),
+);
+
+// External links shown under the description on a project's detail page.
+export const projectLinks = pgTable(
+  "project_links",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    label: varchar("label", { length: 200 }).notNull(),
+    url: varchar("url", { length: 1024 }).notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byProject: index("project_links_project_idx").on(t.projectId),
+  }),
+);
+
 // ---------- Type exports ----------
 
 export type User = typeof users.$inferSelect;
@@ -593,6 +657,12 @@ export type FeaturedDonor = typeof featuredDonors.$inferSelect;
 export type NewFeaturedDonor = typeof featuredDonors.$inferInsert;
 export type DonorContribution = typeof donorContributions.$inferSelect;
 export type NewDonorContribution = typeof donorContributions.$inferInsert;
+export type Project = typeof projects.$inferSelect;
+export type NewProject = typeof projects.$inferInsert;
+export type ProjectImage = typeof projectImages.$inferSelect;
+export type NewProjectImage = typeof projectImages.$inferInsert;
+export type ProjectLink = typeof projectLinks.$inferSelect;
+export type NewProjectLink = typeof projectLinks.$inferInsert;
 
 // Re-export sql for callers who need raw expressions.
 export { sql };

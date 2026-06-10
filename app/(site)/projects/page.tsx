@@ -7,6 +7,7 @@ import { ProgramCard } from "@/components/domain/ProgramCard";
 import { TeacherPanel } from "@/components/domain/TeacherPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { listProjects } from "@/lib/db/queries/projects";
 import { getProjectsByStatus } from "@/lib/content/projects";
 import { getProjectsPage } from "@/lib/content/projectsPage";
 import { getAllSchools } from "@/lib/content/schools";
@@ -16,6 +17,7 @@ import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList, collectionPage } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
 import { FundedRecap } from "./_components/FundedRecap";
+import { ProjectShowcase } from "./_components/ProjectShowcase";
 import { ProjectsHero } from "./_components/ProjectsHero";
 
 export const metadata: Metadata = {
@@ -26,13 +28,15 @@ export const metadata: Metadata = {
 };
 
 export default async function ProjectsPage() {
-  const [{ active, paused, funded }, projectsPage, teachers, schools, t] = await Promise.all([
-    getProjectsByStatus(),
-    getProjectsPage(),
-    getAllTeachers(),
-    getAllSchools(),
-    getTranslations("projectsPageExtra"),
-  ]);
+  const [{ active, paused, funded }, projectsPage, teachers, schools, featuredProjects, t] =
+    await Promise.all([
+      getProjectsByStatus(),
+      getProjectsPage(),
+      getAllTeachers(),
+      getAllSchools(),
+      listProjects({ publishedOnly: true }),
+      getTranslations("projectsPageExtra"),
+    ]);
   const list = [...active, ...paused];
   const totalRaised = list.reduce((sum, p) => sum + p.fundingRaised, 0);
 
@@ -52,6 +56,8 @@ export default async function ProjectsPage() {
   return (
     <>
       <ProjectsHero count={list.length} totalRaised={totalRaised} />
+
+      <ProjectShowcase projects={featuredProjects} />
 
       {/* Scholarships pointer — quick path to the sub-page */}
       <section
