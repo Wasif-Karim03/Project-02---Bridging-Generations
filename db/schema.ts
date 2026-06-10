@@ -628,6 +628,47 @@ export const projectLinks = pgTable(
   }),
 );
 
+// ---------- Blog posts (admin-curated) ----------
+// Admin-managed blog with a cover image, title, body (English or Bengali —
+// stored as plain UTF-8 text), and optional links. Distinct from the Keystatic
+// blogPost collection.
+
+export const blogPosts = pgTable(
+  "blog_posts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: varchar("slug", { length: 160 }).notNull().unique(),
+    title: varchar("title", { length: 300 }).notNull(),
+    coverUrl: varchar("cover_url", { length: 1024 }),
+    body: text("body"),
+    displayOrder: integer("display_order").notNull().default(0),
+    published: boolean("published").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byOrder: index("blog_posts_order_idx").on(t.displayOrder),
+    byCreated: index("blog_posts_created_idx").on(t.createdAt),
+  }),
+);
+
+export const blogPostLinks = pgTable(
+  "blog_post_links",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => blogPosts.id, { onDelete: "cascade" }),
+    label: varchar("label", { length: 200 }).notNull(),
+    url: varchar("url", { length: 1024 }).notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byPost: index("blog_post_links_post_idx").on(t.postId),
+  }),
+);
+
 // ---------- Type exports ----------
 
 export type User = typeof users.$inferSelect;
@@ -663,6 +704,10 @@ export type ProjectImage = typeof projectImages.$inferSelect;
 export type NewProjectImage = typeof projectImages.$inferInsert;
 export type ProjectLink = typeof projectLinks.$inferSelect;
 export type NewProjectLink = typeof projectLinks.$inferInsert;
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type NewBlogPost = typeof blogPosts.$inferInsert;
+export type BlogPostLink = typeof blogPostLinks.$inferSelect;
+export type NewBlogPostLink = typeof blogPostLinks.$inferInsert;
 
 // Re-export sql for callers who need raw expressions.
 export { sql };
