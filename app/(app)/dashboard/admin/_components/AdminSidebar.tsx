@@ -23,6 +23,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard/admin/students", label: "Students", icon: "students", match: "prefix" },
   { href: "/dashboard/admin/projects", label: "Projects", icon: "projects", match: "prefix" },
   { href: "/dashboard/admin/donors", label: "Donators", icon: "donators", match: "prefix" },
+  { href: "/dashboard/admin/donor-wall", label: "Donor Wall", icon: "donorWall", match: "prefix" },
   { href: "/dashboard/admin/pages", label: "Pages", icon: "pages", match: "prefix" },
   { href: "/dashboard/admin/gallery", label: "Gallery", icon: "gallery", match: "prefix" },
   { href: "/dashboard/admin/slides", label: "Slides", icon: "slides", match: "prefix" },

@@ -8,6 +8,7 @@ export type AdminIconName =
   | "students"
   | "projects"
   | "donators"
+  | "donorWall"
   | "pages"
   | "gallery"
   | "slides"
@@ -48,6 +49,12 @@ const PATHS: Record<AdminIconName, React.ReactNode> = {
   donators: (
     <>
       <path d="M20.8 8.6a4.5 4.5 0 0 0-7-5.5l-1.8 1.7-1.8-1.7a4.5 4.5 0 1 0-6.2 6.5l8 7.6 8-7.6c.4-.4.6-.7.8-1Z" />
+    </>
+  ),
+  donorWall: (
+    <>
+      <circle cx="12" cy="8" r="5" />
+      <path d="m9 12.5-1.5 8.5 4.5-2.7 4.5 2.7L15 12.5" />
     </>
   ),
   pages: (

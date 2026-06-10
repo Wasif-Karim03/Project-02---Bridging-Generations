@@ -512,6 +512,58 @@ export const rateLimits = pgTable(
   }),
 );
 
+// ---------- Featured donors (admin-curated public donor wall) ----------
+// Distinct from `donor_profiles` (self-registered donors + Stripe gifts):
+// these are showcase donors an admin enters by hand, with a photo and a
+// per-student contribution breakdown. Totals + student counts are computed
+// from `donor_contributions` rather than stored, so they never drift.
+
+export const featuredDonors = pgTable(
+  "featured_donors",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    // URL-safe handle used for the public detail page /donors/<slug>.
+    slug: varchar("slug", { length: 120 }).notNull().unique(),
+    name: varchar("name", { length: 200 }).notNull(),
+    // Public photo (image URL). Rendered in a circle on the donor wall.
+    photoUrl: varchar("photo_url", { length: 1024 }),
+    // Optional one-line note shown under the name.
+    blurb: varchar("blurb", { length: 280 }),
+    // Lower numbers sort first on the public wall.
+    displayOrder: integer("display_order").notNull().default(0),
+    // Hidden from the public wall when false (draft).
+    published: boolean("published").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byOrder: index("featured_donors_order_idx").on(t.displayOrder),
+  }),
+);
+
+// One row per gift a featured donor made toward a student. year/month are kept
+// as plain integers (not a date) to match the "2024-12" display exactly and to
+// allow a year with an unknown month.
+export const donorContributions = pgTable(
+  "donor_contributions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    donorId: uuid("donor_id")
+      .notNull()
+      .references(() => featuredDonors.id, { onDelete: "cascade" }),
+    studentName: varchar("student_name", { length: 200 }).notNull(),
+    // Free-text student identifier shown as "(ID: 265)". Optional.
+    studentRef: varchar("student_ref", { length: 60 }),
+    amountCents: integer("amount_cents").notNull(),
+    year: integer("year"),
+    month: integer("month"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    byDonor: index("donor_contributions_donor_idx").on(t.donorId),
+  }),
+);
+
 // ---------- Type exports ----------
 
 export type User = typeof users.$inferSelect;
@@ -537,6 +589,10 @@ export type MediaItem = typeof mediaItems.$inferSelect;
 export type NewMediaItem = typeof mediaItems.$inferInsert;
 export type MentorCall = typeof mentorCalls.$inferSelect;
 export type NewMentorCall = typeof mentorCalls.$inferInsert;
+export type FeaturedDonor = typeof featuredDonors.$inferSelect;
+export type NewFeaturedDonor = typeof featuredDonors.$inferInsert;
+export type DonorContribution = typeof donorContributions.$inferSelect;
+export type NewDonorContribution = typeof donorContributions.$inferInsert;
 
 // Re-export sql for callers who need raw expressions.
 export { sql };

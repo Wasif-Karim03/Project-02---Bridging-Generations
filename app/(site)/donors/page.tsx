@@ -5,7 +5,9 @@ import { LifetimeImpact } from "@/app/(site)/donation-journey/_components/Lifeti
 import { YearTimeline } from "@/app/(site)/donation-journey/_components/YearTimeline";
 import { CTAFooterPanel } from "@/components/domain/CTAFooterPanel";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { listFeaturedDonors } from "@/lib/db/queries/featuredDonors";
 import { getDonationJourney } from "@/lib/content/donationJourney";
+import { DonorWall } from "./_components/DonorWall";
 import { pageAlternates } from "@/lib/seo/alternates";
 import { breadcrumbList } from "@/lib/seo/jsonLd";
 import { SITE_URL } from "@/lib/seo/siteUrl";
@@ -19,6 +21,7 @@ export const metadata: Metadata = {
 
 export default async function DonorsPage() {
   const journey = await getDonationJourney();
+  const featuredDonors = await listFeaturedDonors({ publishedOnly: true });
   const t = await getTranslations("donationJourney");
 
   const ldBreadcrumb = breadcrumbList(SITE_URL, [
@@ -34,6 +37,7 @@ export default async function DonorsPage() {
         totalRaisedAllTime={journey.totalRaisedAllTime ?? 0}
       />
       <YearTimeline entries={journey.yearlyEntries} />
+      <DonorWall donors={featuredDonors} />
       <LifetimeImpact
         totalRaisedAllTime={journey.totalRaisedAllTime ?? 0}
         totalStudentsAllTime={journey.totalStudentsAllTime ?? 0}
