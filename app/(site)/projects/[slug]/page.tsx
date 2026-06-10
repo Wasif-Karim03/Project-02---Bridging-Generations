@@ -50,7 +50,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
 
           {/* Name + progress */}
           <header className="flex flex-col gap-5">
-            <h1 className="text-balance text-display-2 text-ink">{project.name}</h1>
+            <h1 className="text-balance text-display-1 text-accent">{project.name}</h1>
             {project.tagline ? <p className="text-body-lg text-ink-2">{project.tagline}</p> : null}
 
             {project.targetCents > 0 ? (

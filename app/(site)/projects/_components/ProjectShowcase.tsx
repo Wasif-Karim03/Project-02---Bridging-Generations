@@ -46,8 +46,11 @@ export function ProjectShowcase({ projects }: { projects: Project[] }) {
 
                 <div className={`flex flex-col gap-5 ${coverRight ? "lg:order-1" : "lg:order-2"}`}>
                   <div className="flex flex-col gap-2">
-                    <h3 className="text-balance text-display-3 text-ink">
-                      <Link href={`/projects/${p.slug}`} className="hover:text-accent-2-text">
+                    <h3 className="text-balance text-display-2 text-accent">
+                      <Link
+                        href={`/projects/${p.slug}`}
+                        className="transition-colors hover:text-accent/75"
+                      >
                         {p.name}
                       </Link>
                     </h3>
