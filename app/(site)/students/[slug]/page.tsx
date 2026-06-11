@@ -39,7 +39,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
   // application. Keystatic students fall through to the curated layout below.
   const approved = await getApprovedStudentDetail(slug);
   if (approved) {
-    return <ApprovedStudentProfile detail={approved} />;
+    return <ApprovedStudentProfile detail={approved} slug={slug} />;
   }
   const student = await getStudentBySlug(slug);
   if (!student) {
@@ -164,7 +164,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
             ) : null}
             <div className="mt-4 flex flex-wrap gap-3">
               <Link
-                href="/be-a-donor"
+                href={`/donate/start?student=${slug}`}
                 className="inline-flex min-h-[48px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
               >
                 Be a Donor
@@ -208,7 +208,7 @@ export default async function StudentProfilePage({ params }: { params: Promise<P
 
 // Full data-rich profile for an approved DB student — shows everything we
 // collected on the application, plus a donations table.
-function ApprovedStudentProfile({ detail }: { detail: ApprovedStudentDetail }) {
+function ApprovedStudentProfile({ detail, slug }: { detail: ApprovedStudentDetail; slug: string }) {
   const f = detail.funding;
   return (
     <main className="bg-ground">
@@ -274,7 +274,7 @@ function ApprovedStudentProfile({ detail }: { detail: ApprovedStudentDetail }) {
 
             <div className="flex flex-wrap gap-3">
               <Link
-                href="/be-a-donor"
+                href={`/donate/start?student=${slug}`}
                 className="inline-flex min-h-[48px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
               >
                 Sponsor this student

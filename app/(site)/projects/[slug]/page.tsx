@@ -129,7 +129,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<Pa
         headline="Help fund this project"
         body="Every gift moves a project closer to its goal."
         ctaLabel="Donate"
-        ctaHref="/donate"
+        ctaHref={`/donate/start?project=${project.slug}`}
         tone="teal"
         titleId="project-cta-title"
       />
