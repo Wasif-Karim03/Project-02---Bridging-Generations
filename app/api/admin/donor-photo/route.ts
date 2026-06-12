@@ -30,7 +30,9 @@ async function gh<T>(endpoint: string, init: RequestInit, token: string): Promis
     cache: "no-store",
   });
   if (!res.ok) {
-    throw new Error(`GitHub ${init.method ?? "GET"} ${endpoint} → ${res.status}: ${await res.text()}`);
+    throw new Error(
+      `GitHub ${init.method ?? "GET"} ${endpoint} → ${res.status}: ${await res.text()}`,
+    );
   }
   return res.json() as Promise<T>;
 }
@@ -91,7 +93,10 @@ export async function POST(request: Request) {
     );
     const blob = await gh<{ sha: string }>(
       `${repo}/git/blobs`,
-      { method: "POST", body: JSON.stringify({ content: bytes.toString("base64"), encoding: "base64" }) },
+      {
+        method: "POST",
+        body: JSON.stringify({ content: bytes.toString("base64"), encoding: "base64" }),
+      },
       token,
     );
     const tree = await gh<{ sha: string }>(
@@ -109,7 +114,11 @@ export async function POST(request: Request) {
       `${repo}/git/commits`,
       {
         method: "POST",
-        body: JSON.stringify({ message: `donor: photo ${filePath}`, tree: tree.sha, parents: [headSha] }),
+        body: JSON.stringify({
+          message: `donor: photo ${filePath}`,
+          tree: tree.sha,
+          parents: [headSha],
+        }),
       },
       token,
     );

@@ -57,7 +57,11 @@ export default async function AdminPostsPage() {
               >
                 {p.coverUrl ? (
                   // biome-ignore lint/performance/noImgElement: CDN-hosted cover URL
-                  <img src={p.coverUrl} alt="" className="h-14 w-20 shrink-0 rounded-lg object-cover" />
+                  <img
+                    src={p.coverUrl}
+                    alt=""
+                    className="h-14 w-20 shrink-0 rounded-lg object-cover"
+                  />
                 ) : (
                   <span className="grid h-14 w-20 shrink-0 place-items-center rounded-lg bg-accent/10 text-meta uppercase text-accent">
                     No cover

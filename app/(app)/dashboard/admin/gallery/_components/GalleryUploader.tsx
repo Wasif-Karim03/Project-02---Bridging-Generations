@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import { GALLERY_TAGS } from "@/lib/gallery/tags";
 
 // Uploads one or more gallery photos under a chosen tag, to the free CDN

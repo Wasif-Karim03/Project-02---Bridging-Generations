@@ -213,7 +213,8 @@ const USERS = [
       subjects: "Math, Science",
       hoursPerWeek: "2-3",
       startTerm: "Spring 2026",
-      whyMentor: "I want to share my passion for math with students who don't have access to good teachers.",
+      whyMentor:
+        "I want to share my passion for math with students who don't have access to good teachers.",
       status: "approved",
     },
     mentorBio: "Math teacher with 8 years of experience; loves making algebra click.",
@@ -302,7 +303,11 @@ const USERS = [
         eventDate: "2026-02-14",
         description: "Adhara's school + community room.",
         items: [
-          { kind: "image", url: "https://drive.example.com/photo-1.jpg", title: "Classroom panorama" },
+          {
+            kind: "image",
+            url: "https://drive.example.com/photo-1.jpg",
+            title: "Classroom panorama",
+          },
           { kind: "image", url: "https://drive.example.com/photo-2.jpg", title: "Math session" },
           { kind: "link", url: "https://drive.example.com/folder", title: "Full Drive folder" },
         ],
@@ -423,7 +428,9 @@ async function run() {
         `;
       }
 
-      console.log(`ok (db=${dbId.slice(0, 8)} clerk=${clerk.id.slice(0, 16)}${clerk.isNew ? " new" : " reused"})`);
+      console.log(
+        `ok (db=${dbId.slice(0, 8)} clerk=${clerk.id.slice(0, 16)}${clerk.isNew ? " new" : " reused"})`,
+      );
     } catch (err) {
       console.log("FAILED:", err.message);
     }

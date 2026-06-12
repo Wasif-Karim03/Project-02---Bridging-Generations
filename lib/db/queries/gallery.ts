@@ -27,19 +27,13 @@ export async function listGalleryItems(): Promise<GalleryItem[]> {
       .select({ url: galleryImages.url, caption: galleryImages.caption, tag: galleryImages.tag })
       .from(galleryImages)
       .orderBy(desc(galleryImages.createdAt)),
-    db
-      .select({ url: projects.coverUrl })
-      .from(projects)
-      .where(eq(projects.published, true)),
+    db.select({ url: projects.coverUrl }).from(projects).where(eq(projects.published, true)),
     db
       .select({ url: projectImages.url })
       .from(projectImages)
       .innerJoin(projects, eq(projectImages.projectId, projects.id))
       .where(eq(projects.published, true)),
-    db
-      .select({ url: blogPosts.coverUrl })
-      .from(blogPosts)
-      .where(eq(blogPosts.published, true)),
+    db.select({ url: blogPosts.coverUrl }).from(blogPosts).where(eq(blogPosts.published, true)),
   ]);
 
   const items: GalleryItem[] = [];

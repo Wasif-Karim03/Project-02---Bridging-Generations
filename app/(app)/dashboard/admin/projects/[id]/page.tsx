@@ -65,18 +65,18 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         <div className="flex flex-wrap items-center gap-5">
           {project.coverUrl ? (
             // biome-ignore lint/performance/noImgElement: R2-hosted cover URL
-            <img
-              src={project.coverUrl}
-              alt=""
-              className="h-32 w-48 rounded-lg object-cover"
-            />
+            <img src={project.coverUrl} alt="" className="h-32 w-48 rounded-lg object-cover" />
           ) : (
             <span className="grid h-32 w-48 place-items-center rounded-lg bg-accent/10 text-meta uppercase text-accent">
               No cover yet
             </span>
           )}
           <div className="flex flex-col gap-2">
-            <ImageUploader projectId={project.id} kind="cover" label={project.coverUrl ? "Change cover" : "Upload cover"} />
+            <ImageUploader
+              projectId={project.id}
+              kind="cover"
+              label={project.coverUrl ? "Change cover" : "Upload cover"}
+            />
             {project.coverUrl ? (
               <form action={removeCoverAction}>
                 <input type="hidden" name="id" value={project.id} />
@@ -188,9 +188,16 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
         ) : (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {project.images.map((img) => (
-              <li key={img.id} className="group relative overflow-hidden rounded-lg border border-hairline">
+              <li
+                key={img.id}
+                className="group relative overflow-hidden rounded-lg border border-hairline"
+              >
                 {/* biome-ignore lint/performance/noImgElement: R2-hosted gallery URL */}
-                <img src={img.url} alt={img.caption ?? ""} className="aspect-square w-full object-cover" />
+                <img
+                  src={img.url}
+                  alt={img.caption ?? ""}
+                  className="aspect-square w-full object-cover"
+                />
                 <form action={deleteImageAction} className="absolute right-1 top-1">
                   <input type="hidden" name="id" value={img.id} />
                   <input type="hidden" name="projectId" value={project.id} />

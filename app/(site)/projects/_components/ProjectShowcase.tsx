@@ -1,6 +1,6 @@
 import { Link } from "next-view-transitions";
-import type { Project } from "@/db/schema";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import type { Project } from "@/db/schema";
 import { formatMoney, fundingPercent, remainingCents } from "@/lib/projects/format";
 
 // Alternating project rows: the first project shows its cover on the right with
@@ -10,11 +10,17 @@ export function ProjectShowcase({ projects }: { projects: Project[] }) {
   if (projects.length === 0) return null;
 
   return (
-    <section className="bg-ground px-4 py-20 sm:px-6 lg:px-[6%] lg:py-28" aria-labelledby="projects-showcase-title">
+    <section
+      className="bg-ground px-4 py-20 sm:px-6 lg:px-[6%] lg:py-28"
+      aria-labelledby="projects-showcase-title"
+    >
       <div className="mx-auto flex max-w-[1280px] flex-col gap-6">
         <header className="flex flex-col gap-3">
           <Eyebrow>Our Projects</Eyebrow>
-          <h2 id="projects-showcase-title" className="max-w-[24ch] text-balance text-display-3 text-ink">
+          <h2
+            id="projects-showcase-title"
+            className="max-w-[24ch] text-balance text-display-3 text-ink"
+          >
             What your support is building
           </h2>
         </header>

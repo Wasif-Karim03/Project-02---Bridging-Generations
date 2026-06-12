@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { listDedicatedGalleryImages } from "@/lib/db/queries/gallery";
 import { PageHeader } from "../_components/SectionScaffold";
-import { deleteGalleryImageAction } from "./actions";
 import { GalleryUploader } from "./_components/GalleryUploader";
+import { deleteGalleryImageAction } from "./actions";
 
 export const metadata: Metadata = {
   title: "Gallery · Admin",
@@ -33,9 +33,16 @@ export default async function AdminGalleryPage() {
         ) : (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {images.map((img) => (
-              <li key={img.id} className="relative overflow-hidden rounded-lg border border-hairline">
+              <li
+                key={img.id}
+                className="relative overflow-hidden rounded-lg border border-hairline"
+              >
                 {/* biome-ignore lint/performance/noImgElement: CDN-hosted gallery URL */}
-                <img src={img.url} alt={img.caption ?? ""} className="aspect-square w-full object-cover" />
+                <img
+                  src={img.url}
+                  alt={img.caption ?? ""}
+                  className="aspect-square w-full object-cover"
+                />
                 <span className="absolute left-1 top-1 rounded-md bg-ink/75 px-2 py-0.5 text-meta uppercase text-white">
                   {img.tag}
                 </span>

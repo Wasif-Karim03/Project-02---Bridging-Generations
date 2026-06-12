@@ -149,7 +149,9 @@ try {
         process.exit(4);
       }
     }
-    console.log(`Clerk: ${deleted} deleted, ${skipped} already-gone, ${preserved.length} preserved`);
+    console.log(
+      `Clerk: ${deleted} deleted, ${skipped} already-gone, ${preserved.length} preserved`,
+    );
     console.log("");
   }
 

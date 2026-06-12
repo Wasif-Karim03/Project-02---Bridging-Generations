@@ -23,6 +23,7 @@ export function DonorAvatar({
   }
   return (
     <span
+      role="img"
       aria-label="Bridging Generations"
       className={`grid shrink-0 place-items-center rounded-full bg-accent font-bold tracking-[-0.02em] text-white ${monogramClassName} ${className}`}
     >

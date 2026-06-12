@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
-import { getApprovedPublicStudents, getAllStudents } from "@/lib/content/students";
+import { getAllStudents, getApprovedPublicStudents } from "@/lib/content/students";
 import { getFeaturedDonorById } from "@/lib/db/queries/featuredDonors";
 import { formatDollars, formatUsd, formatYearMonth } from "@/lib/donor/featured";
 import { PageHeader } from "../../_components/SectionScaffold";
@@ -39,9 +39,9 @@ export default async function EditDonorPage({ params }: { params: Promise<{ id: 
     getAllStudents(),
     getApprovedPublicStudents(),
   ]);
-  const directory = [...new Map(
-    [...ksStudents, ...dbStudents].map((s) => [s.id, s.displayName]),
-  )].map(([sid, displayName]) => ({ id: sid, displayName }));
+  const directory = [
+    ...new Map([...ksStudents, ...dbStudents].map((s) => [s.id, s.displayName])),
+  ].map(([sid, displayName]) => ({ id: sid, displayName }));
 
   return (
     <div className="flex flex-col gap-8">

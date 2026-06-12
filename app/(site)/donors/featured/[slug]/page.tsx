@@ -46,7 +46,9 @@ export default async function FeaturedDonorPage({ params }: { params: Promise<Pa
               monogramClassName="text-heading-2"
             />
             <h1 className="text-heading-2 uppercase tracking-[0.02em] text-ink">{donor.name}</h1>
-            {donor.blurb ? <p className="max-w-[48ch] text-body text-ink-2">{donor.blurb}</p> : null}
+            {donor.blurb ? (
+              <p className="max-w-[48ch] text-body text-ink-2">{donor.blurb}</p>
+            ) : null}
             <p className="text-heading-4 text-ink">
               Total: <span className="tabular-nums">{formatUsd(donor.totalCents)}</span>
             </p>

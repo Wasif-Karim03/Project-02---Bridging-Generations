@@ -39,12 +39,12 @@ describe("Nav", () => {
     expect(aboutDropdown.querySelector(".nav-active-motif")).toBeNull();
   });
 
-  it("renders Be-a-Donor links to /be-a-donor at desktop and mobile-bar widths", () => {
+  it("renders Be-a-Donor links to the donation choice screen at desktop and mobile-bar widths", () => {
     render(<Nav />);
     const cta = screen.getAllByRole("link", { name: "Be a Donor" });
     expect(cta.length).toBeGreaterThanOrEqual(1);
     for (const link of cta) {
-      expect(link).toHaveAttribute("href", "/be-a-donor");
+      expect(link).toHaveAttribute("href", "/donate/start");
     }
   });
 

@@ -49,9 +49,7 @@ export async function listFeaturedDonors(
   });
 }
 
-async function withContributions(
-  donor: FeaturedDonor,
-): Promise<DonorWithContributions> {
+async function withContributions(donor: FeaturedDonor): Promise<DonorWithContributions> {
   const db = getDb();
   const contributions = await db
     .select()
@@ -61,22 +59,14 @@ async function withContributions(
   return { ...donor, contributions, ...summarize(contributions) };
 }
 
-export async function getFeaturedDonorBySlug(
-  slug: string,
-): Promise<DonorWithContributions | null> {
+export async function getFeaturedDonorBySlug(slug: string): Promise<DonorWithContributions | null> {
   if (!isDbConfigured()) return null;
   const db = getDb();
-  const rows = await db
-    .select()
-    .from(featuredDonors)
-    .where(eq(featuredDonors.slug, slug))
-    .limit(1);
+  const rows = await db.select().from(featuredDonors).where(eq(featuredDonors.slug, slug)).limit(1);
   return rows[0] ? withContributions(rows[0]) : null;
 }
 
-export async function getFeaturedDonorById(
-  id: string,
-): Promise<DonorWithContributions | null> {
+export async function getFeaturedDonorById(id: string): Promise<DonorWithContributions | null> {
   if (!isDbConfigured()) return null;
   const db = getDb();
   const rows = await db.select().from(featuredDonors).where(eq(featuredDonors.id, id)).limit(1);
@@ -86,9 +76,7 @@ export async function getFeaturedDonorById(
 async function uniqueSlug(name: string): Promise<string> {
   const db = getDb();
   const base = slugifyName(name);
-  const existing = await db
-    .select({ slug: featuredDonors.slug })
-    .from(featuredDonors);
+  const existing = await db.select({ slug: featuredDonors.slug }).from(featuredDonors);
   const taken = new Set(existing.map((r) => r.slug));
   if (!taken.has(base)) return base;
   for (let i = 2; i < 1000; i++) {

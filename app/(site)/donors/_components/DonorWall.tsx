@@ -10,7 +10,10 @@ export function DonorWall({ donors }: { donors: DonorSummary[] }) {
   if (donors.length === 0) return null;
 
   return (
-    <section className="bg-ground px-4 py-16 sm:px-6 lg:px-[6%] lg:py-24" aria-labelledby="donor-wall-title">
+    <section
+      className="bg-ground px-4 py-16 sm:px-6 lg:px-[6%] lg:py-24"
+      aria-labelledby="donor-wall-title"
+    >
       <div className="mx-auto flex max-w-[1280px] flex-col gap-10">
         <header className="flex flex-col gap-3">
           <Eyebrow>Our Donors</Eyebrow>
@@ -61,4 +64,3 @@ export function DonorWall({ donors }: { donors: DonorSummary[] }) {
     </section>
   );
 }
-

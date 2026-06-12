@@ -14,9 +14,10 @@ export async function listProjects(opts: { publishedOnly?: boolean } = {}): Prom
   if (!isDbConfigured()) return [];
   const db = getDb();
   const base = db.select().from(projects);
-  return (
-    opts.publishedOnly ? base.where(eq(projects.published, true)) : base
-  ).orderBy(asc(projects.displayOrder), asc(projects.name));
+  return (opts.publishedOnly ? base.where(eq(projects.published, true)) : base).orderBy(
+    asc(projects.displayOrder),
+    asc(projects.name),
+  );
 }
 
 async function attach(project: Project): Promise<ProjectFull> {

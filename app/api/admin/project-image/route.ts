@@ -33,7 +33,10 @@ export async function POST(request: Request) {
   }
   const ext = extForImage(file.type);
   if (!ext) {
-    return NextResponse.json({ error: "Use a JPG, PNG, WebP, GIF or AVIF image." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Use a JPG, PNG, WebP, GIF or AVIF image." },
+      { status: 400 },
+    );
   }
   const bytes = Buffer.from(await file.arrayBuffer());
   if (bytes.length === 0) return NextResponse.json({ error: "Empty file." }, { status: 400 });

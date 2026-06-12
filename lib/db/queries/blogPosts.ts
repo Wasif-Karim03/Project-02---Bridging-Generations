@@ -11,9 +11,10 @@ export async function listBlogPosts(opts: { publishedOnly?: boolean } = {}): Pro
   if (!isDbConfigured()) return [];
   const db = getDb();
   const base = db.select().from(blogPosts);
-  return (
-    opts.publishedOnly ? base.where(eq(blogPosts.published, true)) : base
-  ).orderBy(asc(blogPosts.displayOrder), desc(blogPosts.createdAt));
+  return (opts.publishedOnly ? base.where(eq(blogPosts.published, true)) : base).orderBy(
+    asc(blogPosts.displayOrder),
+    desc(blogPosts.createdAt),
+  );
 }
 
 async function attach(post: BlogPost): Promise<BlogPostFull> {

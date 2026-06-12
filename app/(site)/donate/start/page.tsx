@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Link } from "next-view-transitions";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { getProjectBySlug } from "@/lib/db/queries/projects";
 import { getStudentBySlug } from "@/lib/content/students";
+import { getProjectBySlug } from "@/lib/db/queries/projects";
 import { pageAlternates } from "@/lib/seo/alternates";
 
 export const metadata: Metadata = {
@@ -61,11 +61,17 @@ export default async function DonateStartPage({
             </p>
             <ul className="flex flex-col gap-2 text-body-sm text-ink-2">
               <li className="flex items-start gap-2">
-                <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
+                <span
+                  aria-hidden="true"
+                  className="mt-2 size-1.5 shrink-0 rounded-full bg-accent"
+                />
                 Secure card payment via Stripe
               </li>
               <li className="flex items-start gap-2">
-                <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
+                <span
+                  aria-hidden="true"
+                  className="mt-2 size-1.5 shrink-0 rounded-full bg-accent"
+                />
                 Instant tax-deductible receipt by email
               </li>
             </ul>
@@ -87,11 +93,17 @@ export default async function DonateStartPage({
             </p>
             <ul className="flex flex-col gap-2 text-body-sm text-ink-2">
               <li className="flex items-start gap-2">
-                <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
+                <span
+                  aria-hidden="true"
+                  className="mt-2 size-1.5 shrink-0 rounded-full bg-accent"
+                />
                 A personal donor dashboard
               </li>
               <li className="flex items-start gap-2">
-                <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
+                <span
+                  aria-hidden="true"
+                  className="mt-2 size-1.5 shrink-0 rounded-full bg-accent"
+                />
                 Manage recurring gifts and history
               </li>
             </ul>
