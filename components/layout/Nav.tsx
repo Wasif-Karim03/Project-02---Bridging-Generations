@@ -231,7 +231,10 @@ export function Nav({ contactEmail, phoneNumber, whatsappNumber }: NavProps = {}
               <li>
                 <Link
                   href={donateCta.href}
-                  className="inline-flex h-9 items-center bg-accent-2 px-4 text-nav-link font-bold uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
+                  // Darker coral (accent-2-text, ~5.5:1 with white) for the
+                  // small-text chip — text-nav-link (13px) on bg-accent-2
+                  // (3.09:1) fails WCAG AA.
+                  className="inline-flex h-9 items-center bg-accent-2-text px-4 text-nav-link font-bold uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover active:bg-accent-2-hover"
                 >
                   {t("donate")}
                 </Link>

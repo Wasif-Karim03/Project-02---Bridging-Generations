@@ -1,16 +1,27 @@
 # Bridging Generations
 
-Marketing site for Bridging Generations, a U.S. 501(c)(3) nonprofit sponsoring students in the Chittagong Hill Tracts, Bangladesh. Editors (the board) manage every public string through Keystatic at `/keystatic`; developers only touch code in this repo.
+Marketing site + donor / mentor / admin application for **Bridging Generations** — a U.S. 501(c)(3) nonprofit sponsoring underprivileged students in the Chittagong Hill Tracts, Bangladesh.
 
 ## Stack
 
 - **Next.js 16** App Router with Turbopack
 - **React 19** + **TypeScript** (strict)
 - **Tailwind CSS v4** via `@theme` CSS variables
-- **Keystatic** for content (git-backed, GitHub OAuth in prod)
-- **motion** for animation, **Lenis** for smooth scroll, **next-view-transitions** for page transitions
-- **Resend** for contact-form delivery, **Givebutter** embed for donations
-- **Biome** for lint + format, **Vitest** for unit tests, **Playwright** for e2e + axe
+- **Keystatic** — git-backed CMS for marketing content (board edits via `/keystatic`)
+- **Neon Postgres** + **Drizzle ORM** — transactional data (donations, applications, mentor reports, users)
+- **Clerk** — authentication (donor / mentor / admin / IT roles)
+- **Stripe Checkout** — donations (one-time + recurring, per-student / per-project attribution)
+- **Resend** — transactional email (contact form, application receipts)
+- **next-intl** — bilingual EN / বাংলা (cookie-locale mode)
+- **@react-pdf/renderer** — donor receipts
+- **exceljs** — admin XLSX exports
+- **motion**, **Lenis**, **next-view-transitions** — interaction polish
+- **Biome** — lint + format
+- **Vitest** — unit tests
+- **Playwright + axe** — e2e + a11y
+- **GitHub Actions** — CI on every PR
+
+bKash (Bangladesh mobile payment) is **architected pluggable** and slots in once the merchant account is approved.
 
 ## Local development
 
@@ -19,7 +30,14 @@ npm install
 npm run dev        # http://localhost:3001
 ```
 
-Non-engineers editing content should read [CONTRIBUTING.md](./CONTRIBUTING.md).
+The site is fully functional in **preview mode** with no env vars set:
+
+- Forms render and log submissions to stderr
+- Stripe + Clerk webhooks return 200 "not-configured"
+- Dashboards show mock data
+- Donate page shows mailto fallback
+
+Everything "lights up" the moment the matching env var is configured — no code changes required.
 
 ## Scripts
 
@@ -27,59 +45,96 @@ Non-engineers editing content should read [CONTRIBUTING.md](./CONTRIBUTING.md).
 |---|---|
 | `npm run dev` | Next dev server on `:3001` |
 | `npm run build` | Production build (Turbopack) |
-| `npm run analyze` | Webpack build with `@next/bundle-analyzer` for bundle inspection |
+| `npm run analyze` | Webpack build with `@next/bundle-analyzer` |
 | `npm run start` | Serve the production build |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run lint` | Biome check (verify only) |
+| `npm run lint` | Biome check |
 | `npm run format` | Biome write (autofix) |
 | `npm run test` | Vitest unit tests |
-| `npm run test:e2e` | Playwright e2e + axe suite |
+| `npm run test:watch` | Vitest in watch mode |
+| `npm run test:e2e` | Playwright e2e + axe |
+| `npm run db:generate` | drizzle-kit generate (write SQL migrations) |
+| `npm run db:push` | drizzle-kit push (apply schema to DATABASE_URL) |
+| `npm run db:studio` | drizzle-kit studio (browse data via web UI) |
+
+## Repo layout
+
+```
+app/
+  (site)/          # Public site — home, about, students, projects, donate, etc.
+  (app)/           # Signed-in dashboards (donor / mentor / admin)
+  (admin)/         # Keystatic admin (content editors)
+  api/
+    stripe/        # Stripe Checkout session + webhook
+    clerk/         # Clerk user-sync webhook
+    receipt/       # Per-donation PDF receipt
+    export/        # Admin XLSX exports
+    keystatic/     # Keystatic OAuth gateway
+  apply/           # Public application forms (scholarship / mentor / student)
+  sign-in, sign-up # Clerk hosted UI (env-gated)
+components/        # ui, layout, domain, motif, motion, content, seo, dev
+content/           # Keystatic-managed content (YAML / MDX / images)
+db/                # Drizzle schema + client
+keystatic/         # Keystatic singleton + collection schemas
+lib/
+  auth/            # Clerk wrappers + role guards
+  content/         # Keystatic reader + mock fixtures
+  db/queries/      # Drizzle query helpers (env-gated)
+  forms/           # Form helpers (rate limit, email, validation)
+  payments/        # Stripe client
+  pdf/             # @react-pdf/renderer templates
+  seo/             # JSON-LD helpers, canonical URLs
+i18n/              # next-intl config + locale actions
+messages/          # en.json + bn.json translation strings
+tests/             # Vitest unit tests + Playwright e2e
+public/            # Static assets
+_research/         # (gitignored) scrape docs, session notes
+```
 
 ## Environment variables
 
-Copy `.env.example` to `.env.local` and fill in the values you need; everything is optional in dev.
+Copy `.env.example` to `.env.local` and fill in what you need. **Every var is optional in dev** — the site degrades gracefully.
 
-| Variable | Scope | What it's for |
+| Variable | Required for | What it unlocks |
 |---|---|---|
-| `NEXT_PUBLIC_SITE_URL` | build | Canonical site URL for JSON-LD, sitemap, OG. Defaults to production domain. |
-| `RESEND_API_KEY` | server | Contact-form delivery. Without it the route logs to stderr and the form still returns a success state — useful in dev, never leave unset in prod. |
-| `RESEND_FROM_EMAIL` | server | Optional override for the `from:` address in contact-form emails. |
-| `KEYSTATIC_GITHUB_CLIENT_ID` | preview + prod | Keystatic OAuth app client id. |
-| `KEYSTATIC_GITHUB_CLIENT_SECRET` | preview + prod | OAuth app secret. |
-| `KEYSTATIC_SECRET` | preview + prod | 32+ random chars for session cookie signing (`openssl rand -base64 32`). |
-| `KEYSTATIC_URL` | preview + prod | Override if the deploy domain differs from the OAuth callback base. |
+| `NEXT_PUBLIC_SITE_URL` | Always (default supplied) | Canonical URL for JSON-LD, sitemap, OG |
+| `KEYSTATIC_GITHUB_CLIENT_ID` + `_SECRET` | Production | Board edits content via /keystatic |
+| `KEYSTATIC_SECRET` | Production | Session cookie signing |
+| `DATABASE_URL` | Phase 4+ | Application forms persist, dashboards show real data |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` + `CLERK_SECRET_KEY` | Phase 4+ | Sign-in / dashboards |
+| `CLERK_WEBHOOK_SECRET` | Phase 4+ | Sync Clerk users → local DB |
+| `STRIPE_SECRET_KEY` + `_PUBLISHABLE_KEY` | Phase 5+ | Real donation processing |
+| `STRIPE_WEBHOOK_SECRET` | Phase 5+ | Donation row persistence |
+| `RESEND_API_KEY` | Production | Real outbound emails |
+| `RESEND_FROM_EMAIL` | Production | From-address for emails |
+| `BLOB_READ_WRITE_TOKEN` | Phase 6+ | Donor photos, mentor report attachments |
 
-When `KEYSTATIC_GITHUB_CLIENT_ID` is unset, Keystatic falls back to local filesystem storage — safe for `next dev`, but the admin UI will not persist writes in production.
+Full setup walkthrough: see [LAUNCH-CHECKLIST.md](./LAUNCH-CHECKLIST.md) and [PHASE0_OWNER_ACTIONS.md](./PHASE0_OWNER_ACTIONS.md).
 
-## Keystatic admin in production
+## Content editing (board members)
 
-One-time setup by the site admin:
+Editors do not need to write code. Everything that changes on the public site — student records, projects, activities, testimonials, the home-page numbers, the mailing address — lives in the Keystatic admin at `/keystatic`. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the editorial workflow.
 
-1. Create a GitHub OAuth App at https://github.com/settings/developers → **New OAuth App**.
-   - Homepage URL: `https://<your-domain>`
-   - Authorization callback: `https://<your-domain>/api/keystatic/github/oauth/callback`
-2. Copy the **Client ID**, generate a **Client Secret**.
-3. Set the four `KEYSTATIC_*` variables above in Vercel for Preview and Production.
-4. Grant each board editor access to this repo so their GitHub account authenticates.
-5. Redeploy.
+## Auth + roles
+
+| Role | Access |
+|---|---|
+| `anonymous` | Public site only |
+| `donor` | Public site + `/dashboard/donor` (donation history, receipts, profile) |
+| `mentor` | Donor access + `/dashboard/mentor` (assigned students, weekly reports) |
+| `admin` | Mentor access + `/dashboard/admin` (applications queue, user roles, exports) |
+| `it` | Admin access (technical role, currently identical) |
+
+The Clerk webhook seeds new users with `donor`; admins promote via `/dashboard/admin/users`.
+
+## Bilingual
+
+EN is the default; users toggle to BN via the language switch in the nav. Bengali content is opt-in per Keystatic entry — fields like `titleBn`, `excerptBn`, `bodyBn` fall back to English when empty.
 
 ## Deployment
 
-This site deploys to Vercel. Every PR gets an automatic preview URL. Production is promoted per release — the current launch track has a dedicated Phase 12 for domain setup, OG images, sitemap/robots, CSP enforcement, and Resend domain warmup. Analytics are deferred for v1.
-
-## Pre-launch content checklist
-
-Before the site flips from preview to production, the board fills these via Keystatic — the public routes render defensive fallbacks when any of them is still a `[CONFIRM:]` stub:
-
-- [ ] `siteSettings.ein` — real 9-digit EIN
-- [ ] `siteSettings.mailingAddress` — real address or "we operate remotely" note
-- [ ] `siteSettings.form990Url` — link to the most recent 990 filing
-- [ ] `siteSettings.candidProfileUrl` — GuideStar / Candid profile URL
-- [ ] `siteSettings.socialLinks.*` — whichever platforms the org uses
-- [ ] Real board portraits + real gallery photos if placeholder assets should be replaced
-
-The detail lives in [CONTRIBUTING.md § Pre-launch content checklist](./CONTRIBUTING.md#pre-launch-content-checklist).
+Deploys to Vercel. Every PR gets a preview URL; merging to `main` triggers a production deploy. CI runs typecheck + lint + tests on every push.
 
 ## License
 
-Source code is released under the [MIT License](./LICENSE). Brand, copy, photographs, and identity remain the property of Bridging Generations.
+Source code under the [MIT License](./LICENSE). Brand, copy, photographs, and identity remain the property of Bridging Generations.

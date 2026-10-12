@@ -43,14 +43,25 @@ export function HomeProgramsGrid({ projects }: HomeProgramsGridProps) {
           </header>
         </Reveal>
         {projects.length > 0 ? (
+          // Plain <div> grid (with role="list" semantic) so the data-reveal-item
+          // wrapper around each ProgramCard doesn't break the <ul>/<li>
+          // direct-child rule that axe-core enforces under WCAG 1.3.1.
           <Reveal cascade cascadeDelay={100}>
-            <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+            <div
+              role="list"
+              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8"
+            >
               {projects.slice(0, 6).map((project) => (
-                <div key={project.id} data-reveal-item className="flex">
-                  <ProgramCard project={project} scale="card" as="li" />
+                <div
+                  key={project.id}
+                  role="listitem"
+                  data-reveal-item
+                  className="flex"
+                >
+                  <ProgramCard project={project} scale="card" />
                 </div>
               ))}
-            </ul>
+            </div>
           </Reveal>
         ) : (
           <p className="text-body-sm text-ink-2">No projects to show yet.</p>

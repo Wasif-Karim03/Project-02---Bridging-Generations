@@ -208,7 +208,7 @@ export function HomeHeroCarousel() {
         </button>
       </div>
 
-      <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2">
+      <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1">
         {SLIDES.map((s, i) => (
           <button
             type="button"
@@ -216,12 +216,19 @@ export function HomeHeroCarousel() {
             aria-label={`Go to slide ${i + 1}: ${s.headline}`}
             aria-current={i === index ? "true" : undefined}
             onClick={() => goTo(i)}
-            className={
-              i === index
-                ? "h-2 w-8 bg-white transition-all"
-                : "h-2 w-2 bg-white/50 transition-all hover:bg-white/80"
-            }
-          />
+            // The hit target is 24×24 (WCAG 2.5.8); the visual indicator is
+            // a smaller inner span. Active slide gets a 32-wide bar.
+            className="flex h-6 min-w-[24px] items-center justify-center px-1"
+          >
+            <span
+              aria-hidden="true"
+              className={
+                i === index
+                  ? "block h-2 w-8 bg-white transition-all"
+                  : "block h-2 w-2 bg-white/50 transition-all hover:bg-white/80"
+              }
+            />
+          </button>
         ))}
       </div>
     </section>

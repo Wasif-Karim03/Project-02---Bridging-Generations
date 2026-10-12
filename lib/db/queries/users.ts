@@ -1,5 +1,5 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/db/client";
 import type { NewUser, User } from "@/db/schema";
 import { users } from "@/db/schema";
@@ -66,4 +66,12 @@ export async function setUserRole(
   if (!isDbConfigured()) return;
   const db = getDb();
   await db.update(users).set({ role, updatedAt: new Date() }).where(eq(users.id, userId));
+}
+
+// Admin user list — drives the /dashboard/admin/users role assignment screen.
+// Returns the empty list when the DB isn't configured (preview mode).
+export async function listAllUsers(limit = 200): Promise<User[]> {
+  if (!isDbConfigured()) return [];
+  const db = getDb();
+  return db.select().from(users).orderBy(desc(users.createdAt)).limit(limit);
 }

@@ -51,7 +51,7 @@ export default async function ScholarshipsSubPage() {
                 <div className="flex flex-wrap gap-3">
                   <Link
                     href={page.applyCtaHref}
-                    className="inline-flex min-h-[48px] items-center bg-accent-2 px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
+                    className="inline-flex min-h-[48px] items-center bg-accent-2-text px-5 text-nav-link uppercase text-white shadow-[var(--shadow-cta)] transition-colors hover:bg-accent-2-hover"
                   >
                     {page.applyCtaLabel || "Apply for a scholarship"}
                   </Link>

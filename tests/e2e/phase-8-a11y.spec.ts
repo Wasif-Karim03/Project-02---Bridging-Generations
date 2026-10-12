@@ -29,11 +29,14 @@ for (const route of ROUTES) {
 
 test("/donate renders the donate surface and FAQ toggles without JS", async ({ page }) => {
   await page.goto("/donate");
-  // The donate surface is either the Givebutter widget (when real credentials
-  // are wired) or the setup fallback CTA (when the campaign id is a placeholder
-  // — current state as of PRs #82, #83). Accept either.
+  // After the Givebutter → Stripe migration, the donate surface is either
+  // the StripeDonateForm (when STRIPE_SECRET_KEY is set) or the "donations
+  // are temporarily by email" fallback panel (when not). Accept either as
+  // a successful render of the donate page's primary surface.
   const donateSurface = page
-    .locator("main givebutter-widget, main a[href^='mailto:info@bridginggenerations.org']")
+    .locator(
+      "main form, main a[href^='mailto:bridginggeneration20@gmail.com'], main a[href^='mailto:info@bridginggenerations.org']",
+    )
     .first();
   await expect(donateSurface).toBeVisible();
 
